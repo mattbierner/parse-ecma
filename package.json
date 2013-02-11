@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Javascript Generator Library",
   "main": "",
-  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git@github.com:mattbierner/parse-ecma.git"

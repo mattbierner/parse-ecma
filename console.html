@@ -88,7 +88,7 @@
             content: '\00B6';
         }
         
-        .ParseError {
+        .ParseError, .LexError {
             color: red;
         }
     </style>
@@ -103,9 +103,17 @@
         </div>
         <div class='output'>
             <h2>Output</h2>
-            <pre class='LexOut'></pre>
-            <span class='ParseError'></span>
-            <pre class='ParseOut'></pre>
+            <div>
+                <h4>Lex Out</h4>
+                <pre class='LexError'></pre>
+                <pre class='LexOut'></pre>
+            </div>
+            
+            <div>
+                <h4>Parse Out</h4>
+                <pre class='ParseError'></pre>
+                <pre class='ParseOut'></pre>
+            </div>
         </div>
         
         <div class='TokenInfo'>
@@ -156,29 +164,35 @@
                     lexOut.children().remove();
                     $('.ParseOut').children().remove();
                     $('.ParseOut').text('');
+                    $('.ParseError').text('');
+                    $('.LexError').text('');
                     
-                    var nodes = lexer.lex(input);
+                    var nodes;
+                    try {
+                        nodes = lexer.lex(input);
+                        stream.forEach(nodes, function(v) {
+                            var type =  v.type,
+                                value = (type === 'Whitespace' ? '' : v.value),
+                                location = v.loc;
+                            lexOut.append($("<span class='Token " + type + "'>" + value + "</span>").data({
+                                'type': type,
+                                'value': value,
+                                'location': location
+                            }));
+                        });
+                    } catch (e) {
+                        $('.LexError').text(e);
+                        return;
+                    }
 
-                    stream.forEach(nodes, function(v) {
-                        var type =  v.type,
-                            value = (type === 'Whitespace' ? '' : v.value),
-                            location = v.loc;
-                        lexOut.append($("<span class='Token " + type + "'>" + value + "</span>").data({
-                            'type': type,
-                            'value': value,
-                            'location': location
-                        }));
-                    });
-                    
-                    
                     try
                     {
                         var start = new Date().getTime();
-                        console.profile();
+                        //console.profile();
                        
                         var ast = parser.parseStream(nodes);
                         
-                        console.profileEnd();
+                       // console.profileEnd();
                         var end = new Date().getTime();
                         console.log(end - start);
                         
