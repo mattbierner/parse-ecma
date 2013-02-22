@@ -8,7 +8,7 @@ extensibility, and completeness.
 ## To clone ##
     git clone https://github.com/mattbierner/parse-ecma parse-ecma
     cd parse-ecma
-    git submodule update --init --recursive
+    git submodule update --init
 
 
 # Using parse-ecma #
