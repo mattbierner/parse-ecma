@@ -1,7 +1,7 @@
 {
   "name": "parse-ecma",
-  "version": "0.1.1",
-  "description": "Javascript Generator Library",
+  "version": "0.1.2",
+  "description": "parse.js parsers for ECMAScript",
   "main": "",
   "repository": {
     "type": "git",

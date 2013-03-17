@@ -1,5 +1,8 @@
 # ChangeLog #
 
+## 0.1.2 - March 17, 2013 ##
+* Function nodes created with block nodes instead of array of source elements.
+
 ## 0.1.1 - February 1, 2013 ##
 * Lexer must reach the end of the stream or else if will fail. Before, it lexed
   as much of the stream as possible. Note that for lazy streams, the stream
