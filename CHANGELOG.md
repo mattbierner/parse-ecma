@@ -1,5 +1,9 @@
 # ChangeLog #
 
+## 0.1.3 - March 18, 2013 ##
+* Fixed object literal get and set to also use block statement nodes instead of
+  array of source elements.
+
 ## 0.1.2 - March 17, 2013 ##
 * Function nodes created with block nodes instead of array of source elements.
 
