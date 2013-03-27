@@ -1,5 +1,8 @@
 # ChangeLog #
 
+## 0.1.4 - March 27, 2013 ##
+* Parser errors display source locations instead of token stream locations.
+
 ## 0.1.3 - March 18, 2013 ##
 * Fixed object literal get and set to also use block statement nodes instead of
   array of source elements.
