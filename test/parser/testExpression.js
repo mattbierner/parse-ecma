@@ -1,5 +1,5 @@
 define(['parse/parse',
-        'stream/stream',
+        'nu/stream',
         'ecma/lex/lexer',
         'ecma/parse/parser'],
 function(parse,
