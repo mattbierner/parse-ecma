@@ -187,14 +187,14 @@
 
                     try
                     {
-                        var start = new Date().getTime();
-                        //console.profile();
+                        //var start = new Date().getTime();
+                        console.profile();
                        
                         var ast = parser.parseStream(nodes);
                         
-                       // console.profileEnd();
-                        var end = new Date().getTime();
-                        console.log(end - start);
+                        console.profileEnd();
+                       // var end = new Date().getTime();
+                        //console.log(end - start);
                         
                         $('.ParseError').text('');
                         $('.ParseOut').text(ast);
