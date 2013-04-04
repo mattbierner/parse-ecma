@@ -15,7 +15,7 @@ extensibility, and completeness.
 
 ## Dependencies ##
 * [parse.js][parsejs]
-* [stream.js][stream]
+* [Nu][nu]
 
 
 ## Modules ##
@@ -36,4 +36,4 @@ Parsers for building abstract syntax trees from token streams.
  [parsejs]: https://github.com/mattbierner/parse.js
  [ecma51]: http://www.ecma-international.org/publications/standards/Ecma-262.htm
  [parseapi]: https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API
- [stream]: https://github.com/mattbierner/stream.js
+ [nu]: https://github.com/mattbierner/nu
