@@ -170,7 +170,7 @@
                     var nodes;
                     try {
                         nodes = lexer.lex(input);
-                        stream.forEach(nodes, function(v) {
+                        stream.forEach(function(v) {
                             var type =  v.type,
                                 value = (type === 'Whitespace' ? '' : v.value),
                                 location = v.loc;
@@ -179,7 +179,7 @@
                                 'value': value,
                                 'location': location
                             }));
-                        });
+                        }, nodes);
                     } catch (e) {
                         $('.LexError').text(e);
                         return;
