@@ -1,5 +1,8 @@
 # ChangeLog #
 
+## 0.1.5 - April 13, 2013 ##
+* Updated to parse.js 11.0.0.
+
 ## 0.1.4 - March 27, 2013 ##
 * Parser errors display source locations instead of token stream locations.
 

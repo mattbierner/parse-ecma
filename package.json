@@ -1,6 +1,6 @@
 {
   "name": "parse-ecma",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "parse.js parsers for ECMAScript",
   "main": "",
   "repository": {
