@@ -1,5 +1,8 @@
 # ChangeLog #
 
+## 0.1.7 - April 19, 2013 ##
+* * Updated to parse.js 12.0.0.
+  
 ## 0.1.6 - April 18, 2013 ##
 * Fixed lexer treating true, false, and null as identifiers after change to 
   how 'parse_string.trie' is implemented.
