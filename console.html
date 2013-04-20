@@ -51,12 +51,17 @@
         span.Token.Keyword {
             color: red;
         }
-        span.Token:hover {
-            background: gray;
-        }
         
         span.Token.Comment {
             color: blue;
+        }
+        
+        span.Token.Comment:before {
+            content: "/*";
+        }
+        
+        span.Token.Comment:after {
+            content: "*/";
         }
         
         span.Token.String {
@@ -84,12 +89,34 @@
             content: '\00B7';
         }
         
+        span.Token.Whitespace.Tab {
+            width: 2em;
+            text-align: center;
+        }
+        span.Token.Whitespace.Tab:after {
+            content: '\21E5';
+        }
+        
         span.Token.LineTerminator:before {
             content: '\00B6';
         }
         
         .ParseError, .LexError {
             color: red;
+        }
+        
+        .Node {
+            margin-left: 0.5em;
+        }
+        
+        
+        .NodeType {
+            display: block;
+        }
+        
+        .Active,
+        span.Token:hover {
+            background: rgb(200, 200, 200);
         }
     </style>
 </head>
@@ -147,8 +174,8 @@
             }
         });
         $(function(){
-            require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser'],
-                function(parse, stream, lexer, parser)
+            require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/ast/node'],
+                function(parse, stream, lexer, parser, node)
             {
                 var lexOut = $('.LexOut');
                 
@@ -157,6 +184,36 @@
                     $('.TokenInfo .ValueInfo .Value').text($(this).data('value'));
                     $('.TokenInfo .LocationInfo .Value').text($(this).data('location'));
                 });
+                
+                $('.Node').live('mouseover mouseout', function(event) {
+                    event.stopPropagation();
+                    if (event.type == 'mouseover') {
+                        $(this).addClass('Active');
+                    } else {
+                        $(this).removeClass('Active');
+                    }
+                });
+                
+                
+                var walk = function(ast, f) {
+                    if (ast instanceof node.Node) {
+                        var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>").data('location', ast.loc);
+                        
+                        Object.keys(ast).forEach(function(key) {
+                            walk(ast[key], function(x) { n.append($("<span>" + key + ":</span>").append(x)); });
+                        });
+                        return f(n);
+                    }
+                    if (Array.isArray(ast)) {
+                        var n = $("<div class='Array'></div>");
+                        
+                        for (var i = 0; i < ast.length; ++i) {
+                            walk(ast[i], function(x) { n.append(x); });
+                        }
+                        return f(n);
+                    }
+                    return f($("<span>" + ast + "</span>"));
+                };
                 
                 $('button').click(function() {
                     var input = $('textarea').val();
@@ -174,11 +231,17 @@
                             var type =  v.type,
                                 value = (type === 'Whitespace' ? '' : v.value),
                                 location = v.loc;
-                            lexOut.append($("<span class='Token " + type + "'>" + value + "</span>").data({
-                                'type': type,
-                                'value': value,
-                                'location': location
-                            }));
+                            lexOut.append($("<span class='Token'>" + value + "</span>")
+                                .addClass(function() {
+                                    if (v.type === 'Whitespace' && v.value === '\t') {
+                                        return v.type + " Tab";
+                                    }
+                                    return v.type;
+                                }).data({
+                                    'type': type,
+                                    'value': value,
+                                    'location': location
+                                }));
                         }, nodes);
                     } catch (e) {
                         $('.LexError').text(e);
@@ -197,7 +260,9 @@
                         //console.log(end - start);
                         
                         $('.ParseError').text('');
-                        $('.ParseOut').text(ast);
+                        walk(ast, function(x){
+                            $('.ParseOut').append(x);
+                        });
                     } catch (e) {
                         $('.ParseError').text(e);
                     }
