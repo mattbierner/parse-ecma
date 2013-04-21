@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <title>Parse ECMAScript Console</title>
     <style>
+        body {
+            height: 100%;
+            position: relative;
+        }
+        
         .content > * {
             width: 50%;
             float: left;
@@ -24,6 +29,8 @@
             position: fixed;
             left: 0;
             bottom: 0;
+            background: white;
+            border: 1px solid black;
         }
         
         .TokenInfo ul {
@@ -46,6 +53,17 @@
         
         .output pre {
             white-space: pre-wrap;
+        }
+        
+        .output {
+            height: 100%;
+            overflow-y: scroll;
+            position:fixed;
+            right: 0;
+        }
+        
+        .LexOut {
+            margin-bottom: 25em;
         }
         
         span.Token.Keyword {
@@ -116,26 +134,27 @@
         
         .Active,
         span.Token:hover {
-            background: rgb(200, 200, 200);
+            background: rgb(220, 220, 220);
         }
     </style>
 </head>
 
 <body lang="en">
     <div class="content">
-        <div class='console'>
-            <h2>Input</h2>
-            <textarea rows='20'></textarea>
-            <button>Tokenize</button>
-        </div>
-        <div class='output'>
-            <h2>Output</h2>
+        <div>
+            <div class='console'>
+                <h2>Input</h2>
+                <textarea rows='20'></textarea>
+                <button>Tokenize</button>
+            </div>
             <div>
                 <h4>Lex Out</h4>
                 <pre class='LexError'></pre>
                 <pre class='LexOut'></pre>
             </div>
-            
+        </div>
+        <div class='output'>
+
             <div>
                 <h4>Parse Out</h4>
                 <pre class='ParseError'></pre>
@@ -187,20 +206,34 @@
                 
                 $('.Node').live('mouseover mouseout', function(event) {
                     event.stopPropagation();
+                    
+                    var nodeLoc = $(this).data('location');
                     if (event.type == 'mouseover') {
                         $(this).addClass('Active');
+                        lexOut.children().each(function(){
+                            var loc = $(this).data('location');
+                            if (loc.start.compare(nodeLoc.start) >= 0) {
+                                if (loc.end.compare(nodeLoc.end) <= 0) {
+                                    $(this).addClass('Active');
+                                } else {
+                                    return false;
+                                }
+                            }
+                        });
                     } else {
                         $(this).removeClass('Active');
+                        lexOut.children('.Active').removeClass('Active');
                     }
                 });
                 
                 
                 var walk = function(ast, f) {
                     if (ast instanceof node.Node) {
-                        var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>").data('location', ast.loc);
+                        var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>")
+                            .data('location', ast.loc);
                         
                         Object.keys(ast).forEach(function(key) {
-                            walk(ast[key], function(x) { n.append($("<span>" + key + ":</span>").append(x)); });
+                            walk(ast[key], function(x) { n.append($("<div>" + key + ": </div>").append(x)); });
                         });
                         return f(n);
                     }
@@ -250,14 +283,14 @@
 
                     try
                     {
-                        //var start = new Date().getTime();
-                        console.profile();
+                        var start = new Date().getTime();
+                        //console.profile();
                        
                         var ast = parser.parseStream(nodes);
                         
-                        console.profileEnd();
-                       // var end = new Date().getTime();
-                        //console.log(end - start);
+                        //console.profileEnd();
+                        var end = new Date().getTime();
+                        console.log(end - start);
                         
                         $('.ParseError').text('');
                         walk(ast, function(x){

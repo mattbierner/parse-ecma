@@ -1,5 +1,15 @@
 # ChangeLog #
 
+## 0.2.0 - April 20, 2013 ##
+* Made most error messages from expressions actually useful.
+** Most errors display readable expected values when a parser fails and
+  no input is consumed.
+* Fixed source locations being inconsistent.
+* Binary and member expression now have location information attached.
+* Improved debug console.
+** AST printed as tree instead of big text block
+** Displays tabs characters as tabs instead of regular spaces
+
 ## 0.1.7 - April 19, 2013 ##
 * * Updated to parse.js 12.0.0.
   
