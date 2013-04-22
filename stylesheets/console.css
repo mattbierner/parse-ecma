@@ -1,0 +1,132 @@
+body {
+    height: 100%;
+    position: relative;
+}
+
+.content > * {
+    width: 50%;
+    float: left;
+    position: relative;
+}
+
+.content > * > * {
+    padding: 0 2em;
+    display: block;
+}
+
+.console textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.TokenInfo {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background: white;
+    border: 1px solid black;
+}
+
+.TokenInfo ul {
+    list-style: none;
+}
+.TokenInfo ul {
+}
+
+.TokenInfo ul li {
+    padding-bottom: 1em;
+}
+
+.TokenInfo .Key {
+    font-weight: bold;
+}
+
+.TokenInfo .Key {
+    font-weight: bold;
+}
+
+.output pre {
+    white-space: pre-wrap;
+}
+
+.output {
+    height: 100%;
+    overflow-y: scroll;
+    position:fixed;
+    right: 0;
+}
+
+.LexOut {
+    margin-bottom: 25em;
+}
+
+span.Token.Keyword {
+    color: red;
+}
+
+span.Token.Comment {
+    color: blue;
+}
+
+span.Token.Comment:before {
+    content: "/*";
+}
+
+span.Token.Comment:after {
+    content: "*/";
+}
+
+span.Token.String {
+    color: green;
+}
+
+span.Token.Punctuator {
+    color: pink;
+}
+
+span.Token.RegularExpression {
+    color: orange;
+}
+
+span.Token.Whitespace,
+span.Token.LineTerminator {
+    color: rgb(215, 215, 215);
+}
+
+span.Token.Whitespace {
+    display:inline-block;
+}
+
+span.Token.Whitespace:after {
+    content: '\00B7';
+}
+
+span.Token.Whitespace.Tab {
+    width: 2em;
+    text-align: center;
+}
+span.Token.Whitespace.Tab:after {
+    content: '\21E5';
+}
+
+span.Token.LineTerminator:before {
+    content: '\00B6';
+}
+
+.ParseError, .LexError {
+    color: red;
+}
+
+.Node {
+    margin-left: 0.5em;
+}
+
+
+.NodeType {
+    display: block;
+}
+
+.Active,
+span.Token:hover {
+    background: rgb(220, 220, 220);
+}
