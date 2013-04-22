@@ -114,7 +114,7 @@ styles: |
                 var input = $('textarea').val();
                 
                 lexOut.children().remove().show();
-                $('.ParseText').children().remove().show();
+                $('.ParseText').children().remove();
                 $('.ParseError').text('').hide();
                 $('.LexError').text('').hide();
                 
@@ -147,7 +147,7 @@ styles: |
                 try
                 {
                     var ast = parser.parseStream(nodes);
-
+                    $('.ParseText').show();
                     walk(ast, function(x){
                         $('.ParseText').append(x);
                     });
