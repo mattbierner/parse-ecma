@@ -121,6 +121,7 @@ styles: |
                 var nodes;
                 try {
                     nodes = lexer.lex(input);
+                    $('.LexText').show();
                     stream.forEach(function(v) {
                         var type =  v.type,
                             value = (type === 'Whitespace' ? '' : v.value),
