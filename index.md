@@ -1,5 +1,6 @@
 ---
 layout: base
+articleClass: page
 ---
 
 # About #

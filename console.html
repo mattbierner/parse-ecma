@@ -3,45 +3,44 @@ layout: base
 styles: |
     <link rel="stylesheet" href="stylesheets/console.css">
 ---
-<div class="content">
+<div class="content group">
     <div>
         <div class='console'>
             <h2>Input</h2>
             <textarea rows='20'></textarea>
-            <button>Tokenize</button>
+            <button>Parse</button>
         </div>
-        <div>
-            <h4>Lex Out</h4>
+        <div class='LexOut'>
+            <h2>Lex Out</h4>
             <pre class='LexError'></pre>
-            <pre class='LexOut'></pre>
+            <pre class='LexText'></pre>
         </div>
     </div>
     <div class='output'>
-
-        <div>
-            <h4>Parse Out</h4>
+        <div class='ParseOut'>
+            <h2>Parse Out</h4>
             <pre class='ParseError'></pre>
-            <pre class='ParseOut'></pre>
+            <pre class='ParseText'></pre>
         </div>
     </div>
-    
-    <div class='TokenInfo'>
-        <h3>Token Info</h3>
-        <ul>
-            <li class='TypeInfo'>
-                <div class='Key'>Type</div>
-                <div class='Value'></div>
-            </li>
-            <li class='LocationInfo'>
-                <div class='Key'>Location</div>
-                <div class='Value'></div>
-            </li>
-            <li class='ValueInfo'>
-                <div class='Key'>Value</div>
-                <pre class='Value'></pre>
-            </li>
-        </ul>
-    </div>
+</div>
+
+<div class='TokenInfo'>
+    <h3>Lex Token Info</h3>
+    <ul>
+        <li class='TypeInfo'>
+            <div class='Key'>Type</div>
+            <div class='Value'></div>
+        </li>
+        <li class='LocationInfo'>
+            <div class='Key'>Location</div>
+            <div class='Value'></div>
+        </li>
+        <li class='ValueInfo'>
+            <div class='Key'>Value</div>
+            <pre class='Value'></pre>
+        </li>
+    </ul>
 </div>
 
 <script type="application/javascript" src="javascripts/require.js"></script>
@@ -59,7 +58,7 @@ styles: |
         require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/ast/node'],
             function(parse, stream, lexer, parser, node)
         {
-            var lexOut = $('.LexOut');
+            var lexOut = $('.LexText');
             
             $('.Token').live('hover', function() {
                 $('.TokenInfo .TypeInfo .Value').text($(this).data('type'));
@@ -114,11 +113,10 @@ styles: |
             $('button').click(function() {
                 var input = $('textarea').val();
                 
-                lexOut.children().remove();
-                $('.ParseOut').children().remove();
-                $('.ParseOut').text('');
-                $('.ParseError').text('');
-                $('.LexError').text('');
+                lexOut.children().remove().show();
+                $('.ParseText').children().remove().show();
+                $('.ParseError').text('').hide();
+                $('.LexError').text('').hide();
                 
                 var nodes;
                 try {
@@ -139,28 +137,23 @@ styles: |
                                 'location': location
                             }));
                     }, nodes);
+                    
                 } catch (e) {
-                    $('.LexError').text(e);
+                    $('.LexText').hide();
+                    $('.LexError').text(e).show();
                     return;
                 }
 
                 try
                 {
-                    var start = new Date().getTime();
-                    //console.profile();
-                   
                     var ast = parser.parseStream(nodes);
-                    
-                    //console.profileEnd();
-                    var end = new Date().getTime();
-                    console.log(end - start);
-                    
-                    $('.ParseError').text('');
+
                     walk(ast, function(x){
-                        $('.ParseOut').append(x);
+                        $('.ParseText').append(x);
                     });
                 } catch (e) {
-                    $('.ParseError').text(e);
+                    $('.ParseText').hide();
+                    $('.ParseError').text(e).show();
                 }
             });
         });

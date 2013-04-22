@@ -1,11 +1,9 @@
-body {
-    height: 100%;
+.content {
     position: relative;
 }
 
 .content > * {
     width: 50%;
-    float: left;
     position: relative;
 }
 
@@ -14,50 +12,75 @@ body {
     display: block;
 }
 
+.console {
+    margin-bottom: 2em;
+}
+
 .console textarea {
     width: 100%;
     box-sizing: border-box;
+    resize: vertical;
 }
 
-.TokenInfo {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    background: white;
-    border: 1px solid black;
-}
-
-.TokenInfo ul {
-    list-style: none;
-}
-.TokenInfo ul {
-}
-
-.TokenInfo ul li {
-    padding-bottom: 1em;
-}
-
-.TokenInfo .Key {
-    font-weight: bold;
-}
-
-.TokenInfo .Key {
-    font-weight: bold;
-}
-
-.output pre {
+pre {
     white-space: pre-wrap;
 }
 
 .output {
     height: 100%;
-    overflow-y: scroll;
-    position:fixed;
+    position: absolute;
     right: 0;
+    top: 0;
 }
+
+.ParseOut {
+    height: 100%;
+}
+
+.ParseText {
+    overflow-y: scroll;
+    max-height: 100%;
+}
+
 
 .LexOut {
     margin-bottom: 25em;
+}
+
+.ParseError,
+.LexError {
+    display: none;
+}
+
+.TokenInfo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    background: white;
+    border: 1px solid black;
+}
+
+.TokenInfo > * {
+    display: block;
+    margin-left: 0.8em;
+    padding-left: 0;
+    min-width: 20em;
+}
+
+.TokenInfo ul {
+    list-style: none;
+}
+.TokenInfo ul li {
+    padding-bottom: 1em;
+    margin-left: 0;
+}
+
+.TokenInfo .Key {
+    font-weight: bold;
+}
+
+.TokenInfo .Key {
+    font-weight: bold;
 }
 
 span.Token.Keyword {
@@ -129,4 +152,29 @@ span.Token.LineTerminator:before {
 .Active,
 span.Token:hover {
     background: rgb(220, 220, 220);
+}
+
+@media print, screen and (max-width: 580px) {
+    .TokenInfo {
+        display: none;
+    }
+}
+
+@media print, screen and (max-width: 960px) {
+    .output {
+        position: static;
+    }
+    
+    .content > * {
+        width: 100%;
+    }
+    
+    .LexOut {
+        margin-bottom: 2em;
+    }
+    
+    .ParseText {
+        overflow-y: visible;
+    }
+
 }
