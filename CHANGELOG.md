@@ -1,5 +1,8 @@
 # ChangeLog #
 
+## 0.2.1 - April 22, 2013 ##
+* Made lexer error messages useful as well.
+
 ## 0.2.0 - April 20, 2013 ##
 * Made most error messages from expressions actually useful.
 ** Most errors display readable expected values when a parser fails and
