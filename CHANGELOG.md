@@ -5,7 +5,7 @@
 ** Most errors display readable expected values when a parser fails and
   no input is consumed.
 * Fixed source locations being inconsistent.
-* Binary and member expression now have location information attached.
+* Most expressions now have location information attached.
 * Improved debug console.
 ** AST printed as tree instead of big text block
 ** Displays tabs characters as tabs instead of regular spaces
