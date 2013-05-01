@@ -1,5 +1,11 @@
 # ChangeLog #
 
+## 1.0.0 - April 30, 2013 ##
+* All AST node constructors take SourceLocations are first argument. These may
+  be null. 
+** Removed non functional workaround used previously.
+* Exported many more parsers to allow better use of library.
+
 ## 0.2.1 - April 22, 2013 ##
 * Made lexer error messages useful as well.
 
