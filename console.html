@@ -145,7 +145,11 @@
             <div class='console'>
                 <h2>Input</h2>
                 <textarea rows='20'></textarea>
-                <button>Tokenize</button>
+                <form action="">
+                    <input type="radio" name='lexer' checked='checked' value='div'>div</input>
+                    <input type="radio" name='lexer' value='regexp'>regexp</input>
+                </form>
+                <button>Parse</button>
             </div>
             <div>
                 <h4>Lex Out</h4>
@@ -154,7 +158,6 @@
             </div>
         </div>
         <div class='output'>
-
             <div>
                 <h4>Parse Out</h4>
                 <pre class='ParseError'></pre>
@@ -198,6 +201,27 @@
             {
                 var lexOut = $('.LexOut');
                 
+                var walk = function(ast, f) {
+                    if (ast instanceof node.Node) {
+                        var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>")
+                            .data('location', ast.loc);
+                        
+                        Object.keys(ast).forEach(function(key) {
+                            walk(ast[key], function(x) { n.append($("<div>" + key + ": </div>").append(x)); });
+                        });
+                        return f(n);
+                    }
+                    if (Array.isArray(ast)) {
+                        var n = $("<div class='Array'></div>");
+                        
+                        for (var i = 0; i < ast.length; ++i) {
+                            walk(ast[i], function(x) { n.append(x); });
+                        }
+                        return f(n);
+                    }
+                    return f($("<span>" + ast + "</span>"));
+                };
+                
                 $('.Token').live('hover', function() {
                     $('.TokenInfo .TypeInfo .Value').text($(this).data('type'));
                     $('.TokenInfo .ValueInfo .Value').text($(this).data('value'));
@@ -227,26 +251,7 @@
                 });
                 
                 
-                var walk = function(ast, f) {
-                    if (ast instanceof node.Node) {
-                        var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>")
-                            .data('location', ast.loc);
-                        
-                        Object.keys(ast).forEach(function(key) {
-                            walk(ast[key], function(x) { n.append($("<div>" + key + ": </div>").append(x)); });
-                        });
-                        return f(n);
-                    }
-                    if (Array.isArray(ast)) {
-                        var n = $("<div class='Array'></div>");
-                        
-                        for (var i = 0; i < ast.length; ++i) {
-                            walk(ast[i], function(x) { n.append(x); });
-                        }
-                        return f(n);
-                    }
-                    return f($("<span>" + ast + "</span>"));
-                };
+
                 
                 $('button').click(function() {
                     var input = $('textarea').val();
@@ -259,7 +264,16 @@
                     
                     var nodes;
                     try {
-                        nodes = lexer.lex(input);
+                        var lex;
+                        switch($("input:radio:checked").val()) {
+                        case 'div':
+                            lex = lexer.lexDiv;
+                            break;
+                        default:
+                            lex = lexer.lexRegExp;
+                            break;
+                        }
+                        nodes = lex(input);
                         stream.forEach(function(v) {
                             var type =  v.type,
                                 value = (type === 'Whitespace' ? '' : v.value),
