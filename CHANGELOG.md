@@ -1,5 +1,12 @@
 # ChangeLog #
 
+## 2.0.0 - April 30, 2013 ##
+* Lexer refactored to fully support both ECMAScript contexts with leading 
+  divisions and those without.
+** Both versions of 'lex', 'inputElement', and 'lexer' are exported.
+* Lexer lexes non lazily be default.
+* Added 'SoucePosition.initial' for initial SourcePosition.
+
 ## 1.0.0 - April 30, 2013 ##
 * All AST node constructors take SourceLocations are first argument. These may
   be null. 

@@ -149,7 +149,8 @@
                     <input type="radio" name='lexer' checked='checked' value='div'>div</input>
                     <input type="radio" name='lexer' value='regexp'>regexp</input>
                 </form>
-                <button>Parse</button>
+                <button id='parse'>Parse</button>
+                <button id='run'>Run</button>
             </div>
             <div>
                 <h4>Lex Out</h4>
@@ -196,8 +197,9 @@
             }
         });
         $(function(){
-            require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/ast/node'],
-                function(parse, stream, lexer, parser, node)
+            require(['parse/parse', 'nu/stream',
+                'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/run', 'ecma/ast/node'],
+                function(parse, stream, lexer, parser, run, node)
             {
                 var lexOut = $('.LexOut');
                 
@@ -250,10 +252,7 @@
                     }
                 });
                 
-                
-
-                
-                $('button').click(function() {
+                $('button#parse').click(function() {
                     var input = $('textarea').val();
                     
                     lexOut.children().remove();
@@ -306,6 +305,28 @@
                         var end = new Date().getTime();
                         console.log(end - start);
                         
+                        $('.ParseError').text('');
+                        walk(ast, function(x){
+                            $('.ParseOut').append(x);
+                        });
+                    } catch (e) {
+                        $('.ParseError').text(e);
+                    }
+                });
+                
+                
+                  $('button#run').click(function() {
+                    var input = $('textarea').val();
+                    
+                    lexOut.children().remove();
+                    $('.ParseOut').children().remove();
+                    $('.ParseOut').text('');
+                    $('.ParseError').text('');
+                    $('.LexError').text('');
+                    
+                    try
+                    {
+                        var ast = run.run(input);
                         $('.ParseError').text('');
                         walk(ast, function(x){
                             $('.ParseOut').append(x);
