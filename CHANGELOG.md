@@ -1,6 +1,9 @@
 # ChangeLog #
 
-## 2.0.0 - April 30, 2013 ##
+## 2.1.0 - May 29, 2013 ##
+* Removed non standard guard param from CaseClause ast node.
+
+## 2.0.0 - May 24, 2013 ##
 * Lexer refactored to fully support both ECMAScript contexts with leading 
   divisions and those without.
 ** Both versions of 'lex', 'inputElement', and 'lexer' are exported.
