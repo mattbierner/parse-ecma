@@ -198,8 +198,8 @@
         });
         $(function(){
             require(['parse/parse', 'nu/stream',
-                'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/run', 'ecma/ast/node'],
-                function(parse, stream, lexer, parser, run, node)
+                'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/ast/node'],
+                function(parse, stream, lexer, parser, node)
             {
                 var lexOut = $('.LexOut');
                 
@@ -252,7 +252,7 @@
                     }
                 });
                 
-                $('button#parse').click(function() {
+                $('button').click(function() {
                     var input = $('textarea').val();
                     
                     lexOut.children().remove();
@@ -315,7 +315,7 @@
                 });
                 
                 
-                  $('button#run').click(function() {
+                  /*$('button#run').click(function() {
                     var input = $('textarea').val();
                     
                     lexOut.children().remove();
@@ -334,7 +334,7 @@
                     } catch (e) {
                         $('.ParseError').text(e);
                     }
-                });
+                });*/
             });
         });
     </script>
