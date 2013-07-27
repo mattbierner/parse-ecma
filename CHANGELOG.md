@@ -3,7 +3,7 @@
 ## 3.0.0 - July XX, 2013 ##
 * Split out AST nodes to `ecma-ast` library.
 * Position line starts at 1 instead of 0 since most editors use this indexing. 
-* Fixed allowing funciton expressions as top level source elements.
+* Fixed allowing function expressions as top level source elements.
 
 ## 2.1.0 - May 29, 2013 ##
 * Removed non standard guard param from CaseClause ast node.
