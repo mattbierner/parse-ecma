@@ -192,6 +192,7 @@
             paths: {
                 'parse': 'dependencies/parse/lib',
                 'nu': 'dependencies/nu/lib',
+                'ecma_ast': 'dependencies/ecma-ast/lib',
                 
                 'ecma': 'lib'
             }
@@ -297,11 +298,11 @@
                     try
                     {
                         var start = new Date().getTime();
-                        //console.profile();
+                        console.profile();
                        
                         var ast = parser.parseStream(nodes);
                         
-                        //console.profileEnd();
+                        console.profileEnd();
                         var end = new Date().getTime();
                         console.log(end - start);
                         

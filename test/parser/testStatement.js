@@ -315,7 +315,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["With Statement Correct Grouping",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("with (a) with (b) debugger; ")));
+                var stmt = testParser(parser.parserStream(lexer.lexDiv("with (a) with (b) debugger;")));
                 assert.equal(stmt.type, "WithStatement");
                 assert.equal(stmt.object.name, 'a');
                 assert.equal(stmt.body.type, 'WithStatement');
