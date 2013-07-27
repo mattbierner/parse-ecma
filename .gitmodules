@@ -4,3 +4,6 @@
 [submodule "dependencies/nu"]
 	path = dependencies/nu
 	url = git://github.com/mattbierner/nu.git
+[submodule "dependencies/ecma-ast"]
+	path = dependencies/ecma-ast
+	url = https://github.com/mattbierner/ecma-ast.git
