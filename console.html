@@ -50,12 +50,13 @@ styles: |
         paths: {
             'parse': 'dependencies/parse/lib',
             'nu': 'dependencies/nu/lib',
+            'ecma_ast': 'dependencies/ecma-ast/lib',
             
             'ecma': 'lib'
         }
     });
     $(function(){
-        require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/ast/node'],
+        require(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma_ast/node'],
             function(parse, stream, lexer, parser, node)
         {
             var lexOut = $('.LexText');
@@ -120,7 +121,8 @@ styles: |
                 
                 var nodes;
                 try {
-                    nodes = lexer.lex(input);
+                debugger;
+                    nodes = lexer.lexRegExpStream(input);
                     $('.LexText').show();
                     stream.forEach(function(v) {
                         var type =  v.type,

@@ -17,9 +17,6 @@ Parsers for tokenizing ECMAScript 5.1 input streams.
 ### ecma/parse ###
 Parsers for building abstract syntax trees from token streams.
 
-### ecma/ast ###
-[SpiderMonkey][parseapi] abstract syntax tree node definitions.
-
 
 # Usage
 
@@ -30,13 +27,14 @@ Parsers for building abstract syntax trees from token streams.
 
 
 ## Dependencies ##
+* [ecma-ast][ecmaast] - ECMAScript ast node structures.
 * [parse.js][parsejs] - Parser combinator library
 * [Nu][nu] - Stream library
 
 
 
- 
- [parsejs]: https://github.com/mattbierner/parse.js
- [ecma51]: http://www.ecma-international.org/publications/standards/Ecma-262.htm
- [parseapi]: https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API
- [nu]: https://github.com/mattbierner/nu
+[ecmaast]: https://github.com/mattbierner/ecma-ast
+[parsejs]: https://github.com/mattbierner/parse.js
+[ecma51]: http://www.ecma-international.org/publications/standards/Ecma-262.htm
+[parseapi]: https://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API
+[nu]: https://github.com/mattbierner/nu
