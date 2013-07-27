@@ -122,7 +122,7 @@ styles: |
                 var nodes;
                 try {
                 debugger;
-                    nodes = lexer.lexRegExpStream(input);
+                    nodes = lexer.lexRegExp(input);
                     $('.LexText').show();
                     stream.forEach(function(v) {
                         var type =  v.type,
