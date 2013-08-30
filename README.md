@@ -5,7 +5,8 @@ and parsing [ECMAScript 5.1][ecma51]. It is designed for flexibility,
 extensibility, and completeness.
  
 
-## To clone ##
+## To clone
+
     git clone https://github.com/mattbierner/parse-ecma parse-ecma
     cd parse-ecma
     git submodule update --init

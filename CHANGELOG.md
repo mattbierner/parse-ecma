@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 3.0.2 - August 29, 2013
+* Updated parse to V13.0.4.
+* Update Nu to V2.0.5
+
 ## 3.0.1 - July 27, 2013
 * Fixed exported stream lexers name error.
 
