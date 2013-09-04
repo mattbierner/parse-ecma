@@ -13,7 +13,7 @@ function(parse,
     };
     
     return {
-        'module': "Object Literal Tests",
+        'module': "Object Literal",
         'tests': [
             ["Empty Object Literal",
             function(){
@@ -38,6 +38,18 @@ function(parse,
                 assert.equal(result.properties[2].kind, 'init');
                 assert.equal(result.properties[2].key.value, 9);
                 assert.equal(result.properties[2].value.value, 2);
+            }],
+            ["Init Values with get set keys",
+            function(){
+                var result = testParser(lexer.lexDiv("({ get: 0 , set: 1});"));
+                assert.equal(result.properties.length, 2);
+                assert.equal(result.properties[0].kind, 'init');
+                assert.equal(result.properties[0].key.name, 'get');
+                assert.equal(result.properties[0].value.value, 0);
+                
+                assert.equal(result.properties[1].kind, 'init');
+                assert.equal(result.properties[1].key.name, 'set');
+                assert.equal(result.properties[1].value.value, 1);
             }],
             ["Get Value Object Literal",
             function(){

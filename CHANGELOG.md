@@ -1,7 +1,10 @@
 # ChangeLog
 
+## 3.0.3 - September 4, 2013
+* Better error messages for Object Literals with an error in the initializer.
+
 ## 3.0.2 - August 29, 2013
-* Updated parse to V13.0.4.
+* Updated parse to V13.0.4
 * Update Nu to V2.0.5
 
 ## 3.0.1 - July 27, 2013
