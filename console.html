@@ -151,6 +151,7 @@
                 </form>
                 <button id='parse'>Parse</button>
                 <button id='run'>Run</button>
+                <span id='time'></span>
             </div>
             <div>
                 <h4>Lex Out</h4>
@@ -190,9 +191,10 @@
     <script type="application/javascript">
         requirejs.config({
             paths: {
-                'parse': 'dependencies/parse/lib',
+                'parse': '../parse/lib',
                 'nu': 'dependencies/nu/lib',
                 'ecma_ast': 'dependencies/ecma-ast/lib',
+                'seshat': '../seshat/lib/seshat',
                 
                 'ecma': 'lib'
             }
@@ -262,34 +264,21 @@
                     $('.ParseError').text('');
                     $('.LexError').text('');
                     
-                    var nodes;
+                    var nodes, ast;
+                    
+                    var lex;
+                    switch($("input:radio:checked").val()) {
+                    case 'div':
+                        lex = lexer.lexDiv;
+                        break;
+                    default:
+                        lex = lexer.lexRegExp;
+                        break;
+                    }
+                    
+                    var start = new Date().getTime();
                     try {
-                        var lex;
-                        switch($("input:radio:checked").val()) {
-                        case 'div':
-                            lex = lexer.lexDiv;
-                            break;
-                        default:
-                            lex = lexer.lexRegExp;
-                            break;
-                        }
                         nodes = lex(input);
-                        stream.forEach(function(v) {
-                            var type =  v.type,
-                                value = (type === 'Whitespace' ? '' : v.value),
-                                location = v.loc;
-                            lexOut.append($("<span class='Token'>" + value + "</span>")
-                                .addClass(function() {
-                                    if (v.type === 'Whitespace' && v.value === '\t') {
-                                        return v.type + " Tab";
-                                    }
-                                    return v.type;
-                                }).data({
-                                    'type': type,
-                                    'value': value,
-                                    'location': location
-                                }));
-                        }, nodes);
                     } catch (e) {
                         $('.LexError').text(e);
                         return;
@@ -297,22 +286,40 @@
 
                     try
                     {
-                        var start = new Date().getTime();
-                        console.profile();
-                       
-                        var ast = parser.parseStream(nodes);
-                        
-                        console.profileEnd();
-                        var end = new Date().getTime();
-                        console.log(end - start);
-                        
-                        $('.ParseError').text('');
-                        walk(ast, function(x){
-                            $('.ParseOut').append(x);
-                        });
+                        ast = parser.parseStream(nodes);
                     } catch (e) {
+                        $('#time').text('');
                         $('.ParseError').text(e);
+                        return;
                     }
+                    
+                    var end = new Date().getTime();
+                    var diff = end - start;
+                    $('#time').text(diff);
+                    
+                    $('.ParseError').text('');
+                    $('.LexError').text('');
+                    
+                    stream.forEach(function(v) {
+                        var type =  v.type,
+                            value = (type === 'Whitespace' ? '' : v.value),
+                            location = v.loc;
+                        lexOut.append($("<span class='Token'>" + value + "</span>")
+                            .addClass(function() {
+                                if (v.type === 'Whitespace' && v.value === '\t') {
+                                    return v.type + " Tab";
+                                }
+                                return v.type;
+                            }).data({
+                                'type': type,
+                                'value': value,
+                                'location': location
+                            }));
+                    }, nodes);
+                    
+                    walk(ast, function(x){
+                        $('.ParseOut').append(x);
+                    });
                 });
                 
                 
