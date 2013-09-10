@@ -38,6 +38,7 @@ uses parse-ecma for common functionality.
 * [ecma-ast][ecmaast] - ECMAScript ast node structures.
 * [parse.js][parsejs] - Parser combinator library
 * [Nu][nu] - Stream library
+* [Seshat][seshat] - Functional memoization utility.
 
 
 
@@ -48,3 +49,4 @@ uses parse-ecma for common functionality.
 [nu]: https://github.com/mattbierner/nu
 [atum]: https://github.com/mattbierner/atum
 [khepri]: https://github.com/mattbierner/khepri
+[seshat]: https://github.com/mattbierner/seshat
