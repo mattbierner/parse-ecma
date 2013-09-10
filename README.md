@@ -16,8 +16,9 @@ extensibility, and completeness.
 
 ## Dependencies ##
 * [ecma-ast][ecmaast] - Defines AST nodes.
-* [parse.js][parsejs] - Base combinatory parsing library.
-* [Nu][nu] - Functional streams.
+* [parse.js][parsejs] 14.0.X - Base combinatory parsing library.
+* [Nu][nu] 2.0.X - Functional streams.
+* [Seshat][seshat] 0.0.X - Functional memoization utility.
 
 
 ## Modules ##
@@ -33,3 +34,4 @@ Parsers for building abstract syntax trees from token streams.
 [ecma51]: http://www.ecma-international.org/publications/standards/Ecma-262.htm
 [parseapi]: http://developer.mozilla.org/en-US/docs/SpiderMonkey/Parser_API
 [nu]: http://github.com/mattbierner/nu
+[seshat]: http://github.com/mattbierner/seshat
