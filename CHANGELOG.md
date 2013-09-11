@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 3.1.0 - September 10, 2013
+* Updated to parse.js 14
+
 ## 3.0.3 - September 4, 2013
 * Better error messages for Object Literals with an error in the initializer.
 

@@ -8,7 +8,7 @@ function(parse,
         parser) {
     
     var testParser = function(stream) {
-        var expr = parser.parseStream(stream);
+        var expr = parser.parse(stream);
         return expr.body[0].expression;
     };
     
@@ -17,13 +17,13 @@ function(parse,
         'tests': [
             ["This Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("this;"));
+                var expr = testParser("this;");
                 assert.equal(expr.type, 'ThisExpression');
             }],
             
             ["Assignment Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("a = b = c"));
+                var expr = testParser("a = b = c");
                 assert.equal(expr.type, 'AssignmentExpression');
                 
                 // Check Associativity
@@ -35,7 +35,7 @@ function(parse,
             
             ["Simple Conditional Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("a ? b : c"));
+                var expr = testParser("a ? b : c");
                 assert.equal(expr.type, 'ConditionalExpression');
                 assert.equal(expr.test.name, 'a');
                 assert.equal(expr.consequent.name, 'b');
@@ -43,7 +43,7 @@ function(parse,
             }],
             ["Conditional Expression Associativity",
             function(){
-                var expr = testParser(lexer.lexDiv("a ? b : c ? d : e"));
+                var expr = testParser("a ? b : c ? d : e");
                 assert.equal(expr.type, 'ConditionalExpression');
                 assert.equal(expr.test.name, 'a');
                 assert.equal(expr.consequent.name, 'b');
@@ -54,7 +54,7 @@ function(parse,
             }],
             ["Conditional Expression ConditionalExpression in Consequent",
             function(){
-                var expr = testParser(lexer.lexDiv("a ? b ? c : d : e"));
+                var expr = testParser("a ? b ? c : d : e");
                 assert.equal(expr.type, 'ConditionalExpression');
                 assert.equal(expr.test.name, 'a');
                 assert.equal(expr.consequent.type, 'ConditionalExpression');
@@ -65,7 +65,7 @@ function(parse,
             }],
             ["Conditional Expression ConditionalExpression in test",
             function(){
-                var expr = testParser(lexer.lexDiv("(a ? b : c) ? d : e"));
+                var expr = testParser("(a ? b : c) ? d : e");
                 assert.equal(expr.type, 'ConditionalExpression');
                 assert.equal(expr.test.type, 'ConditionalExpression');
                 assert.equal(expr.test.test.name, 'a');
@@ -77,7 +77,7 @@ function(parse,
             
             ["Simple Binary Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("a + b"));
+                var expr = testParser("a + b");
                 assert.equal(expr.type, 'BinaryExpression');
                 assert.equal(expr.operator, '+');
                 assert.equal(expr.left.name, 'a');
@@ -85,7 +85,7 @@ function(parse,
             }],
             ["Binary Expression Left Associativity",
             function(){
-                var expr = testParser(lexer.lexDiv("a + b + c"));
+                var expr = testParser("a + b + c");
                 assert.equal(expr.type, 'BinaryExpression');
                 assert.equal(expr.operator, '+');
                 assert.equal(expr.left.type, 'BinaryExpression');
@@ -95,7 +95,7 @@ function(parse,
             }],
             ["Binary Expression Paren",
             function(){
-                var expr = testParser(lexer.lexDiv("a + (b + c)"));
+                var expr = testParser("a + (b + c)");
                 assert.equal(expr.type, 'BinaryExpression');
                 assert.equal(expr.operator, '+');
                 assert.equal(expr.left.name, 'a');
@@ -106,7 +106,7 @@ function(parse,
             }],
             ["Binary Expression Precedence",
             function(){
-                var expr = testParser(lexer.lexDiv("a + b * c"));
+                var expr = testParser("a + b * c");
                 assert.equal(expr.type, 'BinaryExpression');
                 assert.equal(expr.operator, '+');
                 assert.equal(expr.left.name, 'a');
@@ -118,14 +118,14 @@ function(parse,
             
             ["Simple Unary Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("!a"));
+                var expr = testParser("!a");
                 assert.equal(expr.type, 'UnaryExpression');
                 assert.equal(expr.operator, '!');
                 assert.equal(expr.argument.name, 'a');
             }],
             ["Unary Expression Right Associativity",
             function(){
-                var expr = testParser(lexer.lexDiv("~!a"));
+                var expr = testParser("~!a");
                 assert.equal(expr.type, 'UnaryExpression');
                 assert.equal(expr.operator, '~');
                 assert.equal(expr.argument.type, 'UnaryExpression');
@@ -135,7 +135,7 @@ function(parse,
             
             ["Simple Prefix Update Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("++a"));
+                var expr = testParser("++a");
                 assert.equal(expr.type, 'UpdateExpression');
                 assert.equal(expr.operator, '++');
                 assert.equal(expr.prefix, true);
@@ -143,7 +143,7 @@ function(parse,
             }],
             ["Simple Postfix Update Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("a++"));
+                var expr = testParser("a++");
                 assert.equal(expr.type, 'UpdateExpression');
                 assert.equal(expr.operator, '++');
                 assert.equal(expr.prefix, false);
@@ -152,14 +152,14 @@ function(parse,
            
             ["Simple New Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("new a"));
+                var expr = testParser("new a");
                 assert.equal(expr.type, 'NewExpression');
                 assert.equal(expr.callee.name, 'a');
                 assert.equal(expr.args.length, 0);
             }],
             ["Many New Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("new new a"));
+                var expr = testParser("new new a");
                 assert.equal(expr.type, 'NewExpression');
                 assert.equal(expr.callee.type, 'NewExpression');
                 assert.equal(expr.callee.callee.name, 'a');
@@ -168,7 +168,7 @@ function(parse,
             }],
             ["New Expression Args",
             function(){
-                var expr = testParser(lexer.lexDiv("new a(1)"));
+                var expr = testParser("new a(1)");
                 assert.equal(expr.type, 'NewExpression');
                 assert.equal(expr.callee.name, 'a');
                 assert.equal(expr.args.length, 1);
@@ -176,7 +176,7 @@ function(parse,
             }],
             ["Many New Expression Args",
             function(){
-                var expr = testParser(lexer.lexDiv("new new a(1)(2)"));
+                var expr = testParser("new new a(1)(2)");
                 assert.equal(expr.type, 'NewExpression');
                 assert.equal(expr.callee.type, 'NewExpression');
                 assert.equal(expr.callee.callee.name, 'a');
@@ -188,14 +188,14 @@ function(parse,
             
             ["Simple Call Expression ",
             function(){
-                var expr = testParser(lexer.lexDiv("a()"));
+                var expr = testParser("a()");
                 assert.equal(expr.type, 'CallExpression');
                 assert.equal(expr.callee.name, 'a');
                 assert.equal(expr.args.length, 0);
             }],
             ["Call Expression with args",
             function(){
-                var expr = testParser(lexer.lexDiv("a(b)"));
+                var expr = testParser("a(b)");
                 assert.equal(expr.type, 'CallExpression');
                 assert.equal(expr.callee.name, 'a');
                 assert.equal(expr.args.length, 1);
@@ -203,7 +203,7 @@ function(parse,
             }],
             ["Multiple Call Expression",
             function(){
-                var expr = testParser(lexer.lexDiv("a(b)(c)"));
+                var expr = testParser("a(b)(c)");
                 assert.equal(expr.type, 'CallExpression');
                 assert.equal(expr.callee.type, 'CallExpression');
                 assert.equal(expr.callee.callee.name, 'a');
@@ -215,7 +215,7 @@ function(parse,
             
             ["Simple Dot Accessor",
             function(){
-                var expr = testParser(lexer.lexDiv("a.b"));
+                var expr = testParser("a.b");
                 assert.equal(expr.type, 'MemberExpression');
                 assert.equal(expr.object.name, 'a');
                 assert.equal(expr.property.name, 'b');
@@ -223,7 +223,7 @@ function(parse,
             }],
             ["Many Dot Accessor Left Associativity",
             function(){
-                var expr = testParser(lexer.lexDiv("a.b.c"));
+                var expr = testParser("a.b.c");
                 assert.equal(expr.type, 'MemberExpression');
                 assert.equal(expr.object.type, 'MemberExpression');
                 assert.equal(expr.object.object.name, 'a');
@@ -235,7 +235,7 @@ function(parse,
             
             ["Simple Bracket Accessor",
             function(){
-                var expr = testParser(lexer.lexDiv("a[b]"));
+                var expr = testParser("a[b]");
                 assert.equal(expr.type, 'MemberExpression');
                 assert.equal(expr.object.name, 'a');
                 assert.equal(expr.property.name, 'b');
@@ -243,7 +243,7 @@ function(parse,
             }],
             ["Many Bracket Accessor Left Associativity",
             function(){
-                var expr = testParser(lexer.lexDiv("a[b][c]"));
+                var expr = testParser("a[b][c]");
                 assert.equal(expr.type, 'MemberExpression');
                 assert.equal(expr.object.type, 'MemberExpression');
                 assert.equal(expr.object.object.name, 'a');

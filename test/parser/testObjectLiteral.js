@@ -8,7 +8,7 @@ function(parse,
         expression){
     
     var testParser = function(stream) {
-        var result = parser.parseStream(stream);
+        var result = parser.parse(stream);
         return result.body[0].expression;
     };
     
@@ -17,15 +17,15 @@ function(parse,
         'tests': [
             ["Empty Object Literal",
             function(){
-                var result = testParser(lexer.lexDiv("({});"));
+                var result = testParser("({});");
                 assert.equal(result.properties.length, 0);
                 
-                var result2 = testParser(lexer.lexDiv("({,});"));
+                var result2 = testParser("({,});");
                 assert.equal(result2.properties.length, 0);
             }],
             ["Init Values Object Literal",
             function(){
-                var result = testParser(lexer.lexDiv("({ a: 0 , 'b': 1, 9: 2,});"));
+                var result = testParser("({ a: 0 , 'b': 1, 9: 2,});");
                 assert.equal(result.properties.length, 3);
                 assert.equal(result.properties[0].kind, 'init');
                 assert.equal(result.properties[0].key.name, 'a');
@@ -41,7 +41,7 @@ function(parse,
             }],
             ["Init Values with get set keys",
             function(){
-                var result = testParser(lexer.lexDiv("({ get: 0 , set: 1});"));
+                var result = testParser("({ get: 0 , set: 1});");
                 assert.equal(result.properties.length, 2);
                 assert.equal(result.properties[0].kind, 'init');
                 assert.equal(result.properties[0].key.name, 'get');
@@ -53,7 +53,7 @@ function(parse,
             }],
             ["Get Value Object Literal",
             function(){
-                var result = testParser(lexer.lexDiv("({ get a() { return 3; }, get b(){ return {}; } });"));
+                var result = testParser("({ get a() { return 3; }, get b(){ return {}; } });");
                 assert.equal(result.properties.length, 2);
                 assert.equal(result.properties[0].kind, 'get');
                 assert.equal(result.properties[0].key.name, 'a');
@@ -61,7 +61,7 @@ function(parse,
             }],
             ["Set Value Object Literal",
             function(){
-                var result = testParser(lexer.lexDiv("({ set a(b) { }, set b(a) { return {};} });"));
+                var result = testParser("({ set a(b) { }, set b(a) { return {};} });");
                 assert.equal(result.properties.length, 2);
                 assert.equal(result.properties[0].kind, 'set');
                 assert.equal(result.properties[0].key.name, 'a');

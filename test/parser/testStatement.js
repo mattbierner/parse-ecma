@@ -2,7 +2,7 @@ define(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma
 function(parse, stream, lexer, parser, statement){
     
     var testParser = function(stream) {
-        var stmt = parser.parseStream(stream);
+        var stmt = parser.parse(stream);
         return stmt.body[0];
     };
     
@@ -11,19 +11,19 @@ function(parse, stream, lexer, parser, statement){
         'tests': [
             ["Debugger",
             function(){
-                var stmt = testParser(lexer.lexDiv("debugger;"));
+                var stmt = testParser("debugger;");
                 assert.equal(stmt.type, "DebuggerStatement");
             }],
             
             ["Empty Block",
             function(){
-                var stmt = testParser(lexer.lexDiv("{}"));
+                var stmt = testParser("{}");
                 assert.equal(stmt.type, "BlockStatement");
                 assert.ok(stmt.body.length === 0);
             }],
             ["Non Empty Block",
             function(){
-                var stmt = testParser(lexer.lexDiv("{debugger;{}debugger;}"));
+                var stmt = testParser("{debugger;{}debugger;}");
                 assert.equal(stmt.type, "BlockStatement");
                 assert.ok(stmt.body.length === 3);
                 assert.equal(stmt.body[0].type, "DebuggerStatement");
@@ -33,7 +33,7 @@ function(parse, stream, lexer, parser, statement){
             
             ["Single Variable Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("var a;")));
+                var stmt = testParser("var a;");
                 assert.equal(stmt.type, "VariableDeclaration");
                 assert.deepEqual(stmt.declarations.length, 1);
                 assert.deepEqual(stmt.declarations[0].id.name, 'a');
@@ -41,7 +41,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Single Initilizer Variable Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("var a = 1;")));
+                var stmt = testParser("var a = 1;");
                 assert.equal(stmt.type, "VariableDeclaration");
                 assert.deepEqual(stmt.declarations.length, 1);
                 assert.deepEqual(stmt.declarations[0].id.name, 'a');
@@ -49,7 +49,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Multi Variable Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("var a = 1, b;")));
+                var stmt = testParser("var a = 1, b;");
                 assert.equal(stmt.type, "VariableDeclaration");
                 assert.deepEqual(stmt.declarations.length, 2);
                 assert.deepEqual(stmt.declarations[0].id.name, 'a');
@@ -60,7 +60,7 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple if Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("if (a) debugger;")));
+                var stmt = testParser("if (a) debugger;");
                 assert.equal(stmt.type, "IfStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.consequent.type, 'DebuggerStatement');
@@ -68,7 +68,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple if Block Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("if (a) { debugger; return 3; }")));
+                var stmt = testParser("if (a) { debugger; return 3; }");
                 assert.equal(stmt.type, "IfStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.consequent.type, 'BlockStatement');
@@ -78,7 +78,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple if else Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("if (a) debugger; else ;")));
+                var stmt = testParser("if (a) debugger; else ;");
                 assert.equal(stmt.type, "IfStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.consequent.type, 'DebuggerStatement');
@@ -87,14 +87,14 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple Do While Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("do debugger; while (a);")));
+                var stmt = testParser("do debugger; while (a);");
                 assert.equal(stmt.type, "DoWhileStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.body.type, 'DebuggerStatement');
             }],
             ["Do While While Body Test",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("do while (a) debugger; while (b);")));
+                var stmt = testParser("do while (a) debugger; while (b);");
                 assert.equal(stmt.type, "DoWhileStatement");
                 assert.equal(stmt.test.name, 'b');
                 assert.equal(stmt.body.type, 'WhileStatement');
@@ -102,14 +102,14 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple While Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("while (a) debugger;")));
+                var stmt = testParser("while (a) debugger;");
                 assert.equal(stmt.type, "WhileStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.body.type, 'DebuggerStatement');
             }],
             ["While Statement Do While Body Test",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("while (a) do debugger; while (b);")));
+                var stmt = testParser("while (a) do debugger; while (b);");
                 assert.equal(stmt.type, "WhileStatement");
                 assert.equal(stmt.test.name, 'a');
                 assert.equal(stmt.body.type, 'DoWhileStatement');
@@ -117,7 +117,7 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple For Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (a; b; c) debugger;")));
+                var stmt = testParser("for (a; b; c) debugger;");
                 assert.equal(stmt.type, "ForStatement");
                 assert.equal(stmt.init.name, 'a');
                 assert.equal(stmt.test.name, 'b');
@@ -126,7 +126,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["For Statement Empty Init",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (; b; c) debugger;")));
+                var stmt = testParser("for (; b; c) debugger;");
                 assert.equal(stmt.type, "ForStatement");
                 assert.ok(!stmt.init);
                 assert.equal(stmt.test.name, 'b');
@@ -135,7 +135,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["For Statement Empty Test",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (; ; c) debugger;")));
+                var stmt = testParser("for (; ; c) debugger;");
                 assert.equal(stmt.type, "ForStatement");
                 assert.ok(!stmt.init);
                 assert.ok(!stmt.test);
@@ -144,7 +144,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["For Statement Empty Update",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (;;) debugger;")));
+                var stmt = testParser("for (;;) debugger;");
                 assert.equal(stmt.type, "ForStatement");
                 assert.ok(!stmt.init);
                 assert.ok(!stmt.test);
@@ -153,7 +153,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["For Statement Var Init",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (var a = 3; b; c) debugger;")));
+                var stmt = testParser("for (var a = 3; b; c) debugger;");
                 assert.equal(stmt.type, "ForStatement");
                 assert.equal(stmt.init.type, 'VariableDeclaration');
                 assert.equal(stmt.init.declarations[0].id.name, 'a');
@@ -164,18 +164,18 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["For Statement in operator expression",
             function(){
-                testParser(parser.parserStream(lexer.lexDiv("for (var a = (x in y); (x in y); (x in y)) debugger;")));
+                testParser("for (var a = (x in y); (x in y); (x in y)) debugger;");
                 assert.ok(true);
             }],
             ["For Statement Bad In operator",
             function(){
                 assert.throws(
-                    testParser.bind(undefined, parser.parserStream(lexer.lexDiv("for (var a = x in y; ; ) debugger;"))));
+                    testParser.bind(undefined, "for (var a = x in y; ; ) debugger;"));
             }],
             
             ["Simple For In Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (a in b) debugger;")));
+                var stmt = testParser("for (a in b) debugger;");
                 assert.equal(stmt.type, "ForInStatement");
                 assert.equal(stmt.left.name, 'a');
                 assert.equal(stmt.right.name, 'b');
@@ -183,7 +183,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple For In Statement Var",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (var a in b) debugger;")));
+                var stmt = testParser("for (var a in b) debugger;");
                 assert.equal(stmt.type, "ForInStatement");
                 assert.equal(stmt.left.type, 'VariableDeclaration');
                 assert.equal(stmt.left.declarations[0].id.name, 'a');
@@ -193,7 +193,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple For In Statement Var Init",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("for (var a = 3 in b) debugger;")));
+                var stmt = testParser("for (var a = 3 in b) debugger;");
                 assert.equal(stmt.type, "ForInStatement");
                 assert.equal(stmt.left.type, 'VariableDeclaration');
                 assert.equal(stmt.left.declarations[0].id.name, 'a');
@@ -203,119 +203,119 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple For In Statement With In Operator",
             function(){
-                testParser(parser.parserStream(lexer.lexDiv("for (a in (b in z)) debugger;")));
-                testParser(parser.parserStream(lexer.lexDiv("for (var a = (z in y) in (b in z)) debugger;")));
+                testParser("for (a in (b in z)) debugger;");
+                testParser("for (var a = (z in y) in (b in z)) debugger;");
                 assert.ok(true);
             }],
             
             ["Simple Continue Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("continue;")));
+                var stmt = testParser("continue;");
                 assert.equal(stmt.type, "ContinueStatement");
                 assert.ok(!stmt.label);
             }],
             ["Simple Labeled Continue Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("continue a;")));
+                var stmt = testParser("continue a;");
                 assert.equal(stmt.type, "ContinueStatement");
                 assert.equal(stmt.label.name, 'a');
             }],
             ["Semicolon Insertion Labeled Continue Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("continue a")));
+                var stmt = testParser("continue a");
                 assert.equal(stmt.type, "ContinueStatement");
                 assert.equal(stmt.label.name, 'a');
                 
-                var stmt2 = testParser(parser.parserStream(lexer.lexDiv("continue a\n debugger;")));
+                var stmt2 = testParser("continue a\n debugger;");
                 assert.equal(stmt2.type, "ContinueStatement");
                 assert.equal(stmt2.label.name, 'a');
             }],
             ["Breakline continue Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("continue \n a;")));
+                var stmt = testParser("continue \n a;");
                 assert.equal(stmt.type, "ContinueStatement");
                 assert.ok(!stmt.label);
             }],
             
             ["Simple Break Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("break;")));
+                var stmt = testParser("break;");
                 assert.equal(stmt.type, "BreakStatement");
                 assert.ok(!stmt.label);
             }],
             ["Simple Labeled Break Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("break a;")));
+                var stmt = testParser("break a;");
                 assert.equal(stmt.type, "BreakStatement");
                 assert.equal(stmt.label.name, 'a');
             }],
             ["Semicolon Insertion Labeled Break Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("break a")));
+                var stmt = testParser("break a");
                 assert.equal(stmt.type, "BreakStatement");
                 assert.equal(stmt.label.name, 'a');
                 
-                var stmt2 = testParser(parser.parserStream(lexer.lexDiv("break a\n debugger;")));
+                var stmt2 = testParser("break a\n debugger;");
                 assert.equal(stmt2.type, "BreakStatement");
                 assert.equal(stmt2.label.name, 'a');
             }],
             ["Breakline Break Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("break \n a;")));
+                var stmt = testParser("break \n a;");
                 assert.equal(stmt.type, "BreakStatement");
                 assert.ok(!stmt.label);
             }],
             
             ["Simple Return Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("return;")));
+                var stmt = testParser("return;");
                 assert.equal(stmt.type, "ReturnStatement");
                 assert.ok(!stmt.argument);
             }],
             ["Simple Return Statement With Value",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("return 3;")));
+                var stmt = testParser("return 3;");
                 assert.equal(stmt.type, "ReturnStatement");
                 assert.equal(stmt.argument.value, 3);
             }],
             [" Return Statement With Sequence Expression",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("return 3, 4, 5;")));
+                var stmt = testParser("return 3, 4, 5;");
                 assert.equal(stmt.type, "ReturnStatement");
                 assert.equal(stmt.argument.expressions[2].value, 5);
             }],
             ["Return Statement With SemiColon Insertion",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("return 3")));
+                var stmt = testParser("return 3");
                 assert.equal(stmt.type, "ReturnStatement");
                 
-                var stmt2 = testParser(parser.parserStream(lexer.lexDiv("return 3\n debugger;")));
+                var stmt2 = testParser("return 3\n debugger;");
                 assert.equal(stmt2.type, "ReturnStatement");
             }],
             ["Return Statement With Newline SemiColon Insertion",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("return\n 3")));
+                var stmt = testParser("return\n 3");
                 assert.equal(stmt.type, "ReturnStatement");
                 assert.ok(!stmt.type.argument);
             }],
             
             ["Simple With Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("with (a) debugger;")));
+                var stmt = testParser("with (a) debugger;");
                 assert.equal(stmt.type, "WithStatement");
                 assert.equal(stmt.object.name, 'a');
                 assert.equal(stmt.body.type, 'DebuggerStatement');
             }],
             ["With Statement Expression",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("with (a = 3) debugger;")));
+                var stmt = testParser("with (a = 3) debugger;");
                 assert.equal(stmt.type, "WithStatement");
                 assert.equal(stmt.object.type, 'AssignmentExpression');
                 assert.equal(stmt.body.type, 'DebuggerStatement');
             }],
             ["With Statement Correct Grouping",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("with (a) with (b) debugger;")));
+                var stmt = testParser("with (a) with (b) debugger;");
                 assert.equal(stmt.type, "WithStatement");
                 assert.equal(stmt.object.name, 'a');
                 assert.equal(stmt.body.type, 'WithStatement');
@@ -323,14 +323,14 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple Switch Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("switch (a) {}")));
+                var stmt = testParser("switch (a) {}");
                 assert.equal(stmt.type, "SwitchStatement");
                 assert.equal(stmt.discriminant.name, 'a');
                 assert.deepEqual(stmt.cases, []);
             }],
             ["Switch Statement With Cases",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("switch (a) { case x: break; case y: debugger; break; }")));
+                var stmt = testParser("switch (a) { case x: break; case y: debugger; break; }");
                 assert.equal(stmt.type, "SwitchStatement");
                 assert.equal(stmt.discriminant.name, 'a');
                 assert.equal(stmt.cases.length, 2);
@@ -342,7 +342,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Switch Statement With Default",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("switch (a) { case x: break; default: break; case y: debugger; break; }")));
+                var stmt = testParser("switch (a) { case x: break; default: break; case y: debugger; break; }");
                 assert.equal(stmt.type, "SwitchStatement");
                 assert.equal(stmt.discriminant.name, 'a');
                 assert.equal(stmt.cases.length, 3);
@@ -355,7 +355,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Switch Statement With Fallthrough Cases",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("switch (a) { case x: case y: debugger; break; }")));
+                var stmt = testParser("switch (a) { case x: case y: debugger; break; }");
                 assert.equal(stmt.type, "SwitchStatement");
                 assert.equal(stmt.discriminant.name, 'a');
                 assert.equal(stmt.cases.length, 2);
@@ -368,43 +368,43 @@ function(parse, stream, lexer, parser, statement){
             
             ["Simple Throw Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("throw a;")));
+                var stmt = testParser("throw a;");
                 assert.equal(stmt.type, "ThrowStatement");
                 assert.equal(stmt.argument.name, 'a');
             }],
             ["Semicolon Insertion Labeled Throw Statement",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("throw a")));
+                var stmt = testParser("throw a");
                 assert.equal(stmt.type, "ThrowStatement");
                 assert.equal(stmt.argument.name, 'a');
                 
-                var stmt2 = testParser(parser.parserStream(lexer.lexDiv("throw a\n debugger;")));
+                var stmt2 = testParser("throw a\n debugger;");
                 assert.equal(stmt2.type, "ThrowStatement");
                 assert.equal(stmt2.argument.name, 'a');
             }],
             ["Breakline Throw Statement",
             function(){
                 assert.throws(
-                    testParser.bind(undefined, parser.parserStream(lexer.lexDiv("throw \n a;"))));
+                    testParser.bind(undefined, "throw \n a;"));
             }],
             
             ["Simple Try Statement ",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("try {debugger;}")));
+                var stmt = testParser("try {debugger;}");
                 assert.equal(stmt.type, "TryStatement");
                 assert.equal(stmt.block.body.length, 1);
                 assert.equal(stmt.block.body[0].type, "DebuggerStatement");
             }],
             ["Simple Try Statement With Finally",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("try {} finally { debugger; }")));
+                var stmt = testParser("try {} finally { debugger; }");
                 assert.equal(stmt.type, "TryStatement");
                 assert.equal(stmt.block.body.length, 0);
                 assert.equal(stmt.finalizer.body[0].type, "DebuggerStatement");
             }],
              ["Simple Try Statement With Catch",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("try {} catch (a) { debugger; }")));
+                var stmt = testParser("try {} catch (a) { debugger; }");
                 assert.equal(stmt.type, "TryStatement");
                 assert.equal(stmt.block.body.length, 0);
                 assert.equal(stmt.handler.param.name, "a");
@@ -412,7 +412,7 @@ function(parse, stream, lexer, parser, statement){
             }],
             ["Simple Try Statement With Catch and Finally",
             function(){
-                var stmt = testParser(parser.parserStream(lexer.lexDiv("try {} finally { debugger; }")));
+                var stmt = testParser("try {} finally { debugger; }");
                 assert.equal(stmt.type, "TryStatement");
                 assert.equal(stmt.block.body.length, 0);
                 assert.equal(stmt.finalizer.body[0].type, "DebuggerStatement");

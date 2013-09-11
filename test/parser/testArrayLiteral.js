@@ -8,7 +8,7 @@ function(parse,
         expression){
     
     var testParser = function(stream) {
-        var result = parser.parseStream(stream);
+        var result = parser.parse(stream);
         return result.body[0].expression;
     };
     
@@ -17,38 +17,38 @@ function(parse,
         'tests': [
             ["Empty Array Literal",
             function(){
-                var result = testParser(lexer.lexDiv("[];"));
+                var result = testParser("[];");
                 assert.equal(result.elements.length, 0);
             }],
             ["Single Element Array Literal",
             function(){
-                var result = testParser(lexer.lexDiv("[3];"));
+                var result = testParser("[3];");
                 assert.equal(result.elements.length, 1);
                 assert.equal(result.elements[0].value, 3);
 
-                var result2 = testParser(lexer.lexDiv("[3,];"));
+                var result2 = testParser("[3,];");
                 assert.equal(result2.elements.length, 1);
                 assert.equal(result2.elements[0].value, 3);
             }],
             ["Simple Multi Element Array Literal",
             function(){
-                var result = testParser(lexer.lexDiv("[3, 4];"));
+                var result = testParser("[3, 4];");
                 assert.equal(result.elements.length, 2);
                 assert.equal(result.elements[0].value, 3);
                 assert.equal(result.elements[1].value, 4);
 
-                var result2 = testParser(lexer.lexDiv("[3, 4 ,];"));
+                var result2 = testParser("[3, 4 ,];");
                 assert.equal(result2.elements.length, 2);
                 assert.equal(result2.elements[0].value, 3);
                 assert.equal(result2.elements[1].value, 4);
             }],
             ["Empty Element Array Literal",
             function(){
-                var result = testParser(lexer.lexDiv("[,];"));
+                var result = testParser("[,];");
                 assert.equal(result.elements.length, 1);
                 assert.equal(result.elements[0], null);
                 
-                var result2 = testParser(lexer.lexDiv("[,,,];"));
+                var result2 = testParser("[,,,];");
                 assert.equal(result2.elements.length, 3);
                 assert.equal(result2.elements[0], null);
                 assert.equal(result2.elements[1], null);
@@ -56,16 +56,16 @@ function(parse,
             }],
             [" Multi Element Array With Empty elements",
             function(){
-                var result = testParser(lexer.lexDiv("[3,, 4];"));
+                var result = testParser("[3,, 4];");
                 assert.equal(result.elements.length, 3);
                 assert.equal(result.elements[0].value, 3);
                 assert.equal(result.elements[1], null);
                 assert.equal(result.elements[2].value, 4);
 
-                var result2 = testParser(lexer.lexDiv("[3,, 4,];"));
+                var result2 = testParser("[3,, 4,];");
                 assert.equal(result2.elements.length, 3);
                 
-                var result3 = testParser(lexer.lexDiv("[,, 3,, 4,,];"));
+                var result3 = testParser("[,, 3,, 4,,];");
                 assert.equal(result3.elements.length, 6);
                 assert.equal(result3.elements[0], null);
                 assert.equal(result3.elements[1], null);
