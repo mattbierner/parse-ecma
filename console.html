@@ -276,17 +276,17 @@
                         break;
                     }
                     
-                    var start = new Date().getTime();
                     try {
                         nodes = lex(input);
                     } catch (e) {
                         $('.LexError').text(e);
                         return;
                     }
-
+                    
+                    var start = new Date().getTime();
                     try
                     {
-                        ast = parser.parseStream(nodes);
+                        ast = parser.parse(input);
                     } catch (e) {
                         $('#time').text('');
                         $('.ParseError').text(e);
