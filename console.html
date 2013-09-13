@@ -191,7 +191,7 @@
     <script type="application/javascript">
         requirejs.config({
             paths: {
-                'parse': '../parse/lib',
+                'parse': 'dependencies/parse/lib',
                 'nu': 'dependencies/nu/lib',
                 'ecma_ast': 'dependencies/ecma-ast/lib',
                 'seshat': 'dependencies/seshat/lib/seshat',
@@ -280,10 +280,10 @@
                         nodes = lex(input);
                     } catch (e) {
                         $('.LexError').text(e);
-                        return;
                     }
                     
                     var start = new Date().getTime();
+                    console.profile();
                     try
                     {
                         ast = parser.parse(input);
@@ -291,6 +291,8 @@
                         $('#time').text('');
                         $('.ParseError').text(e);
                         return;
+                    } finally {
+                        console.profileEnd();
                     }
                     
                     var end = new Date().getTime();
