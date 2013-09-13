@@ -252,6 +252,64 @@ function(parse,
                 assert.equal(expr.property.name, 'c');
                 assert.equal(expr.computed, true);
             }],
+            
+            
+            ["Simple Regexp",
+            function(){
+                var expr = testParser("/ab/c");
+                assert.equal(expr.type, 'Literal');
+                assert.equal(expr.kind, 'regexp');
+                assert.equal(expr.value.body, 'ab');
+                assert.equal(expr.value.flags, 'c');
+            }],
+            ["Potential RegExp parsed as Div",
+            function(){
+                var expr = testParser("a/b/c");
+                assert.equal(expr.type, 'BinaryExpression');
+                assert.equal(expr.operator, '/');
+                assert.equal(expr.left.type, 'BinaryExpression');
+                assert.equal(expr.left.operator, '/');
+                assert.equal(expr.left.left.name, 'a');
+                assert.equal(expr.left.right.name, 'b');
+                assert.equal(expr.right.name, 'c');
+            }],
+            ["Mixed Div and RegExp RegExp and Div",
+            function(){
+                var expr = testParser("/a/b/ /c/d");
+                assert.equal(expr.type, 'BinaryExpression');
+                assert.equal(expr.operator, '/');
+                assert.equal(expr.left.type, 'Literal');
+                assert.equal(expr.left.kind, 'regexp');
+                assert.equal(expr.left.value.body, 'a');
+                assert.equal(expr.left.value.flags, 'b');
+                assert.equal(expr.right.type, 'Literal');
+                assert.equal(expr.right.kind, 'regexp');
+                assert.equal(expr.right.value.body, 'c');
+                assert.equal(expr.right.value.flags, 'd');
+            }],
+            
+            ["Mixed Div and RegExp RegExp and Div",
+            function(){
+                var expr = testParser("/a/c/3");
+                assert.equal(expr.type, 'BinaryExpression');
+                assert.equal(expr.operator, '/');
+                assert.equal(expr.left.type, 'Literal');
+                assert.equal(expr.left.kind, 'regexp');
+                assert.equal(expr.left.value.body, 'a');
+                assert.equal(expr.left.value.flags, 'c');
+                assert.equal(expr.right.type, 'Literal');
+                assert.equal(expr.right.kind, 'number');
+                assert.equal(expr.right.value, '3');
+            }],
+            ["Regexp with keyword",
+            function(){
+                var expr = testParser("new /a/c");
+                assert.equal(expr.type, 'NewExpression');
+                assert.equal(expr.callee.type, 'Literal');
+                assert.equal(expr.callee.kind, 'regexp');
+                assert.equal(expr.callee.value.body, 'a');
+                assert.equal(expr.callee.value.flags, 'c')
+            }],
         ],
     };
 });
