@@ -16,7 +16,7 @@ extensibility, and completeness.
 
 ## Dependencies ##
 * [ecma-ast][ecmaast] - Defines AST nodes.
-* [parse.js][parsejs] 14.0.X - Base combinatory parsing library.
+* [parse.js][parsejs] 14.2.X - Base combinatory parsing library.
 * [Nu][nu] 2.0.X - Functional streams.
 * [Seshat][seshat] 0.0.X - Functional memoization utility.
 

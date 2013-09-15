@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 4.0.1 - September 15, 2013
+* Improved lexer errors for invalid strings.
+
 ## 4.0.0 - September 15, 2013
 * Fixed parser to work correctly with division and regular expressions.
 ** The lexer API still must decide which type of lexing to output as the only
