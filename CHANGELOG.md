@@ -1,5 +1,18 @@
 # ChangeLog
 
+## 4.0.0 - September 15, 2013
+* Fixed parser to work correctly with division and regular expressions.
+** The lexer API still must decide which type of lexing to output as the only
+  way to determine of all tokens is by their context during parsing.
+* Changed parser to take character streams instead of token streams. The tokenization
+  functionality had to be folded into the parser to correctly handle  division
+  and regular expressions.
+* Regular expression literals use an object instead of a regular expression
+  for the value. This object has two properties, `body` and `flags`. This
+  allows lexically valid but incorrect regular expressions, such as `/+/`, to be
+  correctly tokenized. The correctness of regular expressions should not be
+  checked at this stage.
+
 ## 3.1.0 - September 10, 2013
 * Updated to parse.js 14
 
