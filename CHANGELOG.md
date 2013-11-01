@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 4.1.0 - Oct 31, 2013
+* Updated to parse.js 15.0.
+
 ## 4.0.1 - September 15, 2013
 * Improved lexer errors for invalid strings.
 
