@@ -1,5 +1,10 @@
 # ChangeLog
 
+## 4.2.0 - November 2, 2013
+* Improved lexer errors for invalid numbers.
+* Removed unused parse functions.
+* Improved expect errors in parser to be much more specific and helpful.
+
 ## 4.1.0 - Oct 31, 2013
 * Updated to parse.js 15.0.
 
