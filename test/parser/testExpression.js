@@ -221,6 +221,14 @@ function(parse,
                 assert.equal(expr.property.name, 'b');
                 assert.equal(expr.computed, false);
             }],
+            ["Simple Dot Accessor with potential number lexing ",
+            function(){
+                var expr = testParser("a3.b");
+                assert.equal(expr.type, 'MemberExpression');
+                assert.equal(expr.object.name, 'a3');
+                assert.equal(expr.property.name, 'b');
+                assert.equal(expr.computed, false);
+            }],
             ["Many Dot Accessor Left Associativity",
             function(){
                 var expr = testParser("a.b.c");
