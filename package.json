@@ -8,9 +8,9 @@
     "url": "git@github.com:mattbierner/parse-ecma.git"
   },
   "keywords": [
-    'parse', 
-    'parse.js',
-    'ecmascript'
+    "parsing",
+    "parser",
+    "ecmascript"
   ],
   "author": "Matt Bierner",
   "license": "MIT"
