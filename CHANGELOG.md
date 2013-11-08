@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 4.2.1 - November 8, 2013
+* Fixed boolean literals getting lexed to identifiers.
+
 ## 4.2.0 - November 2, 2013
 * Improved lexer errors for invalid numbers.
 * Removed unused parse functions.

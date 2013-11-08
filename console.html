@@ -150,7 +150,6 @@
                     <input type="radio" name='lexer' value='regexp'>regexp</input>
                 </form>
                 <button id='parse'>Parse</button>
-                <button id='run'>Run</button>
                 <span id='time'></span>
             </div>
             <div>
@@ -324,27 +323,6 @@
                     });
                 });
                 
-                
-                  /*$('button#run').click(function() {
-                    var input = $('textarea').val();
-                    
-                    lexOut.children().remove();
-                    $('.ParseOut').children().remove();
-                    $('.ParseOut').text('');
-                    $('.ParseError').text('');
-                    $('.LexError').text('');
-                    
-                    try
-                    {
-                        var ast = run.run(input);
-                        $('.ParseError').text('');
-                        walk(ast, function(x){
-                            $('.ParseOut').append(x);
-                        });
-                    } catch (e) {
-                        $('.ParseError').text(e);
-                    }
-                });*/
             });
         });
     </script>
