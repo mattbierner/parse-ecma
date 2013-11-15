@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 4.3.0 - November 15, 2013
+* Updated to parse V16.0 and Nu V3.0.
+
 ## 4.2.1 - November 8, 2013
 * Fixed boolean literals getting lexed to identifiers.
 
