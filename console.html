@@ -274,14 +274,15 @@
                         lex = lexer.lexRegExp;
                         break;
                     }
+                                        var start = new Date().getTime();
                     
                     try {
                         nodes = lex(input);
                     } catch (e) {
                         $('.LexError').text(e);
                     }
+                                        var end = new Date().getTime();
                     
-                    var start = new Date().getTime();
                     console.profile();
                     try
                     {
@@ -294,7 +295,6 @@
                         console.profileEnd();
                     }
                     
-                    var end = new Date().getTime();
                     var diff = end - start;
                     $('#time').text(diff);
 

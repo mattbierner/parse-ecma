@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 4.3.1 - November 15, 2013
+* Improved lexer performance by avoiding more repeated position parsings.
+
 ## 4.3.0 - November 15, 2013
 * Updated to parse V16.0 and Nu V3.0.
 
