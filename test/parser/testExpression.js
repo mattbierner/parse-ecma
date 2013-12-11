@@ -283,17 +283,17 @@ function(parse,
             }],
             ["Mixed Div and RegExp RegExp and Div",
             function(){
-                var expr = testParser("/a/b/ /c/d");
+                var expr = testParser("/a/g/ /c/g");
                 assert.equal(expr.type, 'BinaryExpression');
                 assert.equal(expr.operator, '/');
                 assert.equal(expr.left.type, 'Literal');
                 assert.equal(expr.left.kind, 'regexp');
                 assert.equal(expr.left.value.body, 'a');
-                assert.equal(expr.left.value.flags, 'b');
+                assert.equal(expr.left.value.flags, 'g');
                 assert.equal(expr.right.type, 'Literal');
                 assert.equal(expr.right.kind, 'regexp');
                 assert.equal(expr.right.value.body, 'c');
-                assert.equal(expr.right.value.flags, 'd');
+                assert.equal(expr.right.value.flags, 'g');
             }],
             
             ["Mixed Div and RegExp RegExp and Div",

@@ -274,14 +274,13 @@
                         lex = lexer.lexRegExp;
                         break;
                     }
-                                        var start = new Date().getTime();
                     
                     try {
                         nodes = lex(input);
                     } catch (e) {
                         $('.LexError').text(e);
                     }
-                                        var end = new Date().getTime();
+                                                            var start = new Date().getTime();
                     
                     console.profile();
                     try
@@ -293,7 +292,8 @@
                         return;
                     } finally {
                         console.profileEnd();
-                    }
+                    }                                        var end = new Date().getTime();
+                    
                     
                     var diff = end - start;
                     $('#time').text(diff);
@@ -301,23 +301,25 @@
                     $('.ParseError').text('');
                     $('.LexError').text('');
                     
-                    stream.forEach(function(v) {
-                        var type =  v.type,
-                            value = (type === 'Whitespace' ? '' : v.value),
-                            location = v.loc;
-                        lexOut.append($("<span class='Token'>" + value + "</span>")
-                            .addClass(function() {
-                                if (v.type === 'Whitespace' && v.value === '\t') {
-                                    return v.type + " Tab";
-                                }
-                                return v.type;
-                            }).data({
-                                'type': type,
-                                'value': value,
-                                'location': location
-                            }));
-                    }, nodes);
-                    
+                    if (nodes) {
+                        stream.forEach(function(v) {
+                            var type =  v.type,
+                                value = (type === 'Whitespace' ? '' : v.value),
+                                location = v.loc;
+                            lexOut.append($("<span class='Token'>" + value + "</span>")
+                                .addClass(function() {
+                                    if (v.type === 'Whitespace' && v.value === '\t') {
+                                        return v.type + " Tab";
+                                    }
+                                    return v.type;
+                                }).data({
+                                    'type': type,
+                                    'value': value,
+                                    'location': location
+                                }));
+                        }, nodes);
+                        
+                    }
                     walk(ast, function(x){
                         $('.ParseOut').append(x);
                     });
