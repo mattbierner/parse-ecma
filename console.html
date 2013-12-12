@@ -210,7 +210,7 @@
                         var n = $("<div class='Node " + ast.type +"'><span class='NodeType'>"+ast.type+"</span></div>")
                             .data('location', ast.loc);
                         
-                        Object.keys(ast).forEach(function(key) {
+                        Object.getOwnPropertyNames(ast).forEach(function(key) {
                             walk(ast[key], function(x) { n.append($("<div>" + key + ": </div>").append(x)); });
                         });
                         return f(n);
