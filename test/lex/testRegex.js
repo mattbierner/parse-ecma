@@ -1,4 +1,4 @@
-define(['parse/parse', 'ecma/lex/regular_expression_lexer'], function(parse, regular_expression_lexer){
+define(['bennu/parse', 'ecma/lex/regular_expression_lexer'], function(parse, regular_expression_lexer){
     
     var reEq = function(x, y) {
         assert.equal(x.body, y.body);

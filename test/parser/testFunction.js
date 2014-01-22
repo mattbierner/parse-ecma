@@ -1,9 +1,7 @@
-define(['parse/parse',
-        'ecma/lex/lexer',
+define(['ecma/lex/lexer',
         'ecma/parse/parser',
         'ecma/parse/program_parser'],
-function(parse,
-        lexer,
+function(lexer,
         parser,
         expression){
     

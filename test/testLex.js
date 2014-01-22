@@ -1,6 +1,6 @@
-define(['parse/parse', 'test/lex/testNumber', 'test/lex/testWhiteSpace', 'test/lex/testLineTerminator',
+define(['test/lex/testNumber', 'test/lex/testWhiteSpace', 'test/lex/testLineTerminator',
 'test/lex/testComment', 'test/lex/testString', 'test/lex/testIdentifier', 'test/lex/testRegex'],
-function(parse, testNumber, testWhiteSpace, testLineTerminator,
+function(testNumber, testWhiteSpace, testLineTerminator,
 testComment, testString, testIdentifier, testRegex){
     
     return function(){

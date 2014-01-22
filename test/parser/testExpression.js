@@ -1,10 +1,6 @@
-define(['parse/parse',
-        'nu/stream',
-        'ecma/lex/lexer',
+define(['ecma/lex/lexer',
         'ecma/parse/parser'],
-function(parse,
-        stream,
-        lexer,
+function(lexer,
         parser) {
     
     var testParser = function(stream) {

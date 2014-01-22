@@ -1,4 +1,4 @@
-define(['parse/parse', 'ecma/lex/comment_lexer'], function(parse, comment_lexer){
+define(['bennu/parse','ecma/lex/comment_lexer'], function(parse, comment_lexer){
     return {
         'module': "Comment Tests",
         'tests': [

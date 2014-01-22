@@ -1,5 +1,9 @@
-define(['parse/parse', 'nu/stream', 'ecma/lex/lexer', 'ecma/parse/parser', 'ecma/parse/statement_parser'],
-function(parse, stream, lexer, parser, statement){
+define(['ecma/lex/lexer',
+        'ecma/parse/parser',
+        'ecma/parse/statement_parser'],
+function(lexer,
+        parser,
+        statement){
     
     var testParser = function(stream) {
         var stmt = parser.parse(stream);
