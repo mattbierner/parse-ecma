@@ -51,7 +51,7 @@ ps := character psChar;
  * A line terminator character.
  */
 lineTerminator := label@'Line Terminator Lexer' <|
-    choice(lf, cr, ls, ps);//[lfChar, crChar, lsChar, psChar];
+    oneOf [lfChar, crChar, lsChar, psChar];
 
 /**
  * A sequence of characters denoting a linter terminator.

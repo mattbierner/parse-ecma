@@ -12,11 +12,9 @@ package (
     whitespace)
 with
     import 'bennu::parse' {label token},
-    import 'bennu::text' {character oneOf}
+    import 'bennu::text' {character oneOf match}
 in {
 
-/* Lexers
- ******************************************************************************/
 /**
  * Tab
  */
@@ -50,12 +48,12 @@ bom = character '\uFEFF';
 /**
  * Any Unicode space separator.
  */
-usp = token(RegExp.prototype.test.bind(`^\s$`));
+usp = match `^\s$`;
 
 /**
  * A whitespace character.
  */
-whitespace = label('Whitespace Lexer',
-    oneOf ['\u0009', '\u000B', '\u000C', '\u0020', '\u00A0', '\uFEFF']);
+whitespace = label@'Whitespace Lexer' <|
+    oneOf ['\u0009', '\u000B', '\u000C', '\u0020', '\u00A0', '\uFEFF'];
 
 }

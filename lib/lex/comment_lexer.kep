@@ -63,7 +63,7 @@ multiLineCommentStartMarker := string '/*';
 
 multiLineCommentEndMarker := string '*/' ;
 
-multiLineCommentChars := label@'Multi Line Comment Characters Lexer' <|
+multiLineCommentChars :=
     many next(
         not multiLineCommentEndMarker,
         anyToken);

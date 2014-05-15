@@ -34,6 +34,7 @@ with
     import 'ecma-ast::statement' ast_statement,
 
     import './token_parser' token#{
+        keyword
         punctuator},
     import './common' ecma_parse,
     import './expression_parser' expression,
@@ -83,18 +84,18 @@ var statementList = parse.eager(parse.many(statement));
  */
 blockStatement = parse.label('Block Statement',
     ecma_parse.node(
-        parse_lang.between(punctuator('{'), punctuator('}'), 
+        parse_lang.between(punctuator '{', punctuator '}', 
             statementList),
         ast_statement.BlockStatement.create));
 
 // Variable Statement
 ////////////////////////////////////////
 var initialiser = parse.next(
-    punctuator('='),
+    punctuator '=',
     parse.expected("initialiser expression", expression.assignmentExpression));
 
 var initialiserNoIn = parse.next(
-    punctuator('='),
+    punctuator '=',
     parse.expected("initialiser expression", expression.assignmentExpressionNoIn));
 
 /**
@@ -115,10 +116,10 @@ var variableDeclarationNoIn = ecma_parse.nodea(
         parse.optional(initialiserNoIn)),
     ast_declaration.VariableDeclarator.create);
 
-var variableDeclarationList = parse.eager(parse_lang.sepBy1(punctuator(','),
+var variableDeclarationList = parse.eager(parse_lang.sepBy1(punctuator ',',
     parse.expected('variable declaration', variableDeclaration)));
 
-var variableDeclarationListNoIn = parse.eager(parse_lang.sepBy1(punctuator(','),
+var variableDeclarationListNoIn = parse.eager(parse_lang.sepBy1(punctuator ',',
     parse.expected('variable declaration', variableDeclarationNoIn)));
 
 /**
@@ -127,7 +128,7 @@ var variableDeclarationListNoIn = parse.eager(parse_lang.sepBy1(punctuator(','),
  */
 variableStatement = parse.label('Variable Statement', 
     ecma_parse.node(
-        parse_lang.between(token.keyword('var'), logicalSemiColon,
+        parse_lang.between(keyword 'var', logicalSemiColon,
             parse.expected("variable declaration list", variableDeclarationList)),
         ast_declaration.VariableDeclaration.create));
 
@@ -138,7 +139,7 @@ variableStatement = parse.label('Variable Statement',
  */
 emptyStatement = parse.label('Empty Statement',
     ecma_parse.node(
-        punctuator(';'),
+        punctuator ';',
         ast_statement.EmptyStatement.create));
 
 // Expression
@@ -163,12 +164,12 @@ expressionStatement = parse.label('Expression Statement',
 ifStatement = parse.label('If Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('if'),
+            keyword 'if',
             parse.enumeration(
-                parse_lang.between(punctuator('('), punctuator(')'),
+                parse_lang.between(punctuator '(', punctuator ')',
                     parse.expected("if test", expression.expression)),
                 parse.expected("if consequent", statement),
-                parse.optional(parse.next(token.keyword('else'),
+                parse.optional(parse.next(keyword 'else',
                     parse.expected("if alternate", statement))))),
         ast_statement.IfStatement.create));
 
@@ -180,9 +181,9 @@ ifStatement = parse.label('If Statement',
 whileStatement = parse.label('While Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('while'),
+            keyword 'while',
             parse.enumeration(
-                parse_lang.between(punctuator('('), punctuator(')'),
+                parse_lang.between(punctuator '(', punctuator ')',
                     parse.expected('while test', expression.expression)),
                 parse.expected('while body', statement))),
         ast_statement.WhileStatement.create));
@@ -193,20 +194,20 @@ whileStatement = parse.label('While Statement',
 doWhileStatement = parse.label('Do While Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('do'),
+            keyword 'do',
             parse.enumeration(
                 parse.expected('do-while body', statement),
                 parse.next(
-                    token.keyword('while'),
-                    parse_lang.between(punctuator('('), punctuator(')'),
+                    keyword 'while',
+                    parse_lang.between(punctuator '(', punctuator ')',
                         parse.expected('do-while test', expression.expression))),
-                punctuator(';'))),
+                punctuator ';')),
         ast_statement.DoWhileStatement.create));
 
 var forInit = parse.either(
     ecma_parse.node(
         parse.next(
-            token.keyword('var'),
+            keyword 'var',
             parse.expected("variable declaration list", parse.memo(variableDeclarationListNoIn))),
         ast_declaration.VariableDeclaration.create),
     expression.expressionNoIn);
@@ -217,26 +218,26 @@ var forInit = parse.either(
 forStatement = parse.label('For Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('for'),
+            keyword 'for',
             parse.next(
-                punctuator('('),
+                punctuator '(',
                 parse.enumeration(
                     parse_lang.then(
                         parse.optional(forInit),
-                        punctuator(';')),
+                        punctuator ';'),
                     parse_lang.then(
                         parse.optional(expression.expressionNoIn),
-                        punctuator(';')),
+                        punctuator ';'),
                     parse_lang.then(
                         parse.optional(expression.expressionNoIn),
-                        punctuator(')')),
+                        punctuator ')'),
                     statement))),
         ast_statement.ForStatement.create));
 
 var forInLeft = parse.either(
     ecma_parse.node(
         parse.next(
-            token.keyword('var'),
+            keyword 'var',
             parse.expected("variable declaration", parse.memo(variableDeclarationNoIn))),
         \loc, x ->
             ast_declaration.VariableDeclaration.create(loc, [x])),
@@ -248,16 +249,16 @@ var forInLeft = parse.either(
 forInStatement = parse.label('For In Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('for'),
+            keyword 'for',
             parse.next(
-                punctuator('('),
+                punctuator '(',
                 parse.enumeration(
                     parse_lang.then(
                         forInLeft,
-                        token.keyword('in')),
+                        keyword 'in'),
                     parse_lang.then(
                         expression.expressionNoIn,
-                        punctuator(')')),
+                        punctuator ')'),
                     statement))),
         ast_statement.ForInStatement.create));
 
@@ -278,7 +279,7 @@ iterationStatement = parse.label('Iteration Statement',
  */
 continueStatement = parse.label('Continue Statement',
     ecma_parse.node(
-        parse_lang.between(token.keyword('continue'), logicalSemiColon,
+        parse_lang.between(keyword 'continue', logicalSemiColon,
             parse.optional(noLineTerminator(value.identifier))),
         ast_statement.ContinueStatement.create));
 
@@ -289,7 +290,7 @@ continueStatement = parse.label('Continue Statement',
  */
 breakStatement = parse.label('Break Statement',
     ecma_parse.node(
-        parse_lang.between(token.keyword('break'), logicalSemiColon,
+        parse_lang.between(keyword 'break', logicalSemiColon,
             parse.optional(noLineTerminator(value.identifier))),
         ast_statement.BreakStatement.create));
 
@@ -300,7 +301,7 @@ breakStatement = parse.label('Break Statement',
  */
 returnStatement = parse.label('Return Statement',
     ecma_parse.node(
-        parse_lang.between(token.keyword('return'), logicalSemiColon,
+        parse_lang.between(keyword 'return', logicalSemiColon,
             parse.optional(noLineTerminator(expression.expression))),
         ast_statement.ReturnStatement.create));
 
@@ -311,7 +312,7 @@ returnStatement = parse.label('Return Statement',
  */
 throwStatement = parse.label('Throw Statement',
     ecma_parse.node(
-        parse_lang.between(token.keyword('throw'), logicalSemiColon,
+        parse_lang.between(keyword 'throw', logicalSemiColon,
             parse.expected("throw argument", noLineTerminator(expression.expression))),
         ast_statement.ThrowStatement.create));
 
@@ -323,9 +324,9 @@ throwStatement = parse.label('Throw Statement',
 withStatement = parse.label('With Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('with'),
+            keyword 'with',
             parse.enumeration(
-                parse_lang.between(punctuator('('), punctuator(')'),
+                parse_lang.between(punctuator '(', punctuator ')',
                     parse.expected("with object", expression.expression)),
                 parse.expected("with body", statement))),
         ast_statement.WithStatement.create));
@@ -340,7 +341,7 @@ labeledStatement = parse.label('Labeled Statement',
         parse.enumeration(
             parse_lang.then(
                 value.identifier,
-                punctuator(':')),
+                punctuator ':'),
             statement),
         ast_statement.LabeledStatement.create));
 
@@ -351,11 +352,11 @@ labeledStatement = parse.label('Labeled Statement',
  */
 var caseClause = ecma_parse.nodea(
     parse.next(
-        token.keyword('case'),
+        keyword 'case',
         parse.enumeration(
             parse_lang.then(
                 parse.expected("case test", expression.expression),
-                punctuator(':')),
+                punctuator ':'),
             statementList)),
     ast_clause.SwitchCase.create);
 
@@ -364,16 +365,16 @@ var caseClause = ecma_parse.nodea(
  */
 var defaultClause = ecma_parse.node(
     parse.next(
-        token.keyword('default'),
+        keyword 'default',
         parse.next(
-            punctuator(':'),
+            punctuator ':',
             statementList)),
     \loc, consequent ->
         ast_clause.SwitchCase.create(loc, null, consequent));
 
 var caseClauses = parse.eager(parse.many(caseClause));
 
-var caseBlock = parse_lang.between(punctuator('{'), punctuator('}'),
+var caseBlock = parse_lang.between(punctuator '{', punctuator '}',
     parse.binds(
         parse.enumeration(
             parse.optional([], caseClauses),
@@ -391,9 +392,9 @@ var caseBlock = parse_lang.between(punctuator('{'), punctuator('}'),
 switchStatement = parse.label('Switch Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('switch'),
+            keyword 'switch',
             parse.enumeration(
-                parse_lang.between(punctuator('('), punctuator(')'),
+                parse_lang.between(punctuator '(', punctuator ')',
                     expression.expression),
                 caseBlock)),
         ast_statement.SwitchStatement.create));
@@ -405,9 +406,9 @@ switchStatement = parse.label('Switch Statement',
  */
 var catchBlock = ecma_parse.nodea(
     parse.next(
-        token.keyword('catch'),
+        keyword 'catch',
         parse.enumeration(
-            parse_lang.between(punctuator('('), punctuator(')'),
+            parse_lang.between(punctuator '(', punctuator ')',
                 value.identifier),
             parse.expected("block statement", blockStatement))),
     ast_clause.CatchClause.create);
@@ -416,7 +417,7 @@ var catchBlock = ecma_parse.nodea(
  * label for a finally block in try statement.
  */
 var finallyBlock = parse.next(
-    token.keyword('finally'),
+    keyword 'finally',
     parse.expected("block statement", blockStatement));
 
 /**
@@ -425,7 +426,7 @@ var finallyBlock = parse.next(
 tryStatement = parse.label('Try Statement',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('try'),
+            keyword 'try',
             parse.enumeration(
                 parse.expected("block statement", blockStatement),
                 parse.optional(catchBlock),
@@ -440,8 +441,8 @@ tryStatement = parse.label('Try Statement',
 debuggerStatement = parse.label('Debugger Statement',
     ecma_parse.node(
         parse.next(
-            token.keyword('debugger'),
-            punctuator(';')),
+            keyword 'debugger',
+            punctuator ';'),
         ast_statement.DebuggerStatement.create));
 
 // statement

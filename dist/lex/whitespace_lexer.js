@@ -5,16 +5,16 @@
 define(["require", "exports", "bennu/parse", "bennu/text"], (function(require, exports, __o, __o0) {
     "use strict";
     var tab, vt, ff, sp, nbsp, bom, usp, whitespace, label = __o["label"],
-        token = __o["token"],
         character = __o0["character"],
-        oneOf = __o0["oneOf"];
+        oneOf = __o0["oneOf"],
+        match = __o0["match"];
     (tab = character("\t"));
     (vt = character("\u000b"));
     (ff = character("\f"));
     (sp = character(" "));
     (nbsp = character(" "));
     (bom = character("﻿"));
-    (usp = token(RegExp.prototype.test.bind(/^\s$/)));
+    (usp = match(/^\s$/));
     (whitespace = label("Whitespace Lexer", oneOf(["\t", "\u000b", "\f", " ", " ", "﻿"])));
     (exports["tab"] = tab);
     (exports["vt"] = vt);

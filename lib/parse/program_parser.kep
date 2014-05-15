@@ -22,7 +22,9 @@ with
     import 'ecma-ast::statement' ast_statement,
     
     import './common' ecma_parse,
-    import './token_parser' token,
+    import './token_parser' token#{
+        keyword
+        punctuator},
     import './value_parser' value,
     import './statement_parser' statement
 in {
@@ -51,7 +53,7 @@ functionBody = ecma_parse.node(
 /**
  * label for a function's parameters.
  */
-var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(','),
+var formalParameterList = parse.eager(parse_lang.sepBy(punctuator ',',
     value.identifier));
 
 // Function Expression
@@ -64,12 +66,12 @@ var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(','),
 functionExpression = parse.label('Function Expression',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('function'),
+            keyword 'function',
             parse.enumeration(
                 parse.optional(value.identifier),
-                parse_lang.between(token.punctuator('('), token.punctuator(')'), 
+                parse_lang.between(punctuator '(', punctuator ')', 
                     formalParameterList),
-                parse_lang.between(token.punctuator('{'), token.punctuator('}'),
+                parse_lang.between(punctuator '{', punctuator '}',
                     functionBody))),
         ast_expression.FunctionExpression.create));
 
@@ -83,12 +85,12 @@ functionExpression = parse.label('Function Expression',
 functionDeclaration = parse.label('Function Declaration',
     ecma_parse.nodea(
         parse.next(
-            token.keyword('function'),
+            keyword 'function',
             parse.enumeration(
                 value.identifier,
-                parse_lang.between(token.punctuator('('), token.punctuator(')'), 
+                parse_lang.between(punctuator '(', punctuator ')', 
                     formalParameterList),
-                parse_lang.between(token.punctuator('{'), token.punctuator('}'),
+                parse_lang.between(punctuator '{', punctuator '}',
                     functionBody))),
         ast_declaration.FunctionDeclaration.create));
 

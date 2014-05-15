@@ -31,65 +31,67 @@ package (
 
     numericLiteral)
 with
-    import 'bennu::parse' parse,
-    import 'bennu::lang' parse_lang,
-    import 'bennu::text' parse_text,
+    import 'bennu::parse' parse#{
+        either
+        expected
+        label
+        map
+        many1
+        next
+        optional},
+    import 'bennu::text' {
+        character
+        string
+        oneOf},
     
     import 'nu-stream::stream' {foldl}
 in {
 
-var joinLexer := \p ->
-    parse.bind(p, \s ->
-        parse.always(foldl((+), '', s)));
+var join := map @ (foldl@ (+) @ '');
 
 /* Lexers
  ******************************************************************************/
 // Constants
 ////////////////////////////////////////
-decimal := parse_text.character('.');
+decimal := character '.';
 
-negativeSign := parse_text.character('-');
+negativeSign := character '-';
 
-positiveSign := parse_text.character('+');
+positiveSign := character '+';
 
-exponentIndicator := parse_text.match(`^e$`i);
+exponentIndicator := oneOf 'eE';
 
 hexIndicator :=
-    parse.either(
-        parse_text.string('0x'),
-        parse_text.string('0X'));
+    either(
+        string '0x',
+        string '0X');
 
 // Digits
 ////////////////////////////////////////
 /**
  * Lexer that matches any decimal number digit.
  */
-decimalDigit := parse.label('Decimal Digit Lexer',
-    parse_text.match(`^[0-9]$`));
+decimalDigit := oneOf '0123456789';
 
 /**
  * Lexer that matches any non zero decimal number digit.
  */
-nonZeroDigit := parse.label('Non Zero Digit Lexer',
-    parse_text.match(`^[1-9]$`));
+nonZeroDigit := oneOf '123456789';
 
 /**
  * Lexer that matches any hex number digit.
  */
-hexDigit := parse.label('Hex Digit Lexer',
-     parse_text.match(`^[0-9a-f]$`i));
+hexDigit := oneOf '0123456789abcdefABCDEF';
 
 /**
  * Lexer that matches a string of one or more decimal digits.
  */
-decimalDigits := parse.label('Decimal Digits Lexer',
-    joinLexer(parse.many1(decimalDigit)));
+decimalDigits := join <| many1 decimalDigit;
 
 /**
  * Lexer that matches a string of one or more hex digits.
  */
-hexDigits := parse.label('Hex Digits Lexer',
-    joinLexer(parse.many1(hexDigit)));
+hexDigits := join <| many1 hexDigit;
 
 // Integer
 ////////////////////////////////////////
@@ -98,25 +100,22 @@ hexDigits := parse.label('Hex Digits Lexer',
  * 
  * Returns the numeric value of the integer.
  */
-unsignedInteger := parse.label('Unsigned Integer Lexer',
-    parse.bind(decimalDigits, \t -> {
-        return parse.always(parseInt(t));
-    }));
+unsignedInteger := label@'Unsigned Integer Lexer' <|
+    map(parseInt, decimalDigits);
 
 /**
  * Lexer that matches a signed integer.
  * 
  * Returns the numeric value of the integer.
  */
-signedInteger := parse.label('Signed Integer Lexer',
-    parse.either(
-        parse.next(
+signedInteger := label@'Signed Integer Lexer' <|
+    either(
+        next(
             negativeSign,
-            parse.bind(unsignedInteger, \num->
-                parse.always(--num))),
-        parse.next(
-            parse.optional(positiveSign),
-            unsignedInteger)));
+            map((--), unsignedInteger)),
+        next(
+            optional positiveSign,
+            unsignedInteger));
 
 // Part
 ////////////////////////////////////////
@@ -125,10 +124,10 @@ signedInteger := parse.label('Signed Integer Lexer',
  * 
  * Returns the numeric value of the exponent part.
  */
-exponentPart := parse.label('Exponent Part Lexer',
-    parse.next(
+exponentPart := label@'Exponent Part Lexer' <|
+    next(
         exponentIndicator,
-        parse.expected('exponent', signedInteger)));
+        signedInteger |> expected@'exponent');
 
 /**
  * Digits of a hex number literal.
@@ -140,21 +139,20 @@ hexIntegerLiteralDigits := parse.label('Hex Integer Literal Digits Lexer',
 // Literals
 ////////////////////////////////////////
 /**
- * A hex number literal.
+ * Hex number literal.
  */
-hexIntegerLiteral := parse.label('Hex Integer Literal Lexer',
-    parse.next(
+hexIntegerLiteral := label@ 'Hex Integer Literal Lexer' <|
+    next(
         hexIndicator,
-        parse.expected('hex digits', hexIntegerLiteralDigits)));
+        hexIntegerLiteralDigits |> expected@'hex digits');
 
 /**
- * A integer number literal.
+ * Integer number literal.
  * 
  * Returns the number value of the input.
  */
-decimalIntegerLiteral := parse.label('Decimal Integer Literal',
-    parse.bind(decimalDigits, \num ->
-        parse.always(parseInt(num))));
+decimalIntegerLiteral := label@'Decimal Integer Literal' <|
+    map(parseInt, decimalDigits);
 
 /**
  * A decimal number literal.
@@ -165,7 +163,6 @@ decimalIntegerLiteral := parse.label('Decimal Integer Literal',
  * @return Number value of the input.
  */
 decimalLiteral := parse.label('Decimal Literal Lexer', let
-
     fractional = parse.bind(decimalDigits, \frac ->
         parse.always(parseFloat('.' + frac)))
     
@@ -197,9 +194,9 @@ in
  * @return Number value of the input.
  */
 numericLiteral := parse.label('Numeric Literal Lexer',
-    parse.either(
-        parse.next(
-            parse.attempt(hexIndicator),
+    either(
+        next(
+            hexIndicator,
             parse.expected('hex digits', hexIntegerLiteralDigits)),
         decimalLiteral));
 

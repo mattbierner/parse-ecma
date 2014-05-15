@@ -10,6 +10,8 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
     "use strict";
     var functionBody, functionExpression, functionDeclaration, sourceElement, sourceElements, program, late =
             parse["late"],
+        keyword = token["keyword"],
+        punctuator = token["punctuator"],
         statementlabel = late((function() {
             var __o = require("ecma/parse/statement_parser"),
                 statement0 = __o["statement"];
@@ -19,16 +21,15 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
         return sourceElements;
     })));
     (functionBody = ecma_parse.node(sourceElements, ast_statement.BlockStatement.create));
-    var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(","), value.identifier));
-    (functionExpression = parse.label("Function Expression", ecma_parse.nodea(parse.next(token.keyword(
-            "function"), parse.enumeration(parse.optional(value.identifier), parse_lang.between(
-            token.punctuator("("), token.punctuator(")"), formalParameterList), parse_lang.between(
-            token.punctuator("{"), token.punctuator("}"), functionBody))), ast_expression.FunctionExpression
-        .create)));
-    (functionDeclaration = parse.label("Function Declaration", ecma_parse.nodea(parse.next(token.keyword(
-        "function"), parse.enumeration(value.identifier, parse_lang.between(token.punctuator(
-        "("), token.punctuator(")"), formalParameterList), parse_lang.between(token.punctuator(
-        "{"), token.punctuator("}"), functionBody))), ast_declaration.FunctionDeclaration.create)));
+    var formalParameterList = parse.eager(parse_lang.sepBy(punctuator(","), value.identifier));
+    (functionExpression = parse.label("Function Expression", ecma_parse.nodea(parse.next(keyword("function"),
+        parse.enumeration(parse.optional(value.identifier), parse_lang.between(punctuator("("),
+            punctuator(")"), formalParameterList), parse_lang.between(punctuator("{"),
+            punctuator("}"), functionBody))), ast_expression.FunctionExpression.create)));
+    (functionDeclaration = parse.label("Function Declaration", ecma_parse.nodea(parse.next(keyword("function"),
+        parse.enumeration(value.identifier, parse_lang.between(punctuator("("), punctuator(")"),
+            formalParameterList), parse_lang.between(punctuator("{"), punctuator("}"),
+            functionBody))), ast_declaration.FunctionDeclaration.create)));
     (sourceElement = parse.expected("statement or function", parse.either(functionDeclaration, statementlabel)));
     (sourceElements = parse.eager(parse.many(sourceElement)));
     (program = parse.label("Program", ecma_parse.node(parse.eager(parse.rec((function(self) {

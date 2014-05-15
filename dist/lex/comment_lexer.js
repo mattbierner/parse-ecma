@@ -29,8 +29,7 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
             singleLineCommentChars))));
         (multiLineCommentStartMarker = string("/*"));
         (multiLineCommentEndMarker = string("*/"));
-        (multiLineCommentChars = label("Multi Line Comment Characters Lexer", many(next(not(
-            multiLineCommentEndMarker), anyToken))));
+        (multiLineCommentChars = many(next(not(multiLineCommentEndMarker), anyToken)));
         (multiLineComment = label("Multi Line Comment Lexer", between(multiLineCommentStartMarker,
             multiLineCommentEndMarker, join(multiLineCommentChars))));
         (comment = label("Comment Lexer", either(singleLineComment, multiLineComment)));
