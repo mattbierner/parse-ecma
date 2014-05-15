@@ -194,13 +194,13 @@
                 
                 'bennu': 'dependencies/bennu/dist',
                 'nu-stream': 'dependencies/nu/dist',
-                'ecma_ast': 'dependencies/ecma-ast/lib',
+                'ecma-ast': 'dependencies/ecma-ast/dist',
                 'seshet': 'dependencies/seshet/dist/seshet'
             }
         });
         $(function(){
             require(['nu-stream/stream',
-                'ecma/lex/lexer', 'ecma/parse/parser', 'ecma_ast/node'],
+                'ecma/lex/lexer', 'ecma/parse/parser', 'ecma-ast/node'],
                 function(stream, lexer, parser, node)
             {
                 var lexOut = $('.LexOut');
@@ -280,28 +280,8 @@
                     } catch (e) {
                         $('.LexError').text(e);
                     }
-                                                            var start = new Date().getTime();
                     
-                    console.profile();
-                    try
-                    {
-                        ast = parser.parse(input);
-                    } catch (e) {
-                        $('#time').text('');
-                        $('.ParseError').text(e);
-                        return;
-                    } finally {
-                        console.profileEnd();
-                    }                                        var end = new Date().getTime();
-                    
-                    
-                    var diff = end - start;
-                    $('#time').text(diff);
-
-                    $('.ParseError').text('');
-                    $('.LexError').text('');
-                    
-                    if (nodes) {
+                                        if (nodes) {
                         stream.forEach(function(v) {
                             var type =  v.type,
                                 value = (type === 'Whitespace' ? '' : v.value),
@@ -320,6 +300,28 @@
                         }, nodes);
                         
                     }
+                    
+                                                            var start = new Date().getTime();
+                    
+                    console.profile();
+                    try
+                    {
+                        ast = parser.parse(input);
+                    } catch (e) {
+                        $('#time').text('');
+                        $('.ParseError').text(e);
+                      //  return;
+                    } finally {
+                        console.profileEnd();
+                    }                                        var end = new Date().getTime();
+                    
+                    
+                    var diff = end - start;
+                    $('#time').text(diff);
+
+
+                    
+
                     walk(ast, function(x){
                         $('.ParseOut').append(x);
                     });

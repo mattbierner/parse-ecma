@@ -1,0 +1,219 @@
+/**
+ * @fileOverview Lexers for ECMAScript 5.1 string values.
+ */
+package (
+// Constants
+    doubleQuote
+    escape
+    singleQuote
+    lineContinuation
+    
+// Escape Sequences
+    singleEscapeCharacter
+    escapeCharacter
+    nonEscapeCharacter
+    characterEscapeSequence
+    unicodeEscapeSequence
+    hexEscapeSequence
+    escapeSequence
+    
+// Single String Literal
+    singleStringCharacter
+    singleStringCharacters
+    singleStringLiteral
+    
+// Double String Literal
+    doubleStringCharacter
+    doubleStringCharacters
+    doubleStringLiteral
+
+// Literal
+    stringLiteral)
+with
+    import 'bennu::parse' parse,
+    import 'bennu::lang' parse_lang,
+    import 'bennu::text' parse_text,
+    
+    import 'nu-stream::stream' stream,
+    
+    import './line_terminator_lexer' line_terminator_lexer,
+    import './number_lexer' number_lexer
+in {
+
+var join = (+);
+
+var fromCharCodeParser = \digits ->
+    parse.always(String.fromCharCode(parseInt(stream.foldl(join, '', digits), 16)));
+
+/* Lexers
+ ******************************************************************************/
+// Constants
+////////////////////////////////////////
+doubleQuote = parse_text.character('"');
+escape = parse_text.character('\\');
+singleQuote = parse_text.character("'");
+
+/**
+ * Lexer for string line continuation.
+ * 
+ * Returns an empty string.
+ */
+lineContinuation = parse.next(
+    parse.next(escape, line_terminator_lexer.lineTerminatorSequence),
+    parse.always(''));
+
+// Escape Character
+////////////////////////////////////////
+/**
+ * Lexer for a single escape character.
+ * 
+ * Returns the value represented by the escape character.
+ */
+singleEscapeCharacter = parse.choice(
+    parse_text.character("'"),
+    parse_text.character('"'),
+    parse_text.character('\\'),
+    parse.next(parse_text.character('b'), parse.always('\u0008')),
+    parse.next(parse_text.character('f'), parse.always('\u000C')),
+    parse.next(parse_text.character('n'), parse.always('\u000A')),
+    parse.next(parse_text.character('r'), parse.always('\u000D')),
+    parse.next(parse_text.character('t'), parse.always('\u0009')),
+    parse.next(parse_text.character('v'), parse.always('\u000B')));
+
+/**
+ * 
+ */
+escapeCharacter = parse.choice(
+    singleEscapeCharacter,
+    number_lexer.decimalDigit,
+    parse_text.character('u'),
+    parse_text.character('x'));
+
+/**
+ * Lexer for a string character which is not an escape character.
+ */
+nonEscapeCharacter = parse.token(\tok -> {
+    return !(parse.test(escapeCharacter, tok) ||
+        parse.test(line_terminator_lexer.lineTerminator, tok));
+});
+
+// Escape Sequence
+////////////////////////////////////////
+/**
+ * Lexer for a hex escape sequence.
+ * 
+ * Returns the character defined by the escape sequence.
+ */
+hexEscapeSequence = parse.next(
+    parse_text.character('x'),
+    parse.bind(parse_lang.times(2, number_lexer.hexDigit),
+        fromCharCodeParser));
+
+/**
+ * Lexer for a unicode escape sequence.
+ * 
+ * Returns the unicode character defined by the escape sequence.
+ */
+unicodeEscapeSequence = parse.next(
+    parse_text.character('u'),
+    parse.bind(parse_lang.times(4, number_lexer.hexDigit),
+        fromCharCodeParser));
+
+/**
+ * Lexer for a character escape sequence.
+ */
+characterEscapeSequence = parse.either(
+    singleEscapeCharacter,
+    nonEscapeCharacter);
+
+/**
+ * Lexer for an escape sequence.
+ * 
+ * Returns the character defined by the escape sequence.
+ */
+escapeSequence = parse.choice(
+    characterEscapeSequence,
+    parse.next(
+        parse_text.character('0'),
+        parse.next(
+            parse.either(
+                parse.eof,
+                parse.token(\tok -> {
+                    return !parse.test(number_lexer.decimalDigit, tok);
+                })
+            ),
+        parse.always('\u0000'))),
+    hexEscapeSequence,
+    unicodeEscapeSequence);
+
+// Single String Literal
+////////////////////////////////////////
+/**
+ * Lexer for a valid single string character.
+ */
+singleStringCharacter = parse.choice(
+    parse.attempt(lineContinuation),
+    parse.next(escape, escapeSequence),
+    parse.token(\tok ->{
+        return !(parse.test(singleQuote, tok) ||
+            parse.test(escape, tok) || 
+            parse.test(line_terminator_lexer.lineTerminator, tok));
+    }));
+
+/**
+ * Lexer for a sequence of single string characters.
+ */
+singleStringCharacters = parse.many(singleStringCharacter);
+
+/**
+ * Lexer for a single quoted string literal.
+ * 
+ * Returns the value of the string enclosed in the single quoted string literal.
+ */
+singleStringLiteral = parse.Parser('Single String Literal',
+    parse_lang.between(singleQuote, singleQuote,
+        parse.bind(singleStringCharacters, \str ->
+            parse.always(stream.foldl(join, '', str)))));
+
+// Double String Literal
+////////////////////////////////////////
+/**
+ * Lexer for a valid double string character
+ */
+doubleStringCharacter = parse.choice(
+    parse.attempt(lineContinuation),
+    parse.next(escape, escapeSequence),
+    parse.token(\tok -> {
+        return !(parse.test(doubleQuote, tok) ||
+            parse.test(escape, tok) ||
+            parse.test(line_terminator_lexer.lineTerminator, tok));
+    }));
+
+/**
+ * Lexer for a sequence of double string characters.
+ */
+doubleStringCharacters = parse.many(doubleStringCharacter);
+
+/**
+ * Lexer for a double quoted string literal.
+ * 
+ * Returns the value of the string enclosed in the double quoted string literal.
+ */
+doubleStringLiteral = parse.Parser('Double String Literal',
+    parse_lang.between(doubleQuote, doubleQuote,
+        parse.bind(doubleStringCharacters, \str ->
+            parse.always(stream.foldl(join, '', str)))));
+
+// String Literal
+////////////////////////////////////////
+/**
+ * Lexer for a string literal.
+ * 
+ * Returns the value of the string enclosed in the string literal.
+ */
+stringLiteral = parse.Parser('Sting Literal Lexer',
+    parse.either(
+        singleStringLiteral,
+        doubleStringLiteral));
+
+}

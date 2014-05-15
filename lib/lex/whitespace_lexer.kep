@@ -1,0 +1,61 @@
+/**
+ * @fileOverview
+ */
+package (
+    tab
+    vt
+    ff
+    sp
+    nbsp
+    bom
+    usp
+    whitespace)
+with
+    import 'bennu::parse' {Parser token},
+    import 'bennu::text' {character characters}
+in {
+
+/* Lexers
+ ******************************************************************************/
+/**
+ * Tab
+ */
+tab = character '\u0009';
+
+/**
+ * Vertical Tab
+ */
+vt = character '\u000B';
+
+/**
+ * Form Feed
+ */
+ff = character '\u000C';
+
+/**
+ * Space
+ */
+sp = character '\u0020';
+
+/**
+ * No-break space
+ */
+nbsp = character '\u00A0';
+
+/**
+ * Byte Order Mark
+ */
+bom = character '\uFEFF';
+
+/**
+ * Any Unicode space separator.
+ */
+usp = token(RegExp.prototype.test.bind(`^\s$`));
+
+/**
+ * A whitespace character.
+ */
+whitespace = Parser('Whitespace Lexer',
+    characters ['\u0009', '\u000B', '\u000C', '\u0020', '\u00A0', '\uFEFF']);
+
+}

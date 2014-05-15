@@ -1,0 +1,127 @@
+/**
+ * @fileOverview Parsers for ECMAScript 5.1 Functions and Programs.
+ */
+package (
+    functionBody
+    functionExpression
+    functionDeclaration
+    
+    sourceElement
+    sourceElements
+    
+    program)
+with
+    import 'bennu::parse' parse,
+    import 'bennu::lang' parse_lang,
+    
+    import 'nu-stream::stream' stream,
+    
+    import 'ecma-ast::declaration' ast_declaration,
+    import 'ecma-ast::expression' ast_expression,
+    import 'ecma-ast::program' ast_program,
+    import 'ecma-ast::statement' ast_statement,
+    
+    import './common' ecma_parse,
+    import './token_parser' token,
+    import './value_parser' value,
+    import './statement_parser' statement
+in {
+
+/* Circular
+ ******************************************************************************/
+var statementParser = \-args(...)-> {
+    with
+        import 'ecma/parse/statement_parser' {statement}
+    in {
+        return statement.apply(undefined, args);
+    }
+};
+
+/* Forward declarations
+ ******************************************************************************/
+sourceElements = \-args(...)-> { return sourceElements.apply(undefined, args); };
+
+/* Parsers
+ ******************************************************************************/
+/**
+ * Parser for the body of a function.
+ */
+functionBody = ecma_parse.node(
+    sourceElements,
+    ast_statement.BlockStatement.create);
+
+/**
+ * Parser for a function's parameters.
+ */
+var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(','),
+    value.identifier));
+
+// Function Expression
+////////////////////////////////////////
+/**
+ * Parser for an function expression.
+ * 
+ * May be named or anon.
+ */
+functionExpression = parse.Parser('Function Expression',
+    ecma_parse.nodea(
+        parse.next(
+            token.keyword('function'),
+            parse.enumeration(
+                parse.optional(null, value.identifier),
+                parse_lang.between(token.punctuator('('), token.punctuator(')'), 
+                    formalParameterList),
+                parse_lang.between(token.punctuator('{'), token.punctuator('}'),
+                    functionBody))),
+        ast_expression.FunctionExpression.create));
+
+// Function Declaration
+////////////////////////////////////////
+/**
+ * Parser for a function declaration.
+ * 
+ * Requires an identifier.
+ */
+functionDeclaration = parse.Parser('Function Declaration',
+    ecma_parse.nodea(
+        parse.next(
+            token.keyword('function'),
+            parse.enumeration(
+                value.identifier,
+                parse_lang.between(token.punctuator('('), token.punctuator(')'), 
+                    formalParameterList),
+                parse_lang.between(token.punctuator('{'), token.punctuator('}'),
+                    functionBody))),
+        ast_declaration.FunctionDeclaration.create));
+
+// Source Elements
+////////////////////////////////////////
+/**
+ * Parser for an ECMAScript source element.
+ * 
+ * Source Elements are top level nodes that makes up a program.
+ */
+sourceElement = parse.expected("statement or function",
+    parse.either(
+        functionDeclaration,
+        statementParser));
+
+/**
+ * Parser for a sequence of zero or more source elements.
+ */
+sourceElements = parse.eager(parse.many(sourceElement));
+
+// Program
+////////////////////////////////////////
+/**
+ * Parser for an ECMAScript 5.1 program.
+ */
+program = parse.Parser('Program',
+    ecma_parse.node(
+        parse.eager(parse.rec\self ->
+            parse.either(
+                parse.next(parse.eof, parse.always(stream.end)),
+                parse.cons(sourceElement, self))),
+        ast_program.Program.create));
+
+}

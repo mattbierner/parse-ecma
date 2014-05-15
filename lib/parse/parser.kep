@@ -1,0 +1,209 @@
+/**
+ * @fileOverview 
+ */
+package(
+    ParserState
+    parseStream
+    parse)
+with
+    import 'bennu::parse' {
+        always
+        bind
+        eof
+        choice
+        rec
+        runState
+        parseState
+        expected
+        next
+        setParserState
+        many
+        never
+        
+        'ParserState': BennuParserState},
+    
+    import 'nu-stream::stream' stream,
+    
+    import 'ecma-ast::position' position,
+    import 'ecma-ast::token' lexToken,
+    
+    import '../lex/lexer' lexer,
+    import './program_parser' program
+in {
+
+/* State
+ ******************************************************************************/
+var tokenizer = \token -> {
+    var followLineTerminator = \x -> {
+        return always(?!x : null : Object.create(x, {
+            'loc': {
+                'value': x.loc
+            },
+            'value': {
+                'value': x.value
+            },
+            'lineTerminator': {
+                'value': true
+            }
+        }));
+    };
+    
+    return rec\self -> let
+        onLineTerminator = bind(
+            next(many(lexer.lineTerminator), self),
+            followLineTerminator)
+    in
+        expected('token, comment, or whitespace', choice(
+            eof,
+            bind(
+                lexer.comment,
+                \x ->
+                    ?x.value.indexOf('\n') >= 0
+                        :onLineTerminator
+                        :self),
+            next(lexer.whitespace, self),
+            next(lexer.lineTerminator, onLineTerminator),
+            token));
+};
+
+var inputElementDiv = tokenizer(lexer.tokenDiv);
+
+var inputElementRegExp = tokenizer(lexer.tokenRegExp);
+
+
+/* Position
+ ******************************************************************************/
+var Position = function \position previousEnd =self-> {
+    self.position = position;
+    self.previousEnd = previousEnd;
+};
+
+Position.prototype.increment = \tok =self->
+    new Position(
+        tok.loc,
+        self.position);
+
+Position.prototype.compare = \pos =self->
+    self.position.compare(pos.position);
+
+Position.prototype.next = \position =self->
+    new Position(
+        position,
+        self.position);
+
+/* State
+ ******************************************************************************/
+var createNextRegExpState = \file, input, pos, ok, err ->
+    parseState(
+        inputElementRegExp,
+        new BennuParserState(input, pos),
+        \x, state ->
+            ok(new ParserState(
+                file,
+                ?x === null : stream.end : input,
+                new Position(state.position, pos),
+                x,
+                state.input)),
+        err);
+
+/**
+ * State for an ECMAScript parser.
+ * 
+ */
+ParserState = function \file input pos first rest =self-> {
+    BennuParserState.call(self, input, pos);
+    self.file = file;
+    self._first = first;
+    self._rest = rest;
+};
+ParserState.prototype = new BennuParserState();
+
+Object.defineProperty(ParserState.prototype, 'loc', {
+    'get': \ =self->
+         ?self.isEmpty()
+            :new position.SourceLocation(self.file, self.position.previousEnd, self.position.previousEnd)
+            :self._first.loc
+});
+
+ParserState.prototype.first = \ =self ->
+    self._first;
+
+ParserState.prototype.setInput = \input =self->
+    new ParserState(
+        self.file,
+        input,
+        self.pos,
+        self._first,
+        self._rest);
+
+ParserState.prototype.next = \tok =self-> {
+    if (!self._next) {
+        var end = ?self.loc : self.loc.end : self.position.previousEnd;
+        
+        self._next = parseState(
+            inputElementDiv,
+            new BennuParserState(self._rest, end, self.file),
+            \x state -> let
+                s = new ParserState(
+                    self.file,
+                    ?x === null : stream.end : self._rest,
+                    self.position.next(state.position),
+                    x,
+                    state.input)
+            in
+                \_ m cok -> cok(tok, s, m),
+            never);
+    }
+    return self._next;
+};
+
+ParserState.prototype.asRegExp = \tok =self-> {
+    if (!self._as) {
+        self._as = createNextRegExpState(
+            self.file,
+            self.input,
+            self.position.previousEnd,
+            setParserState,
+            never);
+    }
+    return self._as;
+};
+
+/* Running
+ ******************************************************************************/
+/**
+ * Parses a lex stream into an AST.
+ * 
+ * May throw any parse errors.
+ * 
+ * @param s Stream of characters.
+ * 
+ * @return AST.
+ */
+parseStream = \s, file ->
+    runState(
+        next(
+            new ParserState(
+                file,
+                s,
+                new Position(position.SourcePosition.initial, position.SourcePosition.initial),
+                {},
+                s).next(null),
+            program.program),
+         new BennuParserState());
+
+/**
+ * Parses a lex array into an AST.
+ * 
+ * May throw any parse errors.
+ * 
+ * @param input Array like object of characters.
+ * 
+ * @return AST.
+ */
+parse = \input, file ->
+    parseStream(
+        stream.from(input),
+        file);
+
+}

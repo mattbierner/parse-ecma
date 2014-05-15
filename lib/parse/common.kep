@@ -1,0 +1,119 @@
+/**
+ * @fileOverview 
+ */
+package (
+    precedence
+    
+    node
+    nodea
+    
+    positionParser)
+with
+    import 'bennu::parse' parse,
+    import 'bennu::lang' lang,
+    
+    import 'ecma-ast::position' position,
+    
+    import 'nu-stream::stream' {cons toArray NIL},
+    
+    import './token_parser' token
+in {
+
+// Operator Precedence
+////////////////////////////////////////
+precedence = \p, table -> {
+    var punts = Object.keys(table).reduce(
+        \p c ->
+            ?table.(c).type === 'punctuator' : p.concat(c) : p, 
+        []);
+    
+    var kws = Object.keys(table).reduce(
+        \p c ->
+            ?table.(c).type === 'keyword' : p.concat(c) : p,
+        []);
+    
+    var lookup = \x-> {
+        if (!(x.type === 'Punctuator' || x.type === 'Keyword'))
+            return x;
+        var item =  table.(x.value);
+        return {
+            'value': x.value,
+            'node': item.node,
+            'precedence': item.precedence
+        };
+    };
+    
+    var sep = parse.either(
+        token.punctuator.apply(undefined, punts),
+        token.keyword.apply(undefined, kws));
+    
+    return parse.bind(
+        parse.rec\self->
+            parse.cons(p,
+                parse.optional(NIL,
+                    parse.cons(sep,
+                        parse.expected("binary expression", self)))),
+        \x -> {
+            var list = toArray(x);
+            var stack = [], out = [];
+            
+            while (list.length > 0) {
+                var tok = lookup(list.shift());
+                if (tok.type) {
+                    out.push(tok);
+                } else {
+                    while (stack.length > 0) {
+                        var o2 = stack.(stack.length - 1);
+                        if (o2.precedence <= tok.precedence) {
+                            stack.pop();
+                            var rt = out.pop(),
+                                lf = out.pop();
+                            out.push(new (o2.node)(position.SourceLocation.merge(lf.loc, rt.loc), o2.value, lf, rt));
+                        } else {
+                            break;
+                        }
+                    }
+                    stack.push(tok);
+                }
+            }
+            
+            while (stack.length > 0) {
+                var o = stack.pop();
+                var rt = out.pop(),
+                    lf = out.pop();
+                out.push(new (o.node)(position.SourceLocation.merge(lf.loc, rt.loc), o.value, lf, rt));
+            }
+            
+            return parse.always(out.pop());
+        });
+};
+
+// State Interaction
+////////////////////////////////////////
+positionParser = parse.extract (.position);
+
+var locParser = parse.extract (.loc);
+
+var prevEnd = parse.extract ((.position) \> (.previousEnd));
+
+// Ast Node
+////////////////////////////////////////
+node = \p, f ->
+    parse.binds(
+        parse.enumeration(
+            locParser,
+            p,
+            prevEnd),
+        \o, x, c ->
+            parse.always(f(new position.SourceLocation(o.file, o.start, c), x)));
+
+nodea = \p, f ->
+    parse.binds(
+        parse.enumeration(
+            locParser,
+            p,
+            prevEnd),
+        \o, x, c ->
+            parse.always(f.apply(undefined, toArray(cons(new position.SourceLocation(o.file, o.start, c), x)))));
+
+}

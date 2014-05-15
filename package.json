@@ -1,17 +1,36 @@
 {
-  "name": "ecma-parser",
-  "version": "4.5.0",
-  "description": "parse.js parsers for ECMAScript",
-  "main": "",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:mattbierner/parse-ecma.git"
-  },
-  "keywords": [
-    "parsing",
-    "parser",
-    "ecmascript"
-  ],
-  "author": "Matt Bierner",
-  "license": "MIT"
+    "name": "ecma-parse",
+    "version": "4.5.0",
+    "description": "parse.js parsers for ECMAScript",
+    "main": "",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:mattbierner/parse-ecma.git"
+    },
+    "keywords": [
+        "parsing",
+        "parser",
+        "ecmascript"
+    ],
+    "author": "Matt Bierner",
+    "license": "MIT",
+    
+    "dependencies": {
+        "nu-stream": ">=3.2.0",
+        "bennu": "17.2.x",
+        "ecma-ast": "2.5.x",
+        
+        "require-directory": "1.2.x"
+    },
+    "devDependencies": {
+        "nodeunit": "0.8.x"
+    },
+    
+    "scripts": {
+        "test": "node test.js",
+        
+        "build": "npm run build-amd && npm run build-node",
+        "build-amd": "khepri lib -o dist",
+        "build-node": "khepri lib -o dist_node --package_manager=node"
+    }
 }

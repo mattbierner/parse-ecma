@@ -1,0 +1,250 @@
+/**
+ * @fileOverview Lexers for ECMAScript 5.1.
+ * 
+ * As per the ECMAScript 5.1 spec, two top level symbols are defined, one
+ * that supports leading division operators and division assignment operators, 
+ * and one that does not.
+ */
+package (
+    comment
+    whitespace
+    lineTerminator
+    
+    tokenDiv
+    tokenRegExp
+    
+    lexDivState
+    lexDivStream
+    lexDiv
+    
+    lexRegExpState
+    lexRegExpStream
+    lexRegExp)
+with
+    import 'bennu::parse' parse#{
+        always
+        attempt
+        binds
+        bind
+        choice
+        eof
+        getPosition
+        getState
+        enumeration
+        extract
+        many
+        runState
+        ParserState},
+    import 'bennu::lang' {then},
+    import 'nu-stream::stream' {'from': streamFrom},
+    
+    import 'ecma-ast::token' lexToken,
+    import 'ecma-ast::position' {SourceLocation SourcePosition},
+    
+    import './boolean_lexer' {booleanLiteral},
+    import './comment_lexer' comment_lexer,
+    import './identifier_lexer' {identifier},
+    import './line_terminator_lexer' line_terminator_lexer,
+    import './null_lexer' {nullLiteral},
+    import './number_lexer' {numericLiteral},
+    import './punctuator_lexer' {punctuator divPunctuator},
+    import './reserved_word_lexer' {reservedWord},
+    import './string_lexer' {stringLiteral},
+    import './whitespace_lexer' whitespace_lexer,
+    import './regular_expression_lexer' {regularExpressionLiteral}
+in {
+
+var makeToken = \type p ->
+    bind(p, \x ->
+        always [type, x]);
+
+var buildToken = \p ->
+    binds(
+        enumeration(
+            getState,
+            getPosition,
+            p,
+            getPosition),
+        \file start entry end ->
+            always(new (entry.(0))(
+                new SourceLocation(file, start, end),
+                entry.(1))));
+
+/* Lexers
+ ******************************************************************************/
+// Literal
+////////////////////////////////////////
+/**
+ * Literal in division contexts.
+ */
+var literalDiv = choice(
+    makeToken(
+        lexToken.StringToken.create,
+        stringLiteral),
+    makeToken(
+        lexToken.BooleanToken.create,
+        booleanLiteral),
+    makeToken(
+        lexToken.NullToken.create,
+        nullLiteral),
+    makeToken(
+        lexToken.NumberToken.create,
+        numericLiteral));
+
+/**
+ * Literal in non-division contexts.
+ */
+var literalRegExp = choice(
+    literalDiv,
+    makeToken(
+        lexToken.RegularExpressionToken.create,
+        regularExpressionLiteral));
+
+// Token
+////////////////////////////////////////
+/**
+ * Lexer for a token in division contexts.
+ */
+var tokenDivToken = choice(
+    attempt makeToken(
+        lexToken.IdentifierToken,
+        identifier),
+    literalDiv,
+    makeToken(
+        lexToken.KeywordToken,
+        reservedWord),
+    makeToken(
+        lexToken.PunctuatorToken,
+        choice(
+            punctuator,
+            divPunctuator)));
+
+tokenDiv = buildToken tokenDivToken;
+
+/**
+ * Lexer for a token in non-division contexts.
+ */
+var tokenRegExpToken = choice(
+    attempt makeToken(
+        lexToken.IdentifierToken,
+        identifier),
+    literalRegExp,
+    makeToken(
+        lexToken.KeywordToken,
+        reservedWord),
+    makeToken(
+        lexToken.PunctuatorToken,
+        punctuator));
+
+tokenRegExp = buildToken tokenRegExpToken;
+
+// Input Element
+////////////////////////////////////////
+var commentToken := makeToken(
+    lexToken.CommentToken,
+    comment_lexer.comment);
+
+var whitespaceToken := makeToken(
+    lexToken.WhitespaceToken,
+    whitespace_lexer.whitespace);
+
+var lineTerminatorToken := makeToken(
+    lexToken.LineTerminatorToken,
+    line_terminator_lexer.lineTerminator);
+
+comment = buildToken commentToken;
+whitespace = buildToken whitespaceToken;
+lineTerminator = buildToken lineTerminatorToken;
+
+var element = choice(
+    commentToken,
+    whitespaceToken,
+    lineTerminatorToken);
+
+/**
+ * Lexer for a top level element in division contexts.
+ */
+var inputElementDiv = choice(
+    element,
+    tokenDivToken);
+
+/**
+ * Lexer for a top level element in non-division contexts.
+ */
+var inputElementRegExp = choice(
+    element,
+    tokenRegExpToken);
+
+// Lexers
+////////////////////////////////////////
+/**
+ * Lexer for a stream of tokens in leading division grammars.
+ * 
+ * Lexes as much input as possible, does not check for eof.
+ */
+var lexerDiv = many buildToken(inputElementDiv);
+
+/**
+ * Lexer for a stream of tokens in non leading division grammars.
+ * 
+ * Lexes as much input as possible, does not check for eof.
+ */
+var lexerRegExp = many buildToken(inputElementRegExp);
+
+/* Running
+ ******************************************************************************/
+// Lex Div 
+////////////////////////////////////////
+/**
+ * Lexes state in division context.
+ */
+lexDivState = \state ->
+    runState(
+        then(
+            lexerDiv,
+            eof),
+        state);
+
+/**
+ * Lexes stream in division context.
+ */
+lexDivStream = \s file -> 
+    lexDivState(
+        new ParserState(
+            s,
+            SourcePosition.initial,
+            file));
+
+/**
+ * Lexes array-like input in division context.
+ */
+lexDiv = streamFrom \> lexDivStream;
+
+// Lex RegExp 
+////////////////////////////////////////
+/**
+ * Lexes state in non-division context.
+ */
+lexRegExpState = \state ->
+    runState(
+        then(
+            lexerRegExp,
+            parse.eof),
+        state);
+
+/**
+ * Lexes stream in non-division context.
+ */
+lexRegExpStream = \s file -> 
+    lexRegExpState(
+        new ParserState(
+            s,
+            SourcePosition.initial,
+            file));
+
+/**
+ * Lexes array-like in non-division context.
+ */
+lexRegExp = streamFrom \> lexRegExpStream;
+
+}

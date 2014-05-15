@@ -1,0 +1,27 @@
+/**
+ * @fileOverview Lexers for ECMAScript 5.1 reserved words.
+ */
+package (
+    reservedWord
+    keywordList)
+with
+    import 'bennu::parse' {Parser},
+    import 'bennu::text' {trie}
+in {
+
+keywordList = [
+    'break', 'case', 'catch', 'continue', 'debugger', 'default', 'delete', 
+    'do', 'else', 'finally', 'for', 'function', 'if', 'in', 'instanceof', 
+    'typeof', 'new', 'var', 'return', 'void', 'switch', 'while', 'this', 
+    'with', 'throw', 'try', 'class', 'enum', 'extends', 'super', 'const',
+    'export', 'import', 'implements', 'let', 'private', 'public', 'interface',
+    'package', 'protected', 'static', 'yield',
+    
+    'true', 'false', 'null']; 
+
+/* Lexers
+ ******************************************************************************/
+reservedWord = Parser('Reserved Word Lexer',
+    trie keywordList);
+
+}

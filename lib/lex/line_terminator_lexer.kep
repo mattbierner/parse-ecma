@@ -1,0 +1,73 @@
+/**
+ * @fileOverview 
+ */
+package (
+    lf
+    cr
+    ls
+    ps
+    lineTerminator
+    lineTerminatorSequence)
+with
+    import 'bennu::parse' {
+        always
+        choice
+        optional
+        next
+        Parser},
+    import 'bennu::text' {
+        character
+        oneOf
+        string}
+in {
+
+var lfChar := '\u000A',
+    crChar := '\u000D',
+    lsChar := '\u2028',
+    psChar := '\u2029';
+
+/* Lexers
+ ******************************************************************************/
+/**
+ * Line Feed
+ */
+lf := character lfChar;
+
+/**
+ * Carriage Return
+ */
+cr := character crChar;
+
+/**
+ * Line Separator
+ */
+ls := character lsChar;
+/**
+ * Paragraph Separator
+ */
+ps := character psChar;
+
+/**
+ * A line terminator character.
+ */
+lineTerminator := Parser@'Line Terminator Lexer' <|
+    choice(lf, cr, ls, ps);//[lfChar, crChar, lsChar, psChar];
+
+/**
+ * A sequence of characters denoting a linter terminator.
+ * 
+ * crlf sequences are returned as a single token.
+ */
+lineTerminatorSequence := Parser@'Line Terminator Sequence Lexer' <|
+    choice(
+        lf,
+        ls,
+        ps,
+        next(
+            cr,
+            optional(crChar,
+                next(
+                    lf,
+                    always(crChar + lfChar)))));
+
+}
