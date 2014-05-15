@@ -14,93 +14,77 @@ package (
     
     comment)
 with
-    import 'bennu::parse' parse#{
-        always
-        rec},
+    import 'bennu::parse' {
+        anyToken
+        either
+        label
+        map
+        many
+        next
+        not},
+    import 'bennu::lang' {between},
     import 'bennu::text' {
         character
         string},
     
     import 'nu-stream::stream' {foldl NIL},
-    import './line_terminator_lexer' line_terminator
+    
+    import './line_terminator_lexer' {lineTerminator}
 in {
 
-var join = \p ->
-    parse.bind(p, \s ->
-        always foldl((+), '', s));
+var join := map @ (foldl @ (+) @ '');
 
 /* Lexers
  ******************************************************************************/
 // Single Line Comment
 ////////////////////////////////////////
-/**
- * Lexer for token that marks the start of a single line comment.
- */
-singleLineCommentMarker = string('//');
+singleLineCommentMarker := string '//';
+
+singleLineCommentChar :=
+    next(
+        not lineTerminator,
+        anyToken);
+
+singleLineCommentChars := many singleLineCommentChar;
 
 /**
- * Lexer for a valid character in a single line comment.
- */
-singleLineCommentChar = parse.token(\tok ->
-    !parse.test(line_terminator.lineTerminator, tok));
-
-/**
- * Lexer for the characters in a single line comment.
- */
-singleLineCommentChars = parse.many(singleLineCommentChar);
-
-/**
- * Lexer for a single line comment
+ * Single line comment.
  * 
  * Returns the contents of the comment.
  */
-singleLineComment = parse.label('Single Line Comment Lexer',
-    parse.next(
+singleLineComment := label@'Single Line Comment Lexer' <|
+    next(
         singleLineCommentMarker,
-        join(singleLineCommentChars)));
+        join singleLineCommentChars);
 
 // Multi Line Comment
 ////////////////////////////////////////
-/**
- * Lexer for token that marks the start of a multi line comment.
- */
-multiLineCommentStartMarker = string('/*');
+multiLineCommentStartMarker := string '/*';
+
+multiLineCommentEndMarker := string '*/' ;
+
+multiLineCommentChars := label@'Multi Line Comment Characters Lexer' <|
+    many next(
+        not multiLineCommentEndMarker,
+        anyToken);
 
 /**
- * Lexer for token that marks the end of a multi line comment.
- */
-multiLineCommentEndMarker = string('*/');
-
-/**
- * Lexer for string of characters inside of multi line comment.
- */
-multiLineCommentChars = parse.label('Multi Line Comment Characters Lexer', rec\self ->
-    parse.either(
-        parse.next(
-            character('*'),
-            parse.either(
-                parse.next(character('/'), always NIL),
-                parse.cons(parse.always('*'), self))),
-        parse.cons(parse.anyToken, self)));
-
-/**
- * Lexer for a multi line comment.
+ * Multi line comment.
  * 
  * Returns the contents of the comment.
  */
-multiLineComment = parse.label('Multi Line Comment Lexer',
-    parse.next(
-        multiLineCommentStartMarker,
-        join(multiLineCommentChars)));
+multiLineComment := label@'Multi Line Comment Lexer' <|
+    between(multiLineCommentStartMarker, multiLineCommentEndMarker,
+        join multiLineCommentChars);
 
 // Comment
 ////////////////////////////////////////
 /**
  * Lexer for any ECMAScript 5.1 comment
  */
-comment = parse.label('Comment Lexer',
-    parse.either(
+comment := label@'Comment Lexer'<|
+    either(
         singleLineComment,
-        multiLineComment));
+        multiLineComment);
 
 }
