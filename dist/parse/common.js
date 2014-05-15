@@ -5,7 +5,7 @@
 define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", "nu-stream/stream", "./token_parser"], (
     function(require, exports, parse, lang, position, __o, token) {
         "use strict";
-        var precedence, node, nodea, positionParser, cons = __o["cons"],
+        var precedence, node, nodea, cons = __o["cons"],
             toArray = __o["toArray"],
             NIL = __o["NIL"];
         (precedence = (function(p, table) {
@@ -65,10 +65,7 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", 
                 return parse.always(out.pop());
             }));
         }));
-        (positionParser = parse.extract((function(x) {
-            return x.position;
-        })));
-        var locParser = parse.extract((function(x) {
+        var loclabel = parse.extract((function(x) {
             return x.loc;
         })),
             prevEnd = parse.extract((function(z) {
@@ -76,12 +73,12 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", 
                 return x.previousEnd;
             }));
         (node = (function(p, f) {
-            return parse.binds(parse.enumeration(locParser, p, prevEnd), (function(o, x, c) {
+            return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
                 return parse.always(f(new(position.SourceLocation)(o.file, o.start, c), x));
             }));
         }));
         (nodea = (function(p, f) {
-            return parse.binds(parse.enumeration(locParser, p, prevEnd), (function(o, x, c) {
+            return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
                 return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o.file,
                     o.start, c), x))));
             }));
@@ -89,5 +86,4 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", 
         (exports["precedence"] = precedence);
         (exports["node"] = node);
         (exports["nodea"] = nodea);
-        (exports["positionParser"] = positionParser);
     }));

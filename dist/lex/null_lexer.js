@@ -4,10 +4,10 @@
 */
 define(["require", "exports", "bennu/parse", "bennu/text"], (function(require, exports, __o, __o0) {
     "use strict";
-    var nullLiteral, Parser = __o["Parser"],
+    var nullLiteral, label = __o["label"],
         next = __o["next"],
         always = __o["always"],
         string = __o0["string"];
-    (nullLiteral = Parser("Null Parser", next(string("null"), always(null))));
+    (nullLiteral = label("Null label", next(string("null"), always(null))));
     (exports["nullLiteral"] = nullLiteral);
 }));

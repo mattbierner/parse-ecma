@@ -4,11 +4,11 @@
 package (
     nullLiteral)
 with
-    import 'bennu::parse' {Parser next always},
+    import 'bennu::parse' {label next always},
     import 'bennu::text' {string}
 in {
 
-nullLiteral = Parser@'Null Parser' <|
+nullLiteral = label@'Null label' <|
     next(
         string 'null',
         always null);

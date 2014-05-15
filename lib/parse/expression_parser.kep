@@ -1,5 +1,5 @@
 /**
- * @fileOverview Parser for ECMAScript 5.1 expressions.
+ * @fileOverview label for ECMAScript 5.1 expressions.
  */
 package (
     arrayElement
@@ -63,7 +63,8 @@ package (
     expression
     expressionNoIn)
 with
-    import 'bennu::parse' parse,
+    import 'bennu::parse' parse#{
+        late},
     import 'bennu::lang' parse_lang,
     
     import 'nu-stream::stream' stream,
@@ -93,40 +94,36 @@ var extend = \obj props ->
 
 /* Circular
  ******************************************************************************/
-var functionExpression = \-args()-> {
-    with
-        import 'ecma/parse/program_parser' {functionExpression}
-    in {
-        return functionExpression.apply(undefined, args);
+var functionExpression = late \-> {
+    with import 'ecma/parse/program_parser' {functionExpression} in {
+        return functionExpression;
     }
 };
 
-var functionBody = \-args()-> {
-    with
-        import 'ecma/parse/program_parser' {functionBody}
-    in {
-        return functionBody.apply(undefined, args);
+var functionBody = late \-> {
+    with import 'ecma/parse/program_parser' {functionBody} in {
+        return functionBody;
     }
 };
 
 /* Forward Declarations
  ******************************************************************************/
-assignmentExpression = \-args()-> { return assignmentExpression.apply(undefined, args); };
+assignmentExpression = late \-> { return assignmentExpression; };
 
-assignmentExpressionNoIn = \-args()-> { return assignmentExpressionNoIn.apply(undefined, args); };
+assignmentExpressionNoIn = late \-> { return assignmentExpressionNoIn; };
 
-expression = \-args()-> { return expression.apply(undefined, args); };
+expression = late \-> { return expression; };
 
-newExpression = \-args()-> { return newExpression.apply(undefined, args); };
+newExpression = late \-> { return newExpression; };
 
 /* Parsers
  ******************************************************************************/
 // Array Literal
 ////////////////////////////////////////
 /**
- * Parser for an element in an array literal.
+ * label for an element in an array literal.
  */
-arrayElement = parse.Parser('Array Element',
+arrayElement = parse.label('Array Element',
     parse.either(
         assignmentExpression,
         parse.next(
@@ -134,16 +131,16 @@ arrayElement = parse.Parser('Array Element',
             parse.always(null))));
 
 /**
- * Parser for the elements of an array literal.
+ * label for the elements of an array literal.
  */
-arrayElements = parse.Parser('Array Elements',
+arrayElements = parse.label('Array Elements',
     parse.eager(parse_lang.sepEndBy(token.punctuator(','),
         arrayElement)));
 
 /**
- * Parser for an ECMASccript array literal.
+ * label for an ECMASccript array literal.
  */
-arrayLiteral = parse.Parser('Array Literal',
+arrayLiteral = parse.label('Array Literal',
     ecma_parse.node(
         parse_lang.between(token.punctuator('['), token.punctuator(']'),
             arrayElements),
@@ -152,16 +149,16 @@ arrayLiteral = parse.Parser('Array Literal',
 // Object Literal
 ////////////////////////////////////////
 /**
- * Parser for an object property name.
+ * label for an object property name.
  */
-propertyName = parse.Parser('Property Name',
+propertyName = parse.label('Property Name',
     parse.expected('property name', parse.choice(
         value.identifier,
         value.stringLiteral,
         value.numericLiteral)));
 
 /**
- * Parser for the argument list of a object set initializer property.
+ * label for the argument list of a object set initializer property.
  */
 propertySetParameterList = parse.bind(
     value.identifier,
@@ -169,23 +166,23 @@ propertySetParameterList = parse.bind(
         parse.always [x]);
 
 /**
- * Parser for the key of a value initialized property .
+ * label for the key of a value initialized property .
  */
-var propertyValueKey = parse.Parser('Property Value Key',
+var propertyValueKey = parse.label('Property Value Key',
     parse_lang.then(
         propertyName,
         token.punctuator(':')));
 
 /**
- * Parser for the standard key to value property initializer.
+ * label for the standard key to value property initializer.
  */
-propertyValueInitializer = parse.Parser('Property Value Initializer',
+propertyValueInitializer = parse.label('Property Value Initializer',
     assignmentExpression);
 
 /**
- * Parser for the value property
+ * label for the value property
  */
-var valueProperty = parse.Parser('Value Property',
+var valueProperty = parse.label('Value Property',
     ecma_parse.nodea(
         parse.enumeration(
             parse.attempt(propertyValueKey),
@@ -193,17 +190,17 @@ var valueProperty = parse.Parser('Value Property',
         ast_value.ObjectValue.create));
 
 /**
- * Parser for the key of a property getter.
+ * label for the key of a property getter.
  */
-var propertyGetterKey = parse.Parser('Property Getter Key',
+var propertyGetterKey = parse.label('Property Getter Key',
     parse.next(
         token.identifier('get'),
         propertyName));
 
 /**
- * Parser for a getter for a property.
+ * label for a getter for a property.
  */
-propertyGetInitializer = parse.Parser('Property Get Initializer',
+propertyGetInitializer = parse.label('Property Get Initializer',
     ecma_parse.node(
         parse.next(
             parse.next(
@@ -215,9 +212,9 @@ propertyGetInitializer = parse.Parser('Property Get Initializer',
             new ast_expression.FunctionExpression(loc, null, [], body)));
 
 /**
- * Parser for a property getter.
+ * label for a property getter.
  */
-var getterProperty = parse.Parser('Getter Property',
+var getterProperty = parse.label('Getter Property',
     ecma_parse.nodea(
         parse.enumeration(
             propertyGetterKey,
@@ -225,17 +222,17 @@ var getterProperty = parse.Parser('Getter Property',
         ast_value.ObjectGetter.create));
 
 /**
- * Parser for the key of a property getter.
+ * label for the key of a property getter.
  */
-var propertySetterKey = parse.Parser('Property Setter Key',
+var propertySetterKey = parse.label('Property Setter Key',
     parse.next(
         token.identifier('set'),
         propertyName));
 
 /**
- * Parser for a setter for a property.
+ * label for a setter for a property.
  */
-propertySetInitializer = parse.Parser('Property Set Initializer',
+propertySetInitializer = parse.label('Property Set Initializer',
     ecma_parse.nodea(
         parse.enumeration(
             parse_lang.between(token.punctuator('('), token.punctuator(')'),
@@ -246,9 +243,9 @@ propertySetInitializer = parse.Parser('Property Set Initializer',
             new ast_expression.FunctionExpression(loc, null, params, body)));
 
 /**
- * Parser for a property setter.
+ * label for a property setter.
  */
-var setterProperty = parse.Parser('Setter Property',
+var setterProperty = parse.label('Setter Property',
     ecma_parse.nodea(
         parse.enumeration(
             propertySetterKey,
@@ -256,25 +253,25 @@ var setterProperty = parse.Parser('Setter Property',
         ast_value.ObjectSetter.create));
 
 /**
- * Parser for any property initializer.
+ * label for any property initializer.
  */
-propertyInitializer = parse.Parser('Property Initializer',
+propertyInitializer = parse.label('Property Initializer',
     parse.choice(
         valueProperty,
         getterProperty,
         setterProperty));
 
 /**
- * Parser for the body of an object literal.
+ * label for the body of an object literal.
  */
-propertyList = parse.Parser('Property List',
+propertyList = parse.label('Property List',
     parse.eager(parse_lang.sepEndBy(token.punctuator(','),
         propertyInitializer)));
 
 /**
  * Object Literal
  */
-objectLiteral = parse.Parser('Object Literal',
+objectLiteral = parse.label('Object Literal',
     ecma_parse.node(
         parse_lang.between(token.punctuator('{'), token.punctuator('}'),
             propertyList),
@@ -285,7 +282,7 @@ objectLiteral = parse.Parser('Object Literal',
 /**
  * This Expression
  */
-thisExpression = parse.Parser('This Expression',
+thisExpression = parse.label('This Expression',
     ecma_parse.node(
         token.keyword('this'),
         ast_expression.ThisExpression.create));
@@ -295,7 +292,7 @@ thisExpression = parse.Parser('This Expression',
 /**
  * Primary Expression
  */
-primaryExpression = parse.memo(parse.Parser('Primary Expression',
+primaryExpression = parse.memo(parse.label('Primary Expression',
     parse.choice(
         functionExpression,
         thisExpression,
@@ -309,16 +306,16 @@ primaryExpression = parse.memo(parse.Parser('Primary Expression',
 // Calling
 ////////////////////////////////////////
 /**
- * Parser for a list of arguments.
+ * label for a list of arguments.
  */
-argumentList = parse.Parser('Argument List',
+argumentList = parse.label('Argument List',
     parse.eager(parse_lang.sepBy(token.punctuator(','),
         parse.expected("assignment expression", assignmentExpression))));
 
 /**
- * Parser for a argument list part of a call expression.
+ * label for a argument list part of a call expression.
  */
-args = parse.Parser('Arguments',
+args = parse.label('Arguments',
     ecma_parse.node(
         parse_lang.between(token.punctuator('('), token.punctuator(')'),
             argumentList),
@@ -330,9 +327,9 @@ args = parse.Parser('Arguments',
 // Accessors
 ////////////////////////////////////////
 /**
- * Parser for a dot accessor in a member expression.
+ * label for a dot accessor in a member expression.
  */
-dotAccessor = parse.Parser('Dot Accessor',
+dotAccessor = parse.label('Dot Accessor',
     ecma_parse.node(
         parse.next(
             token.punctuator('.'),
@@ -344,9 +341,9 @@ dotAccessor = parse.Parser('Dot Accessor',
         })));
 
 /**
- * Parser for a bracket accessor in a member expression.
+ * label for a bracket accessor in a member expression.
  */
-bracketAccessor = parse.Parser('Bracket Accessor',
+bracketAccessor = parse.label('Bracket Accessor',
     ecma_parse.node(
         parse_lang.between(token.punctuator('['), token.punctuator(']'),
             parse.expected("expression", expression)),
@@ -357,9 +354,9 @@ bracketAccessor = parse.Parser('Bracket Accessor',
         })));
 
 /**
- * Parser for an accessor in a member expression.
+ * label for an accessor in a member expression.
  */
-accessor = parse.Parser('Accessor',
+accessor = parse.label('Accessor',
     parse.either(
         dotAccessor,
         bracketAccessor));
@@ -367,7 +364,7 @@ accessor = parse.Parser('Accessor',
 // Member Expression
 ////////////////////////////////////////
 /**
- * Parser for a member expression.
+ * label for a member expression.
  */
 memberExpression = let
     reducer = \p, c ->
@@ -377,7 +374,7 @@ memberExpression = let
             c.property,
             c.computed)
 in
-    parse.memo(parse.Parser('Member Expression',
+    parse.memo(parse.label('Member Expression',
         parse.binds(
             parse.enumeration(
                 parse.either(
@@ -391,9 +388,9 @@ in
 // New Expression
 ////////////////////////////////////////
 /**
- * Parser for a new expression
+ * label for a new expression
  */
-newExpression = parse.memo(parse.Parser('New Expression',
+newExpression = parse.memo(parse.label('New Expression',
     ecma_parse.nodea(
         parse.next(
             token.keyword('new'),
@@ -405,7 +402,7 @@ newExpression = parse.memo(parse.Parser('New Expression',
 // Left Hand Side Expression
 ////////////////////////////////////////
 /**
- * Parser for a left hand side expression.
+ * label for a left hand side expression.
  */
 leftHandSideExpression = let
     reducer = \p, c -> let
@@ -415,7 +412,7 @@ leftHandSideExpression = let
              :ast_expression.MemberExpression.create(loc, p, c.property, c.computed)
              :ast_expression.CallExpression.create(loc, p, c)
 in
-    parse.memo(parse.Parser('Left Hand Side Expression',
+    parse.memo(parse.label('Left Hand Side Expression',
         parse.binds(
             parse.enumeration(
                 memberExpression,
@@ -428,19 +425,19 @@ in
 // Postfix Expression
 ////////////////////////////////////////
 /**
- * Parser for a postfix operator
+ * label for a postfix operator
  */
-postfixOperator = parse.Parser('Postfix Operator',
+postfixOperator = parse.label('Postfix Operator',
     token.punctuator('++', '--'));
 
 /**
- * Parser for a postfix expression.
+ * label for a postfix expression.
  */
-postfixExpression = parse.Parser('Postfix Expression',
+postfixExpression = parse.label('Postfix Expression',
     ecma_parse.nodea(
         parse.enumeration(
             leftHandSideExpression,
-            parse.optional(null, postfixOperator)),
+            parse.optional(postfixOperator)),
         \loc, argument, op ->
             ?!op
                 :argument
@@ -452,7 +449,7 @@ postfixExpression = parse.Parser('Postfix Expression',
 
 // Unary Expression
 ////////////////////////////////////////
-unaryOperator = parse.Parser('Unary Operator',
+unaryOperator = parse.label('Unary Operator',
     parse.either(
         token.keyword(
             'delete',
@@ -467,7 +464,7 @@ unaryOperator = parse.Parser('Unary Operator',
             '!')));
 
 /**
- * Parser for a unary (prefix) expression.
+ * label for a unary (prefix) expression.
  */
 unaryExpression = let
     reducer = \argument, op -> let
@@ -478,7 +475,7 @@ unaryExpression = let
             :new ast_expression.UnaryExpression(loc, op.value, argument)
     
 in
-    parse.Parser('Unary Expression',
+    parse.label('Unary Expression',
         parse.binds(
             parse.enumeration(
                 parse.many(unaryOperator),
@@ -577,15 +574,15 @@ var precedenceTableNoIn = extend(basePrecedenceTable, {
     'instanceof': { 'type': 'keyword', 'precedence': 4, 'node': ast_expression.BinaryExpression }
 });
 
-binaryExpression = parse.Parser('Binary Expression',
+binaryExpression = parse.label('Binary Expression',
     ecma_parse.precedence(unaryExpression, precedenceTable));
 
-binaryExpressionNoIn = parse.Parser('Binary Expression',
+binaryExpressionNoIn = parse.label('Binary Expression',
     ecma_parse.precedence(unaryExpression, precedenceTableNoIn));
 
 // Conditional Expression
 ////////////////////////////////////////
-var _baseConditionalExpressionParser = \binExpr assignExpr ->
+var _baseConditionalExpressionlabel = \binExpr assignExpr ->
     parse.either(
         ecma_parse.nodea(
             parse.enumeration(
@@ -600,26 +597,26 @@ var _baseConditionalExpressionParser = \binExpr assignExpr ->
         parse.memo binExpr);
 
 /**
- * Parser for a standard conditional expression.
+ * label for a standard conditional expression.
  */
-conditionalExpression = parse.Parser('Conditional Expression',
-    _baseConditionalExpressionParser(binaryExpression,
+conditionalExpression = parse.label('Conditional Expression',
+    _baseConditionalExpressionlabel(binaryExpression,
         parse.expected("assignment expression", assignmentExpression)));
 
 /**
- * Parser for a conditional expression without the in operator.
+ * label for a conditional expression without the in operator.
  */
-conditionalExpressionNoIn = parse.Parser('Conditional Expression No In',
-    _baseConditionalExpressionParser(binaryExpressionNoIn,
+conditionalExpressionNoIn = parse.label('Conditional Expression No In',
+    _baseConditionalExpressionlabel(binaryExpressionNoIn,
         parse.expected("assignment expression no in", assignmentExpressionNoIn)));
 
 
 // Assignment Expression
 ////////////////////////////////////////
 /**
- * Parser for an assignment operator.
+ * label for an assignment operator.
  */
-assignmentOperator = parse.Parser('Assignment Operator',
+assignmentOperator = parse.label('Assignment Operator',
     token.punctuator(
         '=',
         '*=',
@@ -635,7 +632,7 @@ assignmentOperator = parse.Parser('Assignment Operator',
         '^=',
         '|='));
 
-var _baseAssignmentExpressionParser = \condExpr ->
+var _baseAssignmentExpressionlabel = \condExpr ->
     parse.rec\self ->
         parse.either(
             parse.binds(
@@ -654,20 +651,20 @@ var _baseAssignmentExpressionParser = \condExpr ->
             condExpr);
 
 /**
- * Parser for a standard assignment expression.
+ * label for a standard assignment expression.
  */
-assignmentExpression = parse.Parser('Assignment Expression',
-    _baseAssignmentExpressionParser(conditionalExpression));
+assignmentExpression = parse.label('Assignment Expression',
+    _baseAssignmentExpressionlabel(conditionalExpression));
 
 /**
- * Parser for an assignment expression without the in operator.
+ * label for an assignment expression without the in operator.
  */
-assignmentExpressionNoIn = parse.Parser('Assignment Expression No In', 
-    _baseAssignmentExpressionParser(conditionalExpressionNoIn));
+assignmentExpressionNoIn = parse.label('Assignment Expression No In', 
+    _baseAssignmentExpressionlabel(conditionalExpressionNoIn));
 
 // Expression
 ////////////////////////////////////////
-var _baseExpressionParser = \expr ->
+var _baseExpressionlabel = \expr ->
     ecma_parse.node(
         parse.eager(parse_lang.sepBy1(token.punctuator(','),
             expr)),
@@ -677,17 +674,17 @@ var _baseExpressionParser = \expr ->
                 :list.(0));
 
 /**
- * Parser for a standard expression.
+ * label for a standard expression.
  */
-expression = parse.Parser('Expression',
-    _baseExpressionParser(parse.expected("expression",
+expression = parse.label('Expression',
+    _baseExpressionlabel(parse.expected("expression",
         assignmentExpression)));
 
 /**
- * Parser for an expression without the in operator.
+ * label for an expression without the in operator.
  */
-expressionNoIn = parse.Parser('Expression No In',
-    _baseExpressionParser(parse.expected("expression no in",
+expressionNoIn = parse.label('Expression No In',
+    _baseExpressionlabel(parse.expected("expression no in",
         assignmentExpressionNoIn)));
 
 }

@@ -14,7 +14,7 @@ with
         choice
         optional
         next
-        Parser},
+        label},
     import 'bennu::text' {
         character
         oneOf
@@ -50,7 +50,7 @@ ps := character psChar;
 /**
  * A line terminator character.
  */
-lineTerminator := Parser@'Line Terminator Lexer' <|
+lineTerminator := label@'Line Terminator Lexer' <|
     choice(lf, cr, ls, ps);//[lfChar, crChar, lsChar, psChar];
 
 /**
@@ -58,7 +58,7 @@ lineTerminator := Parser@'Line Terminator Lexer' <|
  * 
  * crlf sequences are returned as a single token.
  */
-lineTerminatorSequence := Parser@'Line Terminator Sequence Lexer' <|
+lineTerminatorSequence := label@'Line Terminator Sequence Lexer' <|
     choice(
         lf,
         ls,

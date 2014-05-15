@@ -9,7 +9,8 @@ var parse = require("bennu")["parse"],
     reserved_word_lexer = require("./reserved_word_lexer"),
     string_lexer = require("./string_lexer"),
     zwnj, zwj, unicodeLetter, unicodeDigit, unicodeConnectorPunctuation, unicodeCombiningMark, identifierStart,
-        identifierPart, identifierParts, identifierName, identifier, foldl = __o["foldl"],
+        identifierPart, identifierParts, identifierName, identifier, oneOf = parse_text["oneOf"],
+    foldl = __o["foldl"],
     __add = (function(x, y) {
         return (x + y);
     }),
@@ -18,7 +19,7 @@ var parse = require("bennu")["parse"],
 (zwj = parse_text.character("‍"));
 (unicodeLetter = parse_text.letter);
 (unicodeDigit = parse_text.digit);
-(unicodeConnectorPunctuation = parse_text.characters(["_", "‿", "⁀", "⁔", "︳", "︴", "﹍", "﹎", "﹏", "＿"]));
+(unicodeConnectorPunctuation = oneOf(["_", "‿", "⁀", "⁔", "︳", "︴", "﹍", "﹎", "﹏", "＿"]));
 (unicodeCombiningMark = parse.never());
 (identifierStart = parse.choice(unicodeLetter, parse_text.character("$"), parse_text.character("_"), parse.next(
     string_lexer.escape, string_lexer.unicodeEscapeSequence)));
@@ -26,7 +27,7 @@ var parse = require("bennu")["parse"],
     unicodeConnectorPunctuation, zwnj, zwj));
 (identifierParts = parse.many(identifierPart));
 (identifierName = parse.cons(identifierStart, identifierParts));
-(identifier = parse.Parser("Identifier Lexer", parse.bind(identifierName, (function(name) {
+(identifier = parse.label("Identifier Lexer", parse.bind(identifierName, (function(name) {
     var v = foldl(join, "", name);
     return ((reserved_word_lexer.keywordList.indexOf(v) >= 0) ? parse.fail(
         "Reserved words cannot be used as identifiers") : parse.always(v));

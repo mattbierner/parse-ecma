@@ -5,9 +5,7 @@ package (
     precedence
     
     node
-    nodea
-    
-    positionParser)
+    nodea)
 with
     import 'bennu::parse' parse,
     import 'bennu::lang' lang,
@@ -90,9 +88,7 @@ precedence = \p, table -> {
 
 // State Interaction
 ////////////////////////////////////////
-positionParser = parse.extract (.position);
-
-var locParser = parse.extract (.loc);
+var loclabel = parse.extract (.loc);
 
 var prevEnd = parse.extract ((.position) \> (.previousEnd));
 
@@ -101,7 +97,7 @@ var prevEnd = parse.extract ((.position) \> (.previousEnd));
 node = \p, f ->
     parse.binds(
         parse.enumeration(
-            locParser,
+            loclabel,
             p,
             prevEnd),
         \o, x, c ->
@@ -110,7 +106,7 @@ node = \p, f ->
 nodea = \p, f ->
     parse.binds(
         parse.enumeration(
-            locParser,
+            loclabel,
             p,
             prevEnd),
         \o, x, c ->

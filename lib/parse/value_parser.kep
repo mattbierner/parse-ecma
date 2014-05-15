@@ -26,27 +26,27 @@ var selectLiteral := \kind p ->
 
 // Literal
 ////////////////////////////////////////
-nullLiteral := parse.Parser('Null Literal',
+nullLiteral := parse.label('Null Literal',
     selectLiteral('null', token.nullLiteral));
 
-booleanLiteral := parse.Parser('Boolean Literal',
+booleanLiteral := parse.label('Boolean Literal',
     selectLiteral('boolean', token.booleanLiteral));
 
-numericLiteral := parse.Parser('Numeric Literal',
+numericLiteral := parse.label('Numeric Literal',
     selectLiteral('number', token.numericLiteral));
 
-stringLiteral := parse.Parser('String Literal',
+stringLiteral := parse.label('String Literal',
     selectLiteral('string', token.stringLiteral));
 
-regularExpressionLiteral := parse.Parser('Regular Expression Literal',
+regularExpressionLiteral := parse.label('Regular Expression Literal',
     parse.next(
         parse.bind(parse.getParserState, \state -> state.asRegExp()),
         selectLiteral('regexp', token.regularExpressionLiteral)));
 
 /**
- * Parser for a simple ECMAScript literal, excluding array and object literals.
+ * label for a simple ECMAScript literal, excluding array and object literals.
  */
-literal := parse.Parser('Literal',
+literal := parse.label('Literal',
     parse.choice(
         nullLiteral,
         booleanLiteral,
@@ -56,7 +56,7 @@ literal := parse.Parser('Literal',
 
 // Identifier
 ////////////////////////////////////////
-identifier := parse.Parser('Identifier',
+identifier := parse.label('Identifier',
     parse.bind(
         token.anyIdentifier,
         \x ->

@@ -11,7 +11,7 @@ package (
     
     program)
 with
-    import 'bennu::parse' parse,
+    import 'bennu::parse' parse#{late},
     import 'bennu::lang' parse_lang,
     
     import 'nu-stream::stream' stream,
@@ -29,29 +29,27 @@ in {
 
 /* Circular
  ******************************************************************************/
-var statementParser = \-args(...)-> {
-    with
-        import 'ecma/parse/statement_parser' {statement}
-    in {
-        return statement.apply(undefined, args);
+var statementlabel = late \-> {
+    with import 'ecma/parse/statement_parser' {statement} in {
+        return statement;
     }
 };
 
 /* Forward declarations
  ******************************************************************************/
-sourceElements = \-args(...)-> { return sourceElements.apply(undefined, args); };
+sourceElements = late \-> { return sourceElements; };
 
 /* Parsers
  ******************************************************************************/
 /**
- * Parser for the body of a function.
+ * label for the body of a function.
  */
 functionBody = ecma_parse.node(
     sourceElements,
     ast_statement.BlockStatement.create);
 
 /**
- * Parser for a function's parameters.
+ * label for a function's parameters.
  */
 var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(','),
     value.identifier));
@@ -59,16 +57,16 @@ var formalParameterList = parse.eager(parse_lang.sepBy(token.punctuator(','),
 // Function Expression
 ////////////////////////////////////////
 /**
- * Parser for an function expression.
+ * label for an function expression.
  * 
  * May be named or anon.
  */
-functionExpression = parse.Parser('Function Expression',
+functionExpression = parse.label('Function Expression',
     ecma_parse.nodea(
         parse.next(
             token.keyword('function'),
             parse.enumeration(
-                parse.optional(null, value.identifier),
+                parse.optional(value.identifier),
                 parse_lang.between(token.punctuator('('), token.punctuator(')'), 
                     formalParameterList),
                 parse_lang.between(token.punctuator('{'), token.punctuator('}'),
@@ -78,11 +76,11 @@ functionExpression = parse.Parser('Function Expression',
 // Function Declaration
 ////////////////////////////////////////
 /**
- * Parser for a function declaration.
+ * label for a function declaration.
  * 
  * Requires an identifier.
  */
-functionDeclaration = parse.Parser('Function Declaration',
+functionDeclaration = parse.label('Function Declaration',
     ecma_parse.nodea(
         parse.next(
             token.keyword('function'),
@@ -97,26 +95,26 @@ functionDeclaration = parse.Parser('Function Declaration',
 // Source Elements
 ////////////////////////////////////////
 /**
- * Parser for an ECMAScript source element.
+ * label for an ECMAScript source element.
  * 
  * Source Elements are top level nodes that makes up a program.
  */
 sourceElement = parse.expected("statement or function",
     parse.either(
         functionDeclaration,
-        statementParser));
+        statementlabel));
 
 /**
- * Parser for a sequence of zero or more source elements.
+ * label for a sequence of zero or more source elements.
  */
 sourceElements = parse.eager(parse.many(sourceElement));
 
 // Program
 ////////////////////////////////////////
 /**
- * Parser for an ECMAScript 5.1 program.
+ * label for an ECMAScript 5.1 program.
  */
-program = parse.Parser('Program',
+program = parse.label('Program',
     ecma_parse.node(
         parse.eager(parse.rec\self ->
             parse.either(

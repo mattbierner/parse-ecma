@@ -64,31 +64,31 @@ hexIndicator :=
 /**
  * Lexer that matches any decimal number digit.
  */
-decimalDigit := parse.Parser('Decimal Digit Lexer',
+decimalDigit := parse.label('Decimal Digit Lexer',
     parse_text.match(`^[0-9]$`));
 
 /**
  * Lexer that matches any non zero decimal number digit.
  */
-nonZeroDigit := parse.Parser('Non Zero Digit Lexer',
+nonZeroDigit := parse.label('Non Zero Digit Lexer',
     parse_text.match(`^[1-9]$`));
 
 /**
  * Lexer that matches any hex number digit.
  */
-hexDigit := parse.Parser('Hex Digit Lexer',
+hexDigit := parse.label('Hex Digit Lexer',
      parse_text.match(`^[0-9a-f]$`i));
 
 /**
  * Lexer that matches a string of one or more decimal digits.
  */
-decimalDigits := parse.Parser('Decimal Digits Lexer',
+decimalDigits := parse.label('Decimal Digits Lexer',
     joinLexer(parse.many1(decimalDigit)));
 
 /**
  * Lexer that matches a string of one or more hex digits.
  */
-hexDigits := parse.Parser('Hex Digits Lexer',
+hexDigits := parse.label('Hex Digits Lexer',
     joinLexer(parse.many1(hexDigit)));
 
 // Integer
@@ -98,7 +98,7 @@ hexDigits := parse.Parser('Hex Digits Lexer',
  * 
  * Returns the numeric value of the integer.
  */
-unsignedInteger := parse.Parser('Unsigned Integer Lexer',
+unsignedInteger := parse.label('Unsigned Integer Lexer',
     parse.bind(decimalDigits, \t -> {
         return parse.always(parseInt(t));
     }));
@@ -108,14 +108,14 @@ unsignedInteger := parse.Parser('Unsigned Integer Lexer',
  * 
  * Returns the numeric value of the integer.
  */
-signedInteger := parse.Parser('Signed Integer Lexer',
+signedInteger := parse.label('Signed Integer Lexer',
     parse.either(
         parse.next(
             negativeSign,
             parse.bind(unsignedInteger, \num->
                 parse.always(--num))),
         parse.next(
-            parse.optional(null, positiveSign),
+            parse.optional(positiveSign),
             unsignedInteger)));
 
 // Part
@@ -125,7 +125,7 @@ signedInteger := parse.Parser('Signed Integer Lexer',
  * 
  * Returns the numeric value of the exponent part.
  */
-exponentPart := parse.Parser('Exponent Part Lexer',
+exponentPart := parse.label('Exponent Part Lexer',
     parse.next(
         exponentIndicator,
         parse.expected('exponent', signedInteger)));
@@ -133,7 +133,7 @@ exponentPart := parse.Parser('Exponent Part Lexer',
 /**
  * Digits of a hex number literal.
  */
-hexIntegerLiteralDigits := parse.Parser('Hex Integer Literal Digits Lexer',
+hexIntegerLiteralDigits := parse.label('Hex Integer Literal Digits Lexer',
     parse.bind(hexDigits, \num ->
         parse.always(parseInt(num, 16))));
 
@@ -142,7 +142,7 @@ hexIntegerLiteralDigits := parse.Parser('Hex Integer Literal Digits Lexer',
 /**
  * A hex number literal.
  */
-hexIntegerLiteral := parse.Parser('Hex Integer Literal Lexer',
+hexIntegerLiteral := parse.label('Hex Integer Literal Lexer',
     parse.next(
         hexIndicator,
         parse.expected('hex digits', hexIntegerLiteralDigits)));
@@ -152,7 +152,7 @@ hexIntegerLiteral := parse.Parser('Hex Integer Literal Lexer',
  * 
  * Returns the number value of the input.
  */
-decimalIntegerLiteral := parse.Parser('Decimal Integer Literal',
+decimalIntegerLiteral := parse.label('Decimal Integer Literal',
     parse.bind(decimalDigits, \num ->
         parse.always(parseInt(num))));
 
@@ -164,7 +164,7 @@ decimalIntegerLiteral := parse.Parser('Decimal Integer Literal',
  * 
  * @return Number value of the input.
  */
-decimalLiteral := parse.Parser('Decimal Literal Lexer', let
+decimalLiteral := parse.label('Decimal Literal Lexer', let
 
     fractional = parse.bind(decimalDigits, \frac ->
         parse.always(parseFloat('.' + frac)))
@@ -196,7 +196,7 @@ in
  * 
  * @return Number value of the input.
  */
-numericLiteral := parse.Parser('Numeric Literal Lexer',
+numericLiteral := parse.label('Numeric Literal Lexer',
     parse.either(
         parse.next(
             parse.attempt(hexIndicator),

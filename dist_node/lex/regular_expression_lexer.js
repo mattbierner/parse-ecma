@@ -45,7 +45,7 @@ var parse = require("bennu")["parse"],
 (regularExpressionBody = parse.bind(parse.cons(regularExpressionFirstChar, regularExpressionChars), (function(s) {
     return parse.always(stream.foldl(join, "", s));
 })));
-(regularExpressionLiteral = parse.Parser("Regular Expression Lexer", parse.binds(parse.enumeration(parse_lang.between(
+(regularExpressionLiteral = parse.label("Regular Expression Lexer", parse.binds(parse.enumeration(parse_lang.between(
         parse_text.character("/"), parse_text.character("/"), regularExpressionBody),
     regularExpressionFlags), (function(body, flags) {
     return parse.always(({

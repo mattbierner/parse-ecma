@@ -10,6 +10,7 @@ var parse = require("bennu")["parse"],
     singleLineCommentMarker, singleLineCommentChar, singleLineCommentChars, singleLineComment,
         multiLineCommentStartMarker, multiLineCommentEndMarker, multiLineCommentChars, multiLineComment, comment,
         always = parse["always"],
+    rec = parse["rec"],
     character = __o["character"],
     string = __o["string"],
     foldl = __o0["foldl"],
@@ -23,22 +24,22 @@ var parse = require("bennu")["parse"],
 })));
 (singleLineCommentChars = parse.many(singleLineCommentChar));
 var p;
-(singleLineComment = parse.Parser("Single Line Comment Lexer", parse.next(singleLineCommentMarker, ((p =
+(singleLineComment = parse.label("Single Line Comment Lexer", parse.next(singleLineCommentMarker, ((p =
     singleLineCommentChars), parse.bind(p, (function(s) {
     return always(foldl(__add, "", s));
 }))))));
 (multiLineCommentStartMarker = string("/*"));
 (multiLineCommentEndMarker = string("*/"));
-(multiLineCommentChars = parse.RecParser("Multi Line Comment Characters Lexer", (function(self) {
+(multiLineCommentChars = parse.label("Multi Line Comment Characters Lexer", rec((function(self) {
     return parse.either(parse.next(character("*"), parse.either(parse.next(character("/"), always(NIL)),
         parse.cons(parse.always("*"), self))), parse.cons(parse.anyToken, self));
-})));
+}))));
 var p0;
-(multiLineComment = parse.Parser("Multi Line Comment Lexer", parse.next(multiLineCommentStartMarker, ((p0 =
+(multiLineComment = parse.label("Multi Line Comment Lexer", parse.next(multiLineCommentStartMarker, ((p0 =
     multiLineCommentChars), parse.bind(p0, (function(s) {
     return always(foldl(__add, "", s));
 }))))));
-(comment = parse.Parser("Comment Lexer", parse.either(singleLineComment, multiLineComment)));
+(comment = parse.label("Comment Lexer", parse.either(singleLineComment, multiLineComment)));
 (exports["singleLineCommentMarker"] = singleLineCommentMarker);
 (exports["singleLineCommentChar"] = singleLineCommentChar);
 (exports["singleLineCommentChars"] = singleLineCommentChars);

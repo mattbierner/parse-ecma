@@ -118,7 +118,7 @@ regularExpressionBody = parse.bind(
 /**
  * Lexer for regular expression literals.
  */
-regularExpressionLiteral = parse.Parser('Regular Expression Lexer',
+regularExpressionLiteral = parse.label('Regular Expression Lexer',
     parse.binds(
         parse.enumeration(
             parse_lang.between(parse_text.character('/'), parse_text.character('/'),

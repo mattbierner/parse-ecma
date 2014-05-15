@@ -49,7 +49,7 @@ var parse = require("bennu")["parse"],
             line_terminator_lexer.lineTerminator, tok)));
     }))));
 (singleStringCharacters = parse.many(singleStringCharacter));
-(singleStringLiteral = parse.Parser("Single String Literal", parse_lang.between(singleQuote, singleQuote, parse.bind(
+(singleStringLiteral = parse.label("Single String Literal", parse_lang.between(singleQuote, singleQuote, parse.bind(
     singleStringCharacters, (function(str) {
         return parse.always(stream.foldl(join, "", str));
     })))));
@@ -59,11 +59,11 @@ var parse = require("bennu")["parse"],
             line_terminator_lexer.lineTerminator, tok)));
     }))));
 (doubleStringCharacters = parse.many(doubleStringCharacter));
-(doubleStringLiteral = parse.Parser("Double String Literal", parse_lang.between(doubleQuote, doubleQuote, parse.bind(
+(doubleStringLiteral = parse.label("Double String Literal", parse_lang.between(doubleQuote, doubleQuote, parse.bind(
     doubleStringCharacters, (function(str) {
         return parse.always(stream.foldl(join, "", str));
     })))));
-(stringLiteral = parse.Parser("Sting Literal Lexer", parse.either(singleStringLiteral, doubleStringLiteral)));
+(stringLiteral = parse.label("Sting Literal Lexer", parse.either(singleStringLiteral, doubleStringLiteral)));
 (exports["doubleQuote"] = doubleQuote);
 (exports["escape"] = escape);
 (exports["singleQuote"] = singleQuote);

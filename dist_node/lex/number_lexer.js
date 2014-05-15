@@ -18,36 +18,36 @@ var parse = require("bennu")["parse"],
 (positiveSign = parse_text.character("+"));
 (exponentIndicator = parse_text.match(/^e$/i));
 (hexIndicator = parse.either(parse_text.string("0x"), parse_text.string("0X")));
-(decimalDigit = parse.Parser("Decimal Digit Lexer", parse_text.match(/^[0-9]$/)));
-(nonZeroDigit = parse.Parser("Non Zero Digit Lexer", parse_text.match(/^[1-9]$/)));
-(hexDigit = parse.Parser("Hex Digit Lexer", parse_text.match(/^[0-9a-f]$/i)));
+(decimalDigit = parse.label("Decimal Digit Lexer", parse_text.match(/^[0-9]$/)));
+(nonZeroDigit = parse.label("Non Zero Digit Lexer", parse_text.match(/^[1-9]$/)));
+(hexDigit = parse.label("Hex Digit Lexer", parse_text.match(/^[0-9a-f]$/i)));
 var p;
-(decimalDigits = parse.Parser("Decimal Digits Lexer", ((p = parse.many1(decimalDigit)), parse.bind(p, (function(s) {
+(decimalDigits = parse.label("Decimal Digits Lexer", ((p = parse.many1(decimalDigit)), parse.bind(p, (function(s) {
     return parse.always(foldl(__add, "", s));
 })))));
 var p0;
-(hexDigits = parse.Parser("Hex Digits Lexer", ((p0 = parse.many1(hexDigit)), parse.bind(p0, (function(s) {
+(hexDigits = parse.label("Hex Digits Lexer", ((p0 = parse.many1(hexDigit)), parse.bind(p0, (function(s) {
     return parse.always(foldl(__add, "", s));
 })))));
-(unsignedInteger = parse.Parser("Unsigned Integer Lexer", parse.bind(decimalDigits, (function(t) {
+(unsignedInteger = parse.label("Unsigned Integer Lexer", parse.bind(decimalDigits, (function(t) {
     return parse.always(parseInt(t));
 }))));
-(signedInteger = parse.Parser("Signed Integer Lexer", parse.either(parse.next(negativeSign, parse.bind(unsignedInteger, (
+(signedInteger = parse.label("Signed Integer Lexer", parse.either(parse.next(negativeSign, parse.bind(unsignedInteger, (
     function(num) {
         return parse.always((-num));
     }))), parse.next(parse.optional(null, positiveSign), unsignedInteger))));
-(exponentPart = parse.Parser("Exponent Part Lexer", parse.next(exponentIndicator, parse.expected("exponent",
+(exponentPart = parse.label("Exponent Part Lexer", parse.next(exponentIndicator, parse.expected("exponent",
     signedInteger))));
-(hexIntegerLiteralDigits = parse.Parser("Hex Integer Literal Digits Lexer", parse.bind(hexDigits, (function(num) {
+(hexIntegerLiteralDigits = parse.label("Hex Integer Literal Digits Lexer", parse.bind(hexDigits, (function(num) {
     return parse.always(parseInt(num, 16));
 }))));
-(hexIntegerLiteral = parse.Parser("Hex Integer Literal Lexer", parse.next(hexIndicator, parse.expected("hex digits",
+(hexIntegerLiteral = parse.label("Hex Integer Literal Lexer", parse.next(hexIndicator, parse.expected("hex digits",
     hexIntegerLiteralDigits))));
-(decimalIntegerLiteral = parse.Parser("Decimal Integer Literal", parse.bind(decimalDigits, (function(num) {
+(decimalIntegerLiteral = parse.label("Decimal Integer Literal", parse.bind(decimalDigits, (function(num) {
     return parse.always(parseInt(num));
 }))));
 var fractional;
-(decimalLiteral = parse.Parser("Decimal Literal Lexer", ((fractional = parse.bind(decimalDigits, (function(frac) {
+(decimalLiteral = parse.label("Decimal Literal Lexer", ((fractional = parse.bind(decimalDigits, (function(frac) {
     return parse.always(parseFloat(("." + frac)));
 }))), parse.binds(parse.enumeration(parse.attempt(parse.either(parse.next(decimal, parse.expected(
     "decimal digits", fractional)), parse.binds(parse.enumeration(decimalIntegerLiteral,
@@ -57,7 +57,7 @@ var fractional;
 })))), parse.optional(0, exponentPart)), (function(num, exp) {
     return parse.always((num * Math.pow(10, parseInt(exp))));
 })))));
-(numericLiteral = parse.Parser("Numeric Literal Lexer", parse.either(parse.next(parse.attempt(hexIndicator), parse.expected(
+(numericLiteral = parse.label("Numeric Literal Lexer", parse.either(parse.next(parse.attempt(hexIndicator), parse.expected(
     "hex digits", hexIntegerLiteralDigits)), decimalLiteral)));
 (exports["decimal"] = decimal);
 (exports["negativeSign"] = negativeSign);

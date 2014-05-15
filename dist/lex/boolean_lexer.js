@@ -7,11 +7,11 @@ define(["require", "exports", "bennu/parse", "bennu/text"], (function(require, e
     var trueLiteral, falseLiteral, booleanLiteral, always = __o["always"],
         either = __o["either"],
         next = __o["next"],
-        Parser = __o["Parser"],
+        label = __o["label"],
         string = __o0["string"];
-    (trueLiteral = Parser("True Literal Lexer", next(string("true"), always(true))));
-    (falseLiteral = Parser("False Literal Lexer", next(string("false"), always(false))));
-    (booleanLiteral = Parser("Boolean Literal Lexer", either(trueLiteral, falseLiteral)));
+    (trueLiteral = label("True Literal Lexer", next(string("true"), always(true))));
+    (falseLiteral = label("False Literal Lexer", next(string("false"), always(false))));
+    (booleanLiteral = label("Boolean Literal Lexer", either(trueLiteral, falseLiteral)));
     (exports["trueLiteral"] = trueLiteral);
     (exports["falseLiteral"] = falseLiteral);
     (exports["booleanLiteral"] = booleanLiteral);

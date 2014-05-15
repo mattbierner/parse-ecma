@@ -15,7 +15,8 @@ package (
     comment)
 with
     import 'bennu::parse' parse#{
-        always},
+        always
+        rec},
     import 'bennu::text' {
         character
         string},
@@ -53,7 +54,7 @@ singleLineCommentChars = parse.many(singleLineCommentChar);
  * 
  * Returns the contents of the comment.
  */
-singleLineComment = parse.Parser('Single Line Comment Lexer',
+singleLineComment = parse.label('Single Line Comment Lexer',
     parse.next(
         singleLineCommentMarker,
         join(singleLineCommentChars)));
@@ -73,7 +74,7 @@ multiLineCommentEndMarker = string('*/');
 /**
  * Lexer for string of characters inside of multi line comment.
  */
-multiLineCommentChars = parse.RecParser('Multi Line Comment Characters Lexer', \self ->
+multiLineCommentChars = parse.label('Multi Line Comment Characters Lexer', rec\self ->
     parse.either(
         parse.next(
             character('*'),
@@ -87,7 +88,7 @@ multiLineCommentChars = parse.RecParser('Multi Line Comment Characters Lexer', \
  * 
  * Returns the contents of the comment.
  */
-multiLineComment = parse.Parser('Multi Line Comment Lexer',
+multiLineComment = parse.label('Multi Line Comment Lexer',
     parse.next(
         multiLineCommentStartMarker,
         join(multiLineCommentChars)));
@@ -97,7 +98,7 @@ multiLineComment = parse.Parser('Multi Line Comment Lexer',
 /**
  * Lexer for any ECMAScript 5.1 comment
  */
-comment = parse.Parser('Comment Lexer',
+comment = parse.label('Comment Lexer',
     parse.either(
         singleLineComment,
         multiLineComment));

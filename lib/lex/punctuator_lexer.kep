@@ -6,7 +6,7 @@ package (
     divPunctuator)
 with
     import 'bennu::parse' {
-        Parser
+        label
         either},
     import 'bennu::text' {
         string
@@ -22,7 +22,7 @@ var punctuators = [
 
 /* Lexer
  ******************************************************************************/
-punctuator = Parser('Punctuator Lexer',
+punctuator = label('Punctuator Lexer',
     trie punctuators);
 
 divPunctuator = either(

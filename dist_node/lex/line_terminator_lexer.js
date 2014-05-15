@@ -9,14 +9,14 @@ var __o = require("bennu")["parse"],
     choice = __o["choice"],
     optional = __o["optional"],
     next = __o["next"],
-    Parser = __o["Parser"],
+    label = __o["label"],
     character = __o0["character"];
 (lf = character("\n"));
 (cr = character("\r"));
 (ls = character("\u2028"));
 (ps = character("\u2029"));
-(lineTerminator = Parser("Line Terminator Lexer", choice(lf, cr, ls, ps)));
-(lineTerminatorSequence = Parser("Line Terminator Sequence Lexer", choice(lf, ls, ps, next(cr, optional("\r", next(lf,
+(lineTerminator = label("Line Terminator Lexer", choice(lf, cr, ls, ps)));
+(lineTerminatorSequence = label("Line Terminator Sequence Lexer", choice(lf, ls, ps, next(cr, optional("\r", next(lf,
     always("\r\n")))))));
 (exports["lf"] = lf);
 (exports["cr"] = cr);

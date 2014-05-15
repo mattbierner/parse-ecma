@@ -11,8 +11,8 @@ package (
     usp
     whitespace)
 with
-    import 'bennu::parse' {Parser token},
-    import 'bennu::text' {character characters}
+    import 'bennu::parse' {label token},
+    import 'bennu::text' {character oneOf}
 in {
 
 /* Lexers
@@ -55,7 +55,7 @@ usp = token(RegExp.prototype.test.bind(`^\s$`));
 /**
  * A whitespace character.
  */
-whitespace = Parser('Whitespace Lexer',
-    characters ['\u0009', '\u000B', '\u000C', '\u0020', '\u00A0', '\uFEFF']);
+whitespace = label('Whitespace Lexer',
+    oneOf ['\u0009', '\u000B', '\u000C', '\u0020', '\u00A0', '\uFEFF']);
 
 }

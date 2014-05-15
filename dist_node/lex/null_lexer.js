@@ -5,9 +5,9 @@
 "use strict";
 var __o = require("bennu")["parse"],
     __o0 = require("bennu")["text"],
-    nullLiteral, Parser = __o["Parser"],
+    nullLiteral, label = __o["label"],
     next = __o["next"],
     always = __o["always"],
     string = __o0["string"];
-(nullLiteral = Parser("Null Parser", next(string("null"), always(null))));
+(nullLiteral = label("Null label", next(string("null"), always(null))));
 (exports["nullLiteral"] = nullLiteral);

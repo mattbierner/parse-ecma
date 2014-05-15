@@ -42,7 +42,7 @@ in {
 
 var join = (+);
 
-var fromCharCodeParser = \digits ->
+var fromCharCodelabel = \digits ->
     parse.always(String.fromCharCode(parseInt(stream.foldl(join, '', digits), 16)));
 
 /* Lexers
@@ -107,7 +107,7 @@ nonEscapeCharacter = parse.token(\tok -> {
 hexEscapeSequence = parse.next(
     parse_text.character('x'),
     parse.bind(parse_lang.times(2, number_lexer.hexDigit),
-        fromCharCodeParser));
+        fromCharCodelabel));
 
 /**
  * Lexer for a unicode escape sequence.
@@ -117,7 +117,7 @@ hexEscapeSequence = parse.next(
 unicodeEscapeSequence = parse.next(
     parse_text.character('u'),
     parse.bind(parse_lang.times(4, number_lexer.hexDigit),
-        fromCharCodeParser));
+        fromCharCodelabel));
 
 /**
  * Lexer for a character escape sequence.
@@ -170,7 +170,7 @@ singleStringCharacters = parse.many(singleStringCharacter);
  * 
  * Returns the value of the string enclosed in the single quoted string literal.
  */
-singleStringLiteral = parse.Parser('Single String Literal',
+singleStringLiteral = parse.label('Single String Literal',
     parse_lang.between(singleQuote, singleQuote,
         parse.bind(singleStringCharacters, \str ->
             parse.always(stream.foldl(join, '', str)))));
@@ -199,7 +199,7 @@ doubleStringCharacters = parse.many(doubleStringCharacter);
  * 
  * Returns the value of the string enclosed in the double quoted string literal.
  */
-doubleStringLiteral = parse.Parser('Double String Literal',
+doubleStringLiteral = parse.label('Double String Literal',
     parse_lang.between(doubleQuote, doubleQuote,
         parse.bind(doubleStringCharacters, \str ->
             parse.always(stream.foldl(join, '', str)))));
@@ -211,7 +211,7 @@ doubleStringLiteral = parse.Parser('Double String Literal',
  * 
  * Returns the value of the string enclosed in the string literal.
  */
-stringLiteral = parse.Parser('Sting Literal Lexer',
+stringLiteral = parse.label('Sting Literal Lexer',
     parse.either(
         singleStringLiteral,
         doubleStringLiteral));

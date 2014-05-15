@@ -8,7 +8,7 @@ var parse = require("bennu")["parse"],
     position = require("ecma-ast")["position"],
     __o = require("nu-stream")["stream"],
     token = require("./token_parser"),
-    precedence, node, nodea, positionParser, cons = __o["cons"],
+    precedence, node, nodea, positionlabel, cons = __o["cons"],
     toArray = __o["toArray"],
     NIL = __o["NIL"];
 (precedence = (function(p, table) {
@@ -66,10 +66,10 @@ var parse = require("bennu")["parse"],
         return parse.always(out.pop());
     }));
 }));
-(positionParser = parse.extract((function(x) {
+(positionlabel = parse.extract((function(x) {
     return x.position;
 })));
-var locParser = parse.extract((function(x) {
+var loclabel = parse.extract((function(x) {
     return x.loc;
 })),
     prevEnd = parse.extract((function(z) {
@@ -77,12 +77,12 @@ var locParser = parse.extract((function(x) {
         return x.previousEnd;
     }));
 (node = (function(p, f) {
-    return parse.binds(parse.enumeration(locParser, p, prevEnd), (function(o, x, c) {
+    return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
         return parse.always(f(new(position.SourceLocation)(o.file, o.start, c), x));
     }));
 }));
 (nodea = (function(p, f) {
-    return parse.binds(parse.enumeration(locParser, p, prevEnd), (function(o, x, c) {
+    return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
         return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o.file, o.start,
             c), x))));
     }));
@@ -90,4 +90,4 @@ var locParser = parse.extract((function(x) {
 (exports["precedence"] = precedence);
 (exports["node"] = node);
 (exports["nodea"] = nodea);
-(exports["positionParser"] = positionParser);
+(exports["positionlabel"] = positionlabel);

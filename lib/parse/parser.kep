@@ -19,6 +19,7 @@ with
         setParserState
         many
         never
+        Parser
         
         'ParserState': BennuParserState},
     
@@ -151,7 +152,7 @@ ParserState.prototype.next = \tok =self-> {
                     x,
                     state.input)
             in
-                \_ m cok -> cok(tok, s, m),
+                new Parser\_ m cok -> cok(tok, s, m),
             never);
     }
     return self._next;

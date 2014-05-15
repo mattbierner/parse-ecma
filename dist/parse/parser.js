@@ -18,6 +18,7 @@ define(["require", "exports", "bennu/parse", "nu-stream/stream", "ecma-ast/posit
         setParserState = __o["setParserState"],
         many = __o["many"],
         never = __o["never"],
+        Parser = __o["Parser"],
         BennuParserState = __o["ParserState"],
         tokenizer = (function(token) {
             var followLineTerminator = (function(x) {
@@ -99,9 +100,9 @@ define(["require", "exports", "bennu/parse", "nu-stream/stream", "ecma-ast/posit
                 function(x, state) {
                     var s = new(ParserState)(self.file, ((x === null) ? stream.end : self._rest),
                         self.position.next(state.position), x, state.input);
-                    return (function(_, m, cok) {
+                    return new(Parser)((function(_, m, cok) {
                         return cok(tok, s, m);
-                    });
+                    }));
                 }), never));
         }
         return self._next;

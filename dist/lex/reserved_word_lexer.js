@@ -4,7 +4,7 @@
 */
 define(["require", "exports", "bennu/parse", "bennu/text"], (function(require, exports, __o, __o0) {
     "use strict";
-    var reservedWord, keywordList, Parser = __o["Parser"],
+    var reservedWord, keywordList, label = __o["label"],
         trie = __o0["trie"];
     (keywordList = ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else",
         "finally", "for", "function", "if", "in", "instanceof", "typeof", "new", "var", "return", "void",
@@ -12,7 +12,7 @@ define(["require", "exports", "bennu/parse", "bennu/text"], (function(require, e
         "export", "import", "implements", "let", "private", "public", "interface", "package", "protected",
         "static", "yield", "true", "false", "null"
     ]);
-    (reservedWord = Parser("Reserved Word Lexer", trie(keywordList)));
+    (reservedWord = label("Reserved Word Lexer", trie(keywordList)));
     (exports["reservedWord"] = reservedWord);
     (exports["keywordList"] = keywordList);
 }));

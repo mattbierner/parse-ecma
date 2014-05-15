@@ -19,7 +19,7 @@ package (
     identifier)
 with
     import 'bennu::parse' parse,
-    import 'bennu::text' parse_text,
+    import 'bennu::text' parse_text#{oneOf},
     
     import 'nu-stream::stream' {foldl},
     
@@ -72,7 +72,7 @@ unicodeDigit = parse_text.digit;
  * 
  * Any character in the Unicode category Connector Punctuation (Pc).
  */
-unicodeConnectorPunctuation = parse_text.characters([
+unicodeConnectorPunctuation = oneOf [
     '\u005F',
     '\u203F',
     '\u2040',
@@ -82,7 +82,7 @@ unicodeConnectorPunctuation = parse_text.characters([
     '\uFE4D',
     '\uFE4E',
     '\uFE4F',
-    '\uFF3F']);
+    '\uFF3F'];
 
 /**
  * Lexer for any combining mark Unicode character.
@@ -138,7 +138,7 @@ var reservedWordTest = parse.next(
  * 
  * Checks to make sure returned identifier is not a keyword.
  */
-identifier = parse.Parser('Identifier Lexer',
+identifier = parse.label('Identifier Lexer',
     parse.bind(identifierName, \name -> {
         var v = foldl(join, '', name);
         return ?reserved_word_lexer.keywordList.indexOf(v) >= 0

@@ -31,7 +31,7 @@ var parse = require("bennu")["parse"],
     enumeration = parse["enumeration"],
     many = parse["many"],
     runState = parse["runState"],
-    ParserState = parse["ParserState"],
+    labelState = parse["labelState"],
     then = __o["then"],
     streamFrom = __o0["from"],
     SourceLocation = __o1["SourceLocation"],
@@ -116,7 +116,7 @@ var element = choice(commentToken, whitespaceToken, lineTerminatorToken),
     return runState(then(lexerDiv, eof), state);
 }));
 (lexDivStream = (function(s, file) {
-    return lexDivState(new(ParserState)(s, SourcePosition.initial, file));
+    return lexDivState(new(labelState)(s, SourcePosition.initial, file));
 }));
 var y = lexDivStream;
 (lexDiv = (function(z) {
@@ -126,7 +126,7 @@ var y = lexDivStream;
     return runState(then(lexerRegExp, parse.eof), state);
 }));
 (lexRegExpStream = (function(s, file) {
-    return lexRegExpState(new(ParserState)(s, SourcePosition.initial, file));
+    return lexRegExpState(new(labelState)(s, SourcePosition.initial, file));
 }));
 var y0 = lexRegExpStream;
 (lexRegExp = (function(z) {

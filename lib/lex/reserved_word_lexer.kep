@@ -5,7 +5,7 @@ package (
     reservedWord
     keywordList)
 with
-    import 'bennu::parse' {Parser},
+    import 'bennu::parse' {label},
     import 'bennu::text' {trie}
 in {
 
@@ -21,7 +21,7 @@ keywordList = [
 
 /* Lexers
  ******************************************************************************/
-reservedWord = Parser('Reserved Word Lexer',
+reservedWord = label('Reserved Word Lexer',
     trie keywordList);
 
 }

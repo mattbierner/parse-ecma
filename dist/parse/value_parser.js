@@ -7,31 +7,31 @@ define(["require", "exports", "bennu/parse", "ecma-ast/value", "./token_parser"]
     "use strict";
     var nullLiteral, booleanLiteral, numericLiteral, stringLiteral, regularExpressionLiteral, literal,
             identifier, p;
-    (nullLiteral = parse.Parser("Null Literal", ((p = token.nullLiteral), parse.bind(p, (function(x) {
+    (nullLiteral = parse.label("Null Literal", ((p = token.nullLiteral), parse.bind(p, (function(x) {
         return parse.always(new(ast_value.Literal)(x.loc, "null", x.value));
     })))));
     var p0;
-    (booleanLiteral = parse.Parser("Boolean Literal", ((p0 = token.booleanLiteral), parse.bind(p0, (function(x) {
+    (booleanLiteral = parse.label("Boolean Literal", ((p0 = token.booleanLiteral), parse.bind(p0, (function(x) {
         return parse.always(new(ast_value.Literal)(x.loc, "boolean", x.value));
     })))));
     var p1;
-    (numericLiteral = parse.Parser("Numeric Literal", ((p1 = token.numericLiteral), parse.bind(p1, (function(x) {
+    (numericLiteral = parse.label("Numeric Literal", ((p1 = token.numericLiteral), parse.bind(p1, (function(x) {
         return parse.always(new(ast_value.Literal)(x.loc, "number", x.value));
     })))));
     var p2;
-    (stringLiteral = parse.Parser("String Literal", ((p2 = token.stringLiteral), parse.bind(p2, (function(x) {
+    (stringLiteral = parse.label("String Literal", ((p2 = token.stringLiteral), parse.bind(p2, (function(x) {
         return parse.always(new(ast_value.Literal)(x.loc, "string", x.value));
     })))));
     var p3;
-    (regularExpressionLiteral = parse.Parser("Regular Expression Literal", parse.next(parse.bind(parse.getParserState, (
+    (regularExpressionLiteral = parse.label("Regular Expression Literal", parse.next(parse.bind(parse.getParserState, (
         function(state) {
             return state.asRegExp();
         })), ((p3 = token.regularExpressionLiteral), parse.bind(p3, (function(x) {
         return parse.always(new(ast_value.Literal)(x.loc, "regexp", x.value));
     }))))));
-    (literal = parse.Parser("Literal", parse.choice(nullLiteral, booleanLiteral, numericLiteral, stringLiteral,
+    (literal = parse.label("Literal", parse.choice(nullLiteral, booleanLiteral, numericLiteral, stringLiteral,
         regularExpressionLiteral)));
-    (identifier = parse.Parser("Identifier", parse.bind(token.anyIdentifier, (function(x) {
+    (identifier = parse.label("Identifier", parse.bind(token.anyIdentifier, (function(x) {
         return parse.always(new(ast_value.Identifier)(x.loc, x.value));
     }))));
     (exports["nullLiteral"] = nullLiteral);

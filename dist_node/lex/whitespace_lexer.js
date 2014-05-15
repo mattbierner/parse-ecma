@@ -5,10 +5,10 @@
 "use strict";
 var __o = require("bennu")["parse"],
     __o0 = require("bennu")["text"],
-    tab, vt, ff, sp, nbsp, bom, usp, whitespace, Parser = __o["Parser"],
+    tab, vt, ff, sp, nbsp, bom, usp, whitespace, label = __o["label"],
     token = __o["token"],
     character = __o0["character"],
-    characters = __o0["characters"];
+    oneOf = __o0["oneOf"];
 (tab = character("\t"));
 (vt = character("\u000b"));
 (ff = character("\f"));
@@ -16,7 +16,7 @@ var __o = require("bennu")["parse"],
 (nbsp = character(" "));
 (bom = character("﻿"));
 (usp = token(RegExp.prototype.test.bind(/^\s$/)));
-(whitespace = Parser("Whitespace Lexer", characters(["\t", "\u000b", "\f", " ", " ", "﻿"])));
+(whitespace = label("Whitespace Lexer", oneOf(["\t", "\u000b", "\f", " ", " ", "﻿"])));
 (exports["tab"] = tab);
 (exports["vt"] = vt);
 (exports["ff"] = ff);

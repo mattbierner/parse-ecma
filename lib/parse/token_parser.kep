@@ -28,7 +28,7 @@ var expectError = \msg ->
     \pos, tok ->
         new ExpectError(pos, msg, ?tok : tok.value : "end of input");
 
-var typeParser = \type, msg ->
+var typelabel = \type, msg ->
     token(
         \tok -> (tok.type === type),
         expectError(msg));
@@ -45,18 +45,18 @@ punctuator = selectAny 'Punctuator';
 
 keyword = selectAny 'Keyword';
 
-anyIdentifier = typeParser('Identifier', 'any identifier');
+anyIdentifier = typelabel('Identifier', 'any identifier');
 
 identifier = selectAny 'Identifier';
 
-nullLiteral = typeParser('Null', 'Null literal');
+nullLiteral = typelabel('Null', 'Null literal');
 
-booleanLiteral = typeParser('Boolean', 'boolean literal');
+booleanLiteral = typelabel('Boolean', 'boolean literal');
 
-numericLiteral = typeParser('Number', 'numeric literal');
+numericLiteral = typelabel('Number', 'numeric literal');
 
-stringLiteral = typeParser('String', 'string literal');
+stringLiteral = typelabel('String', 'string literal');
 
-regularExpressionLiteral = typeParser('RegularExpression', 'regular expression literal');
+regularExpressionLiteral = typelabel('RegularExpression', 'regular expression literal');
 
 }
