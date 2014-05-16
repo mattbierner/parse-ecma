@@ -8,17 +8,17 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
 ], (function(require, exports, parse, parse_lang, stream, ast_declaration, ast_expression, ast_program,
     ast_statement, __o, token, value, statement) {
     "use strict";
-    var late = parse["late"],
+    var functionBody, functionExpression, functionDeclaration, sourceElement, sourceElements, program, late =
+            parse["late"],
         node = __o["node"],
         nodea = __o["nodea"],
         keyword = token["keyword"],
         punctuator = token["punctuator"],
-        functionBody, functionExpression, functionDeclaration, sourceElement, sourceElements, program,
-            statementlabel = late((function() {
-                var __o0 = require("ecma/parse/statement_parser"),
-                    statement0 = __o0["statement"];
-                return statement0;
-            }));
+        statementlabel = late((function() {
+            var __o0 = require("./statement_parser"),
+                statement0 = __o0["statement"];
+            return statement0;
+        }));
     (sourceElements = late((function() {
         return sourceElements;
     })));

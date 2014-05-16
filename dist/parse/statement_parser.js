@@ -4,7 +4,7 @@
 */
 define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/clause", "ecma-ast/declaration",
     "ecma-ast/statement", "ecma-ast/node", "./token_parser", "./common", "./expression_parser", "./value_parser"
-], (function(require, exports, parse, __o, ast_clause, ast_declaration, ast_statement, __o0, __o1, __o2, __o3, __o4) {
+], (function(require, exports, parse, __o, ast_clause, ast_declaration, ast_statement, __o0, __o1, __o2, _, __o3) {
     "use strict";
     var blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement,
             forInStatement, whileStatement, doWhileStatement, iterationStatement, continueStatement,
@@ -27,12 +27,32 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/clause", "e
         punctuator = __o1["punctuator"],
         node = __o2["node"],
         nodea = __o2["nodea"],
-        assignmentExpression = __o3["assignmentExpression"],
-        assignmentExpressionNoIn = __o3["assignmentExpressionNoIn"],
-        expression = __o3["expression"],
-        expressionNoIn = __o3["expressionNoIn"],
-        leftHandSideExpression = __o3["leftHandSideExpression"],
-        identifier = __o4["identifier"];
+        identifier = __o3["identifier"],
+        expression = late((function() {
+            var __o4 = require("./expression_parser"),
+                expression0 = __o4["expression"];
+            return expression0;
+        })),
+        expressionNoIn = late((function() {
+            var __o4 = require("./expression_parser"),
+                expressionNoIn0 = __o4["expressionNoIn"];
+            return expressionNoIn0;
+        })),
+        assignmentExpression = late((function() {
+            var __o4 = require("./expression_parser"),
+                assignmentExpression0 = __o4["assignmentExpression"];
+            return assignmentExpression0;
+        })),
+        assignmentExpressionNoIn = late((function() {
+            var __o4 = require("./expression_parser"),
+                assignmentExpressionNoIn0 = __o4["assignmentExpressionNoIn"];
+            return assignmentExpressionNoIn0;
+        })),
+        leftHandSideExpression = late((function() {
+            var __o4 = require("./expression_parser"),
+                leftHandSideExpression0 = __o4["leftHandSideExpression"];
+            return leftHandSideExpression0;
+        }));
     (statement = late((function() {
         return statement;
     })));

@@ -106,13 +106,13 @@ var extend = \obj props ->
 /* Circular
  ******************************************************************************/
 var functionExpression = late \-> {
-    with import 'ecma/parse/program_parser' {functionExpression} in {
+    with import './program_parser' {functionExpression} in {
         return functionExpression;
     }
 };
 
 var functionBody = late \-> {
-    with import 'ecma/parse/program_parser' {functionBody} in {
+    with import './program_parser' {functionBody} in {
         return functionBody;
     }
 };

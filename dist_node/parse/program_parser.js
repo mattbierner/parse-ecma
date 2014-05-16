@@ -20,7 +20,7 @@ var parse = require("bennu")["parse"],
     keyword = token["keyword"],
     punctuator = token["punctuator"],
     statementlabel = late((function() {
-        var __o0 = require("ecma/parse/statement_parser"),
+        var __o0 = require("./statement_parser"),
             statement0 = __o0["statement"];
         return statement0;
     }));

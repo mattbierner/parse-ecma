@@ -3,7 +3,7 @@ var parser = require('../../index').parse.parser;
 
 
 var testParser = function(stream) {
-    var result = parser.parseStream(stream);
+    var result = parser.parseStream(lexer.lex(stream));
     return result.body[0].expression;
 };
 
@@ -15,7 +15,7 @@ exports.empty = function(test) {
     test.done();
 };
 
-exports_single element = function(test) {
+exports_single_element = function(test) {
     var result = testParser("[3];");
     test.equal(result.elements.length, 1);
     test.equal(result.elements[0].value, 3);
@@ -53,7 +53,7 @@ exports.empty_element_array_literal = function(test) {
     test.equal(result2.elements[2], null);
     test.done();
 };
-[" Multi Element Array With Empty elements",
+
 exports.with_empty_elements = function(test) {
     var result = testParser("[3,, 4];");
     test.equal(result.elements.length, 3);

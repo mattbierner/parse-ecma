@@ -32,7 +32,7 @@ in {
 /* Circular
  ******************************************************************************/
 var statementlabel = late \-> {
-    with import 'ecma/parse/statement_parser' {statement} in {
+    with import './statement_parser' {statement} in {
         return statement;
     }
 };

@@ -50,14 +50,41 @@ with
         keyword
         punctuator},
     import './common' {node nodea},
-    import './expression_parser' {
-        assignmentExpression
-        assignmentExpressionNoIn
-        expression
-        expressionNoIn
-        leftHandSideExpression},
+    import './expression_parser' _,
     import './value_parser' {identifier}
 in {
+
+/* Circular
+ ******************************************************************************/
+var expression := late \-> {
+    with import './expression_parser' {expression} in {
+        return expression;
+    }
+};
+
+var expressionNoIn := late \-> {
+    with import './expression_parser' {expressionNoIn} in {
+        return expressionNoIn;
+    }
+};
+
+var assignmentExpression := late \-> {
+    with import './expression_parser' {assignmentExpression} in {
+        return assignmentExpression;
+    }
+};
+
+var assignmentExpressionNoIn := late \-> {
+    with import './expression_parser' {assignmentExpressionNoIn} in {
+        return assignmentExpressionNoIn;
+    }
+};
+
+var leftHandSideExpression := late \-> {
+    with import './expression_parser' {leftHandSideExpression} in {
+        return leftHandSideExpression;
+    }
+};
 
 /* Forward declarations
  ******************************************************************************/

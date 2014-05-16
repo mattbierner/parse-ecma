@@ -33,12 +33,12 @@ var parse = require("bennu")["parse"],
     nodea = __o0["nodea"],
     precedence = __o0["precedence"],
     obj, props, obj0, props0, functionExpression = late((function() {
-        var __o1 = require("ecma/parse/program_parser"),
+        var __o1 = require("./program_parser"),
             functionExpression0 = __o1["functionExpression"];
         return functionExpression0;
     })),
     functionBody = late((function() {
-        var __o1 = require("ecma/parse/program_parser"),
+        var __o1 = require("./program_parser"),
             functionBody0 = __o1["functionBody"];
         return functionBody0;
     }));
