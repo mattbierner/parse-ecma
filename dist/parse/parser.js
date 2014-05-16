@@ -2,124 +2,104 @@
  * THIS FILE IS AUTO GENERATED FROM 'lib/parse/parser.kep'
  * DO NOT EDIT
 */
-define(["require", "exports", "bennu/parse", "nu-stream/stream", "ecma-ast/position", "ecma-ast/token", "../lex/lexer",
+define(["require", "exports", "bennu/parse", "nu-stream/stream", "ecma-ast/token", "ecma-ast/position", "../lex/lexer",
     "./program_parser"
-], (function(require, exports, __o, stream, position, lexToken, lexer, program) {
+], (function(require, exports, __o, stream, lexToken, __o0, lexer, program) {
     "use strict";
-    var ParserState, parseStream, parse, always = __o["always"],
-        bind = __o["bind"],
-        eof = __o["eof"],
-        choice = __o["choice"],
-        rec = __o["rec"],
-        runState = __o["runState"],
-        parseState = __o["parseState"],
-        expected = __o["expected"],
-        next = __o["next"],
-        setParserState = __o["setParserState"],
-        many = __o["many"],
-        never = __o["never"],
+    var ParserState, parseStream, parse, runState = __o["runState"],
         Parser = __o["Parser"],
+        Position = __o["Position"],
         BennuParserState = __o["ParserState"],
-        tokenizer = (function(token) {
-            var followLineTerminator = (function(x) {
-                return always(((!x) ? null : Object.create(x, ({
+        SourcePosition = __o0["SourcePosition"],
+        SourceLocation = __o0["SourceLocation"],
+        whitespaceFilter, commentFilter, x, y, x0, y0, langElementStream = ((whitespaceFilter = (function(z) {
+            var y = z.type;
+            return ("Whitespace" !== y);
+        })), (commentFilter = (function(x) {
+            if ((x.type === "Comment")) {
+                return ((x.value.indexOf("\n") >= 0) ? stream.cons(new(lexToken.LineTerminatorToken)
+                    (x.loc, "\n"), stream.end) : stream.end);
+            }
+            return stream.cons(x, stream.end);
+        })), (x = stream.filter.bind(null, whitespaceFilter)), (y = stream.bind.bind(null, commentFilter)), (
+            function(z) {
+                return y(x(z));
+            })),
+        lineTerminatorStream = (function(s) {
+            if (stream.isEmpty(s)) return s;
+            var first = stream.first(s),
+                rest = stream.rest(s);
+            if ((first.type === "LineTerminator")) {
+                while ((first.type === "LineTerminator")) {
+                    if (stream.isEmpty(rest)) return rest;
+                    (first = stream.first(rest));
+                    (rest = stream.rest(rest));
+                }
+                (first = Object.create(first, ({
                     "loc": ({
-                        "value": x.loc
+                        "value": first.loc
                     }),
                     "value": ({
-                        "value": x.value
+                        "value": first.value
                     }),
                     "lineTerminator": ({
                         "value": true
                     })
-                }))));
-            });
-            return rec((function(self) {
-                var onLineTerminator = bind(next(many(lexer.lineTerminator), self),
-                    followLineTerminator);
-                return expected("token, comment, or whitespace", choice(eof, bind(lexer.comment, (
-                    function(x) {
-                        return ((x.value.indexOf("\n") >= 0) ? onLineTerminator : self);
-                    })), next(lexer.whitespace, self), next(lexer.lineTerminator,
-                    onLineTerminator), token));
-            }));
+                })));
+            }
+            return stream.memoStream(first, lineTerminatorStream.bind(undefined, rest));
         }),
-        inputElementDiv = tokenizer(lexer.tokenDiv),
-        inputElementRegExp = tokenizer(lexer.tokenRegExp),
-        Position = (function(position0, previousEnd) {
+        parserStream = ((x0 = langElementStream), (y0 = lineTerminatorStream), (function(z) {
+            return y0(x0(z));
+        })),
+        ParserPosition = (function(tokenPosition, sourcePosition) {
             var self = this;
-            (self.position = position0);
-            (self.previousEnd = previousEnd);
+            (self.tokenPosition = tokenPosition);
+            (self.sourcePosition = sourcePosition);
         });
-    (Position.prototype.increment = (function(tok) {
+    (ParserPosition.initial = new(ParserPosition)(Position.initial, SourcePosition.initial));
+    (ParserPosition.prototype.increment = (function(tok, end) {
         var self = this;
-        return new(Position)(tok.loc, self.position);
+        return new(ParserPosition)(self.tokenPosition.increment(tok), end);
     }));
-    (Position.prototype.compare = (function(pos) {
+    (ParserPosition.prototype.toString = (function() {
         var self = this;
-        return self.position.compare(pos.position);
+        return ("" + self.sourcePosition);
     }));
-    (Position.prototype.next = (function(position0) {
+    (ParserPosition.prototype.compare = (function(pos) {
         var self = this;
-        return new(Position)(position0, self.position);
+        return self.tokenPosition.compare(pos.tokenPosition);
     }));
-    var createNextRegExpState = (function(input, pos, ok, err) {
-        return parseState(inputElementRegExp, new(BennuParserState)(input, pos), (function(x, state) {
-            return ok(new(ParserState)(((x === null) ? stream.end : input), new(Position)(state.position,
-                pos), x, state.input));
-        }), err);
-    });
-    (ParserState = (function(input, pos, first, rest) {
+    (ParserState = (function(stream0, pos, prevEnd) {
         var self = this;
-        BennuParserState.call(self, input, pos);
-        (self._first = first);
-        (self._rest = rest);
+        BennuParserState.call(self, stream0, pos);
+        (self._prevEnd = prevEnd);
     }));
     (ParserState.prototype = new(BennuParserState)());
-    Object.defineProperty(ParserState.prototype, "loc", ({
-        "get": (function() {
-            var self = this;
-            return (self.isEmpty() ? new(position.SourceLocation)(self.position.previousEnd, self.position
-                .previousEnd, self.position.previousEnd.file) : self._first.loc);
-        })
-    }));
-    (ParserState.prototype.first = (function() {
-        var self = this;
-        return self._first;
-    }));
-    (ParserState.prototype.setInput = (function(input) {
-        var self = this;
-        return new(ParserState)(input, self.pos, self._first, self._rest);
-    }));
     (ParserState.prototype.next = (function(tok) {
         var self = this;
         if ((!self._next)) {
-            var end = (self.loc ? self.loc.end : self.position.previousEnd);
-            (self._next = parseState(inputElementDiv, new(BennuParserState)(self._rest, end), (function(
-                x, state) {
-                var s = new(ParserState)(((x === null) ? stream.end : self._rest), self.position
-                    .next(state.position), x, state.input);
-                return new(Parser)((function(_, m, cok) {
-                    return cok(tok, s, m);
-                }));
-            }), never));
+            var rest = stream.rest(self.input),
+                end = (stream.isEmpty(rest) ? tok.loc.end : stream.first(rest)
+                    .loc.start),
+                s = new(ParserState)(rest, self.position.increment(tok, end), self.loc.end);
+            (self._next = new(Parser)((function(_, m, cok) {
+                return cok(tok, s, m);
+            })));
         }
         return self._next;
     }));
-    (ParserState.prototype.asRegExp = (function(tok) {
-        var self = this;
-        if ((!self._as)) {
-            (self._as = createNextRegExpState(self.input, self.position.previousEnd, setParserState,
-                never));
-        }
-        return self._as;
+    Object.defineProperty(ParserState.prototype, "loc", ({
+        "get": (function() {
+            var self = this;
+            return (stream.isEmpty(self.input) ? new(SourceLocation)(self._prevEnd, self._prevEnd) :
+                stream.first(self.input)
+                .loc);
+        })
     }));
     (parseStream = (function(s, file) {
-        var initial;
-        return runState(next(new(ParserState)(s, ((initial = new(position.SourcePosition)(position.SourcePosition
-                    .initial.line, position.SourcePosition.initial.column, file)), new(Position)
-                (initial, initial)), ({}), s)
-            .next(null), program.program), new(BennuParserState)());
+        return runState(program.program, new(ParserState)(parserStream(lexer.lexStream(s)),
+            ParserPosition.initial, SourcePosition.initial));
     }));
     (parse = (function(input, file) {
         return parseStream(stream.from(input), file);

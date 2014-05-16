@@ -190,7 +190,7 @@
     <script type="application/javascript">
         requirejs.config({
             paths: {
-                'ecma': 'lib',
+                'ecma': 'dist',
                 
                 'bennu': 'dependencies/bennu/dist',
                 'nu-stream': 'dependencies/nu/dist',
@@ -265,18 +265,10 @@
                     
                     var nodes, ast;
                     
-                    var lex;
-                    switch($("input:radio:checked").val()) {
-                    case 'div':
-                        lex = lexer.lexDiv;
-                        break;
-                    default:
-                        lex = lexer.lexRegExp;
-                        break;
-                    }
+     
                     
                     try {
-                        nodes = lex(input);
+                        nodes = lexer.lex(input);
                     } catch (e) {
                         $('.LexError').text(e);
                     }
@@ -306,6 +298,7 @@
                     console.profile();
                     try
                     {
+                    debugger;
                         ast = parser.parse(input);
                     } catch (e) {
                         $('#time').text('');

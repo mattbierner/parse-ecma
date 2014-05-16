@@ -23,12 +23,10 @@ var p2;
     return parse.always(new(ast_value.Literal)(x.loc, "string", x.value));
 })))));
 var p3;
-(regularExpressionLiteral = parse.label("Regular Expression Literal", parse.next(parse.bind(parse.getParserState, (
-    function(state) {
-        return state.asRegExp();
-    })), ((p3 = token.regularExpressionLiteral), parse.bind(p3, (function(x) {
-    return parse.always(new(ast_value.Literal)(x.loc, "regexp", x.value));
-}))))));
+(regularExpressionLiteral = parse.label("Regular Expression Literal", ((p3 = token.regularExpressionLiteral), parse.bind(
+    p3, (function(x) {
+        return parse.always(new(ast_value.Literal)(x.loc, "regexp", x.value));
+    })))));
 (literal = parse.label("Literal", parse.choice(nullLiteral, booleanLiteral, numericLiteral, stringLiteral,
     regularExpressionLiteral)));
 (identifier = parse.label("Identifier", parse.bind(token.anyIdentifier, (function(x) {

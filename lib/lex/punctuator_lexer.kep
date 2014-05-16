@@ -2,12 +2,10 @@
  * @fileOverview Lexers for ECMAScript 5.1 punctuators.
  */
 package (
-    punctuator
-    divPunctuator)
+    punctuator)
 with
     import 'bennu::parse' {
-        label
-        either},
+        label},
     import 'bennu::text' {
         string
         trie}
@@ -18,15 +16,11 @@ var punctuators = [
     '{', '}', '(', ')', ',', '[', ']', '.', ';', ',', ':', '?', '&&', '||', '<<', '>>',
     '>>>', '<=', '<', '>=', '>', '===', '!==', '==', '!=', '=', '<<=', '>>=',
     '>>>=', '+=', '-=', '*=', '%=', '++', '--', '!', '~', '&', '|', '^', '+',
-    '-', '*', '%'];
+    '-', '*', '%', '/', '/='];
 
 /* Lexer
  ******************************************************************************/
 punctuator = label('Punctuator Lexer',
     trie punctuators);
-
-divPunctuator = either(
-    string '/=',
-    string '/');
 
 }

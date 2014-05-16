@@ -69,9 +69,8 @@ var parse = require("bennu")["parse"],
 var loclabel = parse.extract((function(x) {
     return x.loc;
 })),
-    prevEnd = parse.extract((function(z) {
-        var x = z.position;
-        return x.previousEnd;
+    prevEnd = parse.extract((function(x) {
+        return x._prevEnd;
     }));
 (node = (function(p, f) {
     return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {

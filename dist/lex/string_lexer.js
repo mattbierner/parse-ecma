@@ -6,11 +6,7 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
     "./number_lexer"
 ], (function(require, exports, __o, __o0, __o1, __o2, __o3, __o4) {
     "use strict";
-    var doubleQuote, escape, singleQuote, lineContinuation, singleEscapeCharacter, escapeCharacter,
-            nonEscapeCharacter, characterEscapeSequence, unicodeEscapeSequence, hexEscapeSequence,
-            escapeSequence, singleStringCharacter, singleStringCharacters, singleStringLiteral,
-            doubleStringCharacter, doubleStringCharacters, doubleStringLiteral, stringLiteral, always = __o[
-                "always"],
+    var always = __o["always"],
         anyToken = __o["anyToken"],
         attempt = __o["attempt"],
         choice = __o["choice"],
@@ -32,14 +28,18 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
         lineTerminatorSequence = __o3["lineTerminatorSequence"],
         decimalDigit = __o4["decimalDigit"],
         hexDigit = __o4["hexDigit"],
-        y, __add = (function(x, y) {
-            return (x + y);
-        }),
+        doubleQuote, escape, singleQuote, lineContinuation, singleEscapeCharacter, escapeCharacter,
+            nonEscapeCharacter, characterEscapeSequence, unicodeEscapeSequence, hexEscapeSequence,
+            escapeSequence, singleStringCharacter, singleStringCharacters, singleStringLiteral,
+            doubleStringCharacter, doubleStringCharacters, doubleStringLiteral, stringLiteral, y, __add = (
+                function(x, y) {
+                    return (x + y);
+                }),
         join = map.bind(null, foldl.bind(null, __add, "")),
         fromCharCodeParser = ((y = map.bind(null, (function(x) {
             return String.fromCharCode(parseInt(x, 16));
-        }))), (function(z) {
-            return y(join(z));
+        }))), (function(x) {
+            return y(join(x));
         }));
     (doubleQuote = character("\""));
     (escape = character("\\"));

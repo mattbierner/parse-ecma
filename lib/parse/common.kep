@@ -90,7 +90,7 @@ precedence = \p, table -> {
 ////////////////////////////////////////
 var loclabel = parse.extract (.loc);
 
-var prevEnd = parse.extract ((.position) \> (.previousEnd));
+var prevEnd = parse.extract ((._prevEnd));
 
 // Ast Node
 ////////////////////////////////////////

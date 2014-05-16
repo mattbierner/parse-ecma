@@ -39,9 +39,7 @@ stringLiteral := parse.label('String Literal',
     selectLiteral('string', token.stringLiteral));
 
 regularExpressionLiteral := parse.label('Regular Expression Literal',
-    parse.next(
-        parse.bind(parse.getParserState, \state -> state.asRegExp()),
-        selectLiteral('regexp', token.regularExpressionLiteral)));
+    selectLiteral('regexp', token.regularExpressionLiteral));
 
 /**
  * Parser for a simple ECMAScript literal, excluding array and object literals.

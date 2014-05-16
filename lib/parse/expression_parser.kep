@@ -417,7 +417,7 @@ newExpression = parse.memo(parse.label('New Expression',
  */
 leftHandSideExpression = let
     reducer = \p, c -> let
-        loc = position.SourceLocation.merge(p.loc, c.loc)
+        loc = ?c.loc : position.SourceLocation.merge(p.loc, c.loc) : p.loc
     in
         ?c.hasOwnProperty('property')
              :ast_expression.MemberExpression.create(loc, p, c.property, c.computed)

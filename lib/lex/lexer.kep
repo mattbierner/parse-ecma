@@ -1,25 +1,16 @@
 /**
  * @fileOverview Lexers for ECMAScript 5.1.
- * 
- * As per the ECMAScript 5.1 spec, two top level symbols are defined, one
- * that supports leading division operators and division assignment operators, 
- * and one that does not.
  */
 package (
     comment
     whitespace
     lineTerminator
     
-    tokenDiv
-    tokenRegExp
+    token
     
-    lexDivState
-    lexDivStream
-    lexDiv
-    
-    lexRegExpState
-    lexRegExpStream
-    lexRegExp)
+    lexState
+    lexStream
+    lex)
 with
     import 'bennu::parse' parse#{
         always
@@ -29,18 +20,21 @@ with
         choice
         eof
         getPosition
+        modifyParserState
         getState
         enumeration
         extract
+        next
         many
         runState
-        ParserState},
+        never},
     import 'bennu::lang' {then},
     import 'nu-stream::stream' {'from': streamFrom},
     
     import 'ecma-ast::token' lexToken,
     import 'ecma-ast::position' {SourceLocation SourcePosition},
     
+    import './state' ParserState,
     import './boolean_lexer' {booleanLiteral},
     import './comment_lexer' comment_lexer,
     import './identifier_lexer' {identifier},
@@ -53,6 +47,8 @@ with
     import './whitespace_lexer' whitespace_lexer,
     import './regular_expression_lexer' {regularExpressionLiteral}
 in {
+
+var position = getPosition;//.map (.position);
 
 var makeToken = \type p ->
     bind(p, \x ->
@@ -67,7 +63,23 @@ var buildToken = \p ->
         \start [type value] end ->
             always(new type(
                 new SourceLocation(start, end, start.file || end.file),
-                value)));
+                value)))
+    .chain \tok ->
+        next(
+            modifyParserState \s ->
+            s.consume(tok),
+            always tok);
+
+var isRegExpCtx := extract((.prevTok)).chain \ prev -> {
+    if (!prev) return always();
+    switch (prev.type) {
+    case 'Keyword':
+    case 'Punctuator':
+        return always();
+    
+    }
+    return never();
+};
 
 /* Lexers
  ******************************************************************************/
@@ -76,7 +88,7 @@ var buildToken = \p ->
 /**
  * Literal in division contexts.
  */
-var literalDiv = choice(
+var literal = choice(
     makeToken(
         lexToken.StringToken.create,
         stringLiteral),
@@ -88,46 +100,23 @@ var literalDiv = choice(
         nullLiteral),
     makeToken(
         lexToken.NumberToken.create,
-        numericLiteral));
-
-/**
- * Literal in non-division contexts.
- */
-var literalRegExp = choice(
-    literalDiv,
+        numericLiteral),
     makeToken(
         lexToken.RegularExpressionToken.create,
-        regularExpressionLiteral));
+        next(
+            isRegExpCtx,
+            regularExpressionLiteral)));
 
 // Token
 ////////////////////////////////////////
 /**
  * Lexer for a token in division contexts.
  */
-var tokenDivToken = choice(
+var tokenToken = choice(
     attempt makeToken(
         lexToken.IdentifierToken,
         identifier),
-    literalDiv,
-    makeToken(
-        lexToken.KeywordToken,
-        reservedWord),
-    makeToken(
-        lexToken.PunctuatorToken,
-        choice(
-            punctuator,
-            divPunctuator)));
-
-tokenDiv = buildToken tokenDivToken;
-
-/**
- * Lexer for a token in non-division contexts.
- */
-var tokenRegExpToken = choice(
-    attempt makeToken(
-        lexToken.IdentifierToken,
-        identifier),
-    literalRegExp,
+    literal,
     makeToken(
         lexToken.KeywordToken,
         reservedWord),
@@ -135,7 +124,7 @@ var tokenRegExpToken = choice(
         lexToken.PunctuatorToken,
         punctuator));
 
-tokenRegExp = buildToken tokenRegExpToken;
+token = buildToken tokenToken;
 
 // Input Element
 ////////////////////////////////////////
@@ -155,24 +144,14 @@ comment = buildToken commentToken;
 whitespace = buildToken whitespaceToken;
 lineTerminator = buildToken lineTerminatorToken;
 
-var element = choice(
-    commentToken,
-    whitespaceToken,
-    lineTerminatorToken);
-
 /**
  * Lexer for a top level element in division contexts.
  */
-var inputElementDiv = choice(
-    element,
-    tokenDivToken);
-
-/**
- * Lexer for a top level element in non-division contexts.
- */
-var inputElementRegExp = choice(
-    element,
-    tokenRegExpToken);
+var inputElement = choice(
+    commentToken,
+    whitespaceToken,
+    lineTerminatorToken,
+    tokenToken);
 
 // Lexers
 ////////////////////////////////////////
@@ -181,14 +160,7 @@ var inputElementRegExp = choice(
  * 
  * Lexes as much input as possible, does not check for eof.
  */
-var lexerDiv = many buildToken(inputElementDiv);
-
-/**
- * Lexer for a stream of tokens in non leading division grammars.
- * 
- * Lexes as much input as possible, does not check for eof.
- */
-var lexerRegExp = many buildToken(inputElementRegExp);
+var lexer = many buildToken(inputElement);
 
 /* Running
  ******************************************************************************/
@@ -197,18 +169,18 @@ var lexerRegExp = many buildToken(inputElementRegExp);
 /**
  * Lexes state in division context.
  */
-lexDivState = \state ->
+lexState = \state ->
     runState(
         then(
-            lexerDiv,
+            lexer,
             eof),
         state);
 
 /**
  * Lexes stream in division context.
  */
-lexDivStream = \s file -> 
-    lexDivState(
+lexStream = \s file -> 
+    lexState(
         new ParserState(
             s,
             new SourcePosition(1, 0, file)));
@@ -216,32 +188,6 @@ lexDivStream = \s file ->
 /**
  * Lexes array-like input in division context.
  */
-lexDiv = streamFrom \> lexDivStream;
-
-// Lex RegExp 
-////////////////////////////////////////
-/**
- * Lexes state in non-division context.
- */
-lexRegExpState = \state ->
-    runState(
-        then(
-            lexerRegExp,
-            parse.eof),
-        state);
-
-/**
- * Lexes stream in non-division context.
- */
-lexRegExpStream = \s file -> 
-    lexRegExpState(
-        new ParserState(
-            s,
-            new SourcePosition(1, 0, file)));
-
-/**
- * Lexes array-like in non-division context.
- */
-lexRegExp = streamFrom \> lexRegExpStream;
+lex = streamFrom \> lexStream;
 
 }

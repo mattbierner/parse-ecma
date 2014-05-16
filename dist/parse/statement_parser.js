@@ -7,10 +7,7 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/clause", "e
 ], (function(require, exports, parse, parse_lang, ast_clause, ast_declaration, ast_statement, token, __o,
     expression, value) {
     "use strict";
-    var blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement,
-            forInStatement, whileStatement, doWhileStatement, iterationStatement, continueStatement,
-            breakStatement, returnStatement, withStatement, labeledStatement, switchStatement, throwStatement,
-            tryStatement, debuggerStatement, statement, eager = parse["eager"],
+    var eager = parse["eager"],
         late = parse["late"],
         next = parse["next"],
         not = parse["not"],
@@ -19,7 +16,11 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/clause", "e
         keyword = token["keyword"],
         punctuator = token["punctuator"],
         node = __o["node"],
-        nodea = __o["nodea"];
+        nodea = __o["nodea"],
+        blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement,
+            forInStatement, whileStatement, doWhileStatement, iterationStatement, continueStatement,
+            breakStatement, returnStatement, withStatement, labeledStatement, switchStatement, throwStatement,
+            tryStatement, debuggerStatement, statement;
     (statement = late((function() {
         return statement;
     })));

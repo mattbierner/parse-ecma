@@ -123,7 +123,7 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
             parse.expected("member expression", memberExpression), parse.optional([], args))),
         ast_expression.NewExpression.create))));
     var reducer0 = (function(p, c) {
-        var loc = position.SourceLocation.merge(p.loc, c.loc);
+        var loc = (c.loc ? position.SourceLocation.merge(p.loc, c.loc) : p.loc);
         return (c.hasOwnProperty("property") ? ast_expression.MemberExpression.create(loc, p, c.property, c
             .computed) : ast_expression.CallExpression.create(loc, p, c));
     });

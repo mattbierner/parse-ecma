@@ -135,6 +135,8 @@ regularExpressionBody :=
 ////////////////////////////////////////
 /**
  * Regular expression literal.
+ * 
+ * This does not check the context.
  */
 regularExpressionLiteral := label@'Regular Expression Lexer' <|
     binds(
