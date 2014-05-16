@@ -2,13 +2,8 @@
  * @fileOverview Lexers for ECMAScript 5.1.
  */
 package (
-    comment
-    whitespace
-    lineTerminator
+    lexer
     
-    token
-    
-    lexState
     lexStream
     lex)
 with
@@ -20,21 +15,21 @@ with
         choice
         eof
         getPosition
-        modifyParserState
+        modifyState
         getState
         enumeration
         extract
         next
         many
         runState
-        never},
+        never
+        ParserState},
     import 'bennu::lang' {then},
     import 'nu-stream::stream' {'from': streamFrom},
     
     import 'ecma-ast::token' lexToken,
     import 'ecma-ast::position' {SourceLocation SourcePosition},
     
-    import './state' ParserState,
     import './boolean_lexer' {booleanLiteral},
     import './comment_lexer' comment_lexer,
     import './identifier_lexer' {identifier},
@@ -47,12 +42,23 @@ with
     import './whitespace_lexer' whitespace_lexer,
     import './regular_expression_lexer' {regularExpressionLiteral}
 in {
+/* State
+ ******************************************************************************/
+var consume := \tok self -> {
+    switch (tok.type) {
+    case 'Comment':
+    case 'Whitespace':
+    case 'LineTerminator':
+        return self;
+    default:
+        return tok;
+    }
+};
 
-var position = getPosition;//.map (.position);
-
+/* Token
+ ******************************************************************************/
 var makeToken = \type p ->
-    bind(p, \x ->
-        always [type, x]);
+    p.map \ x -> [type, x];
 
 var buildToken = \p ->
     binds(
@@ -66,11 +72,10 @@ var buildToken = \p ->
                 value)))
     .chain \tok ->
         next(
-            modifyParserState \s ->
-            s.consume(tok),
+            modifyState (consume @ tok),
             always tok);
 
-var isRegExpCtx := extract((.prevTok)).chain \ prev -> {
+var isRegExpCtx := getState.chain \ prev -> {
     if (!prev) return always();
     switch (prev.type) {
     case 'Keyword':
@@ -83,10 +88,8 @@ var isRegExpCtx := extract((.prevTok)).chain \ prev -> {
 
 /* Lexers
  ******************************************************************************/
-// Literal
-////////////////////////////////////////
 /**
- * Literal in division contexts.
+ * Language literal.
  */
 var literal = choice(
     makeToken(
@@ -107,12 +110,10 @@ var literal = choice(
             isRegExpCtx,
             regularExpressionLiteral)));
 
-// Token
-////////////////////////////////////////
 /**
- * Lexer for a token in division contexts.
+ * Language token.
  */
-var tokenToken = choice(
+var token := choice(
     attempt makeToken(
         lexToken.IdentifierToken,
         identifier),
@@ -124,69 +125,43 @@ var tokenToken = choice(
         lexToken.PunctuatorToken,
         punctuator));
 
-token = buildToken tokenToken;
-
-// Input Element
-////////////////////////////////////////
-var commentToken := makeToken(
-    lexToken.CommentToken,
-    comment_lexer.comment);
-
-var whitespaceToken := makeToken(
-    lexToken.WhitespaceToken,
-    whitespace_lexer.whitespace);
-
-var lineTerminatorToken := makeToken(
-    lexToken.LineTerminatorToken,
-    line_terminator_lexer.lineTerminator);
-
-comment = buildToken commentToken;
-whitespace = buildToken whitespaceToken;
-lineTerminator = buildToken lineTerminatorToken;
-
 /**
  * Lexer for a top level element in division contexts.
  */
-var inputElement = choice(
-    commentToken,
-    whitespaceToken,
-    lineTerminatorToken,
-    tokenToken);
+var inputElement := choice(
+    makeToken(
+        lexToken.CommentToken,
+        comment_lexer.comment),
+    makeToken(
+        lexToken.WhitespaceToken,
+        whitespace_lexer.whitespace),
+    makeToken(
+        lexToken.LineTerminatorToken,
+        line_terminator_lexer.lineTerminator),
+    token);
 
-// Lexers
-////////////////////////////////////////
 /**
- * Lexer for a stream of tokens in leading division grammars.
- * 
- * Lexes as much input as possible, does not check for eof.
+ * Tokenizer.
  */
-var lexer = many buildToken(inputElement);
+lexer := then(
+    many buildToken(inputElement),
+    eof);
 
 /* Running
  ******************************************************************************/
-// Lex Div 
-////////////////////////////////////////
 /**
- * Lexes state in division context.
- */
-lexState = \state ->
-    runState(
-        then(
-            lexer,
-            eof),
-        state);
-
-/**
- * Lexes stream in division context.
+ * Lexes stream of characters
  */
 lexStream = \s file -> 
-    lexState(
+    runState(
+        lexer,
         new ParserState(
             s,
-            new SourcePosition(1, 0, file)));
+            new SourcePosition(1, 0, file),
+            null));
 
 /**
- * Lexes array-like input in division context.
+ * Lexes array-like input of characters.
  */
 lex = streamFrom \> lexStream;
 
