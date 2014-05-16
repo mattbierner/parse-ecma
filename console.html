@@ -298,7 +298,7 @@
                     console.profile();
                     try
                     {
-                        ast = parser.parseStream(node);
+                        ast = parser.parseStream(nodes);
                     } catch (e) {
                         $('#time').text('');
                         $('.ParseError').text(e);

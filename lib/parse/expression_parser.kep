@@ -593,7 +593,7 @@ assignmentOperator = parse.label('Assignment Operator',
         '^=',
         '|='));
 
-var _baseAssignmentExpressionlabel = \condExpr ->
+var _baseAssignmentExpressionParser = \condExpr ->
     parse.rec\self ->
         either(
             parse.binds(
@@ -615,13 +615,13 @@ var _baseAssignmentExpressionlabel = \condExpr ->
  * Parser for a standard assignment expression.
  */
 assignmentExpression = parse.label('Assignment Expression',
-    _baseAssignmentExpressionlabel(conditionalExpression));
+    _baseAssignmentExpressionParser(conditionalExpression));
 
 /**
  * Parser for an assignment expression without the in operator.
  */
 assignmentExpressionNoIn = parse.label('Assignment Expression No In', 
-    _baseAssignmentExpressionlabel(conditionalExpressionNoIn));
+    _baseAssignmentExpressionParser(conditionalExpressionNoIn));
 
 // Expression
 ////////////////////////////////////////
