@@ -71,7 +71,7 @@ var fromCharCodeParser := join \> map @ \x -> String.fromCharCode(parseInt(x, 16
 // //////////////////////////////////////
 doubleQuote := character '"';
 escape := character '\\';
-singleQuote := character("'");
+singleQuote := character "'";
 
 /**
  * Lexer for string line continuation.
@@ -102,18 +102,12 @@ singleEscapeCharacter := choice(
     next(character 't', always('\u0009')),
     next(character 'v', always('\u000B')));
 
-/**
- * 
- */
 escapeCharacter :=
     choice(
         singleEscapeCharacter,
         decimalDigit,
         oneOf 'ux');
 
-/**
- * Lexer for a string character which is not an escape character.
- */
 nonEscapeCharacter :=
     sequence(
         not escapeCharacter,
@@ -123,7 +117,7 @@ nonEscapeCharacter :=
 // Escape Sequence
 // //////////////////////////////////////
 /**
- * Lexer for a hex escape sequence.
+ * Hex escape sequence in a string.
  * 
  * Returns the character defined by the escape sequence.
  */
@@ -133,7 +127,7 @@ hexEscapeSequence :=
         hexDigit |> times@2 |> fromCharCodeParser);
 
 /**
- * Lexer for a unicode escape sequence.
+ * Unicode escape sequence in a string.
  * 
  * Returns the unicode character defined by the escape sequence.
  */
@@ -143,7 +137,7 @@ unicodeEscapeSequence :=
         hexDigit |> times@4 |> fromCharCodeParser);
 
 /**
- * Lexer for a character escape sequence.
+ * Character escape sequence in a string.
  */
 characterEscapeSequence :=
     either(
@@ -151,7 +145,7 @@ characterEscapeSequence :=
         nonEscapeCharacter);
 
 /**
- * Lexer for an escape sequence.
+ * Escape sequence in a string.
  * 
  * Returns the character defined by the escape sequence.
  */
@@ -160,11 +154,7 @@ escapeSequence :=
         characterEscapeSequence,
         sequence(
             character '0',
-            either(
-                eof,
-                next(
-                    not decimalDigit,
-                    anyToken)),
+            not decimalDigit,
             always '\u0000'),
         hexEscapeSequence,
         unicodeEscapeSequence);
@@ -172,7 +162,7 @@ escapeSequence :=
 // Single String Literal
 // //////////////////////////////////////
 /**
- * Lexer for a valid single string character.
+ * Character in a single quoted string.
  */
 singleStringCharacter :=
     choice(
@@ -185,12 +175,12 @@ singleStringCharacter :=
             noneOf "\\'"));
 
 /**
- * Lexer for a sequence of single string characters.
+ * Single quoted string characters.
  */
 singleStringCharacters := many singleStringCharacter;
 
 /**
- * Lexer for a single quoted string literal.
+ * Single quoted string literal.
  * 
  * Returns the value of the string enclosed in the single quoted string literal.
  */
@@ -201,7 +191,7 @@ singleStringLiteral := label@'Single String Literal' <|
 // Double String Literal
 // //////////////////////////////////////
 /**
- * Lexer for a valid double string character
+ * Character in a double quoted string.
  */
 doubleStringCharacter :=
     choice(
@@ -214,12 +204,12 @@ doubleStringCharacter :=
             noneOf '"\\'));
 
 /**
- * Lexer for a sequence of double string characters.
+ * Double quoted string characters.
  */
 doubleStringCharacters := many doubleStringCharacter;
 
 /**
- * Lexer for a double quoted string literal.
+ * Double quoted string literal.
  * 
  * Returns the value of the string enclosed in the double quoted string literal.
  */
@@ -230,7 +220,7 @@ doubleStringLiteral := label@'Double String Literal' <|
 // String Literal
 // //////////////////////////////////////
 /**
- * Lexer for a string literal.
+ * String literal.
  * 
  * Returns the value of the string enclosed in the string literal.
  */

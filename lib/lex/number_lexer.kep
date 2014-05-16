@@ -193,11 +193,11 @@ in
  * 
  * @return Number value of the input.
  */
-numericLiteral := parse.label('Numeric Literal Lexer',
+numericLiteral := label@'Numeric Literal Lexer' <|
     either(
         next(
             hexIndicator,
-            parse.expected('hex digits', hexIntegerLiteralDigits)),
-        decimalLiteral));
+            hexIntegerLiteralDigits |> expected@'hex digits'),
+        decimalLiteral);
 
 }

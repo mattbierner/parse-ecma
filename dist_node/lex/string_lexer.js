@@ -22,7 +22,6 @@ var __o = require("bennu")["parse"],
     many = __o["many"],
     next = __o["next"],
     not = __o["not"],
-    eof = __o["eof"],
     sequence = __o["sequence"],
     between = __o0["between"],
     times = __o0["times"],
@@ -55,8 +54,8 @@ var __o = require("bennu")["parse"],
 (hexEscapeSequence = next(character("x"), fromCharCodeParser(times(2, hexDigit))));
 (unicodeEscapeSequence = next(character("u"), fromCharCodeParser(times(4, hexDigit))));
 (characterEscapeSequence = either(singleEscapeCharacter, nonEscapeCharacter));
-(escapeSequence = choice(characterEscapeSequence, sequence(character("0"), either(eof, next(not(decimalDigit), anyToken)),
-    always("\u0000")), hexEscapeSequence, unicodeEscapeSequence));
+(escapeSequence = choice(characterEscapeSequence, sequence(character("0"), not(decimalDigit), always("\u0000")),
+    hexEscapeSequence, unicodeEscapeSequence));
 (singleStringCharacter = choice(attempt(lineContinuation), next(escape, escapeSequence), next(not(lineTerminator),
     noneOf("\\'"))));
 (singleStringCharacters = many(singleStringCharacter));

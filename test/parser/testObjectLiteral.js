@@ -6,7 +6,7 @@ function(lexer,
         expression){
     
     var testParser = function(stream) {
-        var result = parser.parse(stream);
+        var result = parser.parseStream(lexer.lex(stream));
         return result.body[0].expression;
     };
     

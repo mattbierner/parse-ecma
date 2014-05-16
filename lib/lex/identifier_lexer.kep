@@ -129,10 +129,6 @@ identifierName = parse.cons(identifierStart, identifierParts);
 
 // Identifier
 ////////////////////////////////////////
-var reservedWordTest = parse.next(
-    reserved_word_lexer.reservedWord,
-    parse.eof);
-
 /**
  * Lexer for an identifier.
  * 

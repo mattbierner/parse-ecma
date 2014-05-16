@@ -293,20 +293,20 @@
                         
                     }
                     
-                                                            var start = new Date().getTime();
+                    var start = new Date().getTime();
                     
                     console.profile();
                     try
                     {
-                    debugger;
-                        ast = parser.parse(input);
+                        ast = parser.parseStream(node);
                     } catch (e) {
                         $('#time').text('');
                         $('.ParseError').text(e);
                       //  return;
                     } finally {
                         console.profileEnd();
-                    }                                        var end = new Date().getTime();
+                    }
+                    var end = new Date().getTime();
                     
                     
                     var diff = end - start;

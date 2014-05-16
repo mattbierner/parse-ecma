@@ -15,8 +15,6 @@ define(["require", "exports", "bennu/parse", "nu-stream/stream", "ecma-ast/posit
         (self.sourcePosition = sourcePosition);
         (self.prevEnd = prevEnd);
     }));
-    (ParserPosition.prototype = new(Position)());
-    (ParserPosition.prototype.constructor = ParserPosition);
     (ParserPosition.initial = new(ParserPosition)(Position.initial, SourcePosition.initial, Position.initial));
     (ParserPosition.prototype.increment = (function(tok, r) {
         var self = this;

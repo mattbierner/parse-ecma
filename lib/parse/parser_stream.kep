@@ -1,0 +1,72 @@
+/**
+ * @fileOverview 
+ */
+package parserStream
+with
+    import 'nu-stream::stream' {
+        cons
+        bind
+        first
+        rest
+        isEmpty
+        filter
+        memoStream
+        NIL},
+    
+    import 'ecma-ast::node' {setData getData},
+    import 'ecma-ast::token' {LineTerminatorToken}
+
+in {
+
+/**
+ * Filters lex stream to remove whitespace and comments.
+ * 
+ * TODO: better line terminator check
+ */
+var langElementStream := let
+    whitespaceFilter := (.type) \> (!==, 'Whitespace'),
+    
+    commentFilter := \x -> {
+        if (x.type === 'Comment') {
+            return ?x.value.indexOf('\n') >= 0
+                :cons(new LineTerminatorToken(x.loc, '\n'), NIL)
+                :NIL;
+        }
+        return cons(x, NIL);
+    }
+in
+    filter @ whitespaceFilter \> bind @ commentFilter;
+
+/**
+ * Filters lex stream to remove line terminators and note tokens following
+ * a line terminator.
+ */
+var lineTerminatorStream := \s -> {
+    if (isEmpty s)
+        return s;
+    
+    var x = first s,
+        xs = rest s;
+    
+    if (x.type === 'LineTerminator') {
+        while (x.type === 'LineTerminator') {
+            if (isEmpty xs)
+                return xs;
+            x = first xs;
+            xs = rest xs;
+        }
+        x = setData(x, 'lineTerminator', true);
+    }
+    return memoStream(x, lineTerminatorStream@xs);
+};
+
+/**
+ * Maps a lex stream to a parse stream.
+ * 
+ * @param s Stream of tokens.
+ * 
+ * @return Stream suitable for parsing.
+ */
+ parserStream := langElementStream \> lineTerminatorStream;
+
+}

@@ -15,14 +15,13 @@ in {
  * 
  * @member tokenPosition Index of the current token.
  * @member sourcePosition Source position of the current token.
+ * @member prevEnd Previous token's end position.
  */
 ParserPosition := function \tokenPosition sourcePosition prevEnd =self-> {
     self.tokenPosition := tokenPosition;
     self.sourcePosition := sourcePosition;
     self.prevEnd := prevEnd;
 };
-ParserPosition.prototype = new Position();
-ParserPosition.prototype.constructor = ParserPosition;
 
 ParserPosition.initial = new ParserPosition(
     Position.initial,

@@ -59,8 +59,8 @@ define(["require", "exports", "bennu/parse", "bennu/text", "nu-stream/stream"], 
     })))), parse.optional(0, exponentPart)), (function(num, exp) {
         return parse.always((num * Math.pow(10, parseInt(exp))));
     })))));
-    (numericLiteral = parse.label("Numeric Literal Lexer", either(next(hexIndicator, parse.expected(
-        "hex digits", hexIntegerLiteralDigits)), decimalLiteral)));
+    (numericLiteral = label("Numeric Literal Lexer", either(next(hexIndicator, expected("hex digits",
+        hexIntegerLiteralDigits)), decimalLiteral)));
     (exports["decimal"] = decimal);
     (exports["negativeSign"] = negativeSign);
     (exports["positiveSign"] = positiveSign);

@@ -1,5 +1,13 @@
 # ChangeLog
 
+## 5.0.0 - May 16, 2014
+* Published as node package.
+** Rewritten in Khepri.
+* Lexer can correctly identifier div/regexp tokens (mostly).
+** Removed dual top level productions.
+* Fixed parsing of strings with zero escape "\0"
+* Performance improvements.
+
 ## 4.5.0 - January 21, 2014
 * Updated submodules.
 

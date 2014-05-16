@@ -1,112 +1,46 @@
 /**
- * @fileOverview 
+ * @fileOverview
  */
-package(
+package (
     parseStream
-    
     parse)
 with
     import 'bennu::parse' {
         runState
         ParserState},
     
-    import 'nu-stream::stream' stream#{
-        first
-        rest
-        isEmpty
-        filter},
+   import 'nu-stream::stream' {
+        'from': streamFrom},
     
-    import 'ecma-ast::node' {setData getData},
-    import 'ecma-ast::token' {LineTerminatorToken},
-    
-    import 'ecma-ast::position' {SourcePosition},
-    
-    import '../lex/lexer' lexer,
     import './position' Position,
-    import './program_parser' program
+    import './parser_stream' parserStream,
+
+    import './program_parser' {program}
 in {
 
 /**
- * Filters lex stream to remove whitespace and comments.
+ * Parses a lex stream to an AST.
  * 
- * TODO: better line terminator check
- */
-var langElementStream = let
-    whitespaceFilter = (.type) \> (!==, 'Whitespace'),
-    
-    commentFilter = \x -> {
-        if (x.type === 'Comment') {
-            return ?x.value.indexOf('\n') >= 0
-                :stream.cons(new LineTerminatorToken(x.loc, '\n'), stream.end)
-                :stream.end;
-        }
-        return stream.cons(x, stream.end);
-    }
-in
-    filter@whitespaceFilter \> stream.bind@commentFilter;
-
-/**
- * Filters lex stream to remove line terminators and note tokens following
- * a line terminator.
- */
-var lineTerminatorStream = \s -> {
-    if (isEmpty s)
-        return s;
-    
-    var x = first s,
-        xs = rest s;
-    
-    if (x.type === 'LineTerminator') {
-        while (x.type === 'LineTerminator') {
-            if (isEmpty xs)
-                return xs;
-            x = first xs;
-            xs = rest xs;
-        }
-        x = setData(x, 'lineTerminator', true);
-    }
-    return stream.memoStream(x, lineTerminatorStream@xs);
-};
-
-/**
- * Maps a lex stream to a parse stream.
+ * Throws parse errors.
  * 
  * @param s Stream of tokens.
  * 
- * @return Stream suitable for parsing.
- */
-var parserStream = langElementStream \> lineTerminatorStream;
-
-/* Running
- ******************************************************************************/
-/**
- * Parses a lex stream into an AST.
- * 
- * May throw any parse errors.
- * 
- * @param s Stream of characters.
- * 
  * @return AST.
  */
-parseStream = \s file ->
+parseStream = \s ->
     runState(
-        program.program,
+        program,
         new ParserState(
-            parserStream(lexer.lexStream s),
+            parserStream s,
             Position.initial));
 
 /**
- * Parses a lex array into an AST.
+ * Parses a token array to an AST.
  * 
- * May throw any parse errors.
+ * @see parserStream
  * 
- * @param input Array like object of characters.
- * 
- * @return AST.
+ * @param input Array-like of tokens.
  */
-parse = \input, file ->
-    parseStream(
-        stream.from(input),
-        file);
+parse = streamFrom \> parserStream;
 
 }

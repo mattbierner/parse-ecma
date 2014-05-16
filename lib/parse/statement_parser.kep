@@ -26,13 +26,19 @@ package (
     statement)
 with
     import 'bennu::parse' parse#{
+        attempt
         eager
+        enumeration
+        expected
         late
+        label
         look
         next
-        not},
-    import 'bennu::lang' parse_lang#{
+        not
+        optional},
+    import 'bennu::lang' {
         between
+        sepBy1
         then},
     
     import 'ecma-ast::clause' ast_clause,
@@ -40,15 +46,20 @@ with
     import 'ecma-ast::statement' ast_statement,
     import 'ecma-ast::node' {getData},
 
-    import './token_parser' token#{
+    import './token_parser' {
         keyword
         punctuator},
     import './common' {node nodea},
-    import './expression_parser' expression,
-    import './value_parser' value
+    import './expression_parser' {
+        assignmentExpression
+        assignmentExpressionNoIn
+        expression
+        expressionNoIn
+        leftHandSideExpression},
+    import './value_parser' {identifier}
 in {
 
-    /* Forward declarations
+/* Forward declarations
  ******************************************************************************/
 statement = late \-> { return statement; };
 
@@ -59,12 +70,12 @@ statement = late \-> { return statement; };
 /**
  * Checks if a line terminator existed in the original stream.
  */
-var lineTerminator = look parse.token(\node -> getData(node, 'lineTerminator'));
+var lineTerminator := look parse.token(\node -> getData(node, 'lineTerminator'));
 
 /**
  * Consumes 'p' as long as a line terminator did not exist before 'p'.
  */
-var noLineTerminator = next @ (not lineTerminator);
+var noLineTerminator := next @ (not lineTerminator);
 
 /**
  * Matches a logical semicolon in the grammar.
@@ -73,198 +84,194 @@ var noLineTerminator = next @ (not lineTerminator);
  *    'OMeta: an Object-Oriented Language for Pattern Matching',
  *    Alessandro, Warth, Ian Piumarta 2007
  */
-var logicalSemiColon = parse.expected('logical semicolon',
+var logicalSemiColon := parse.expected('logical semicolon',
     parse.choice(
         punctuator ';',
-        parse.look(punctuator '}'),
+        look punctuator('}'),
         lineTerminator,
         parse.eof));
 
 /* Statement labels
  ******************************************************************************/
-var statementList = eager(parse.many(statement));
+var statementList := eager parse.many(statement);
 
 // Block
 ////////////////////////////////////////
 /**
  * Parser for a block statement
  */
-blockStatement = parse.label('Block Statement',
+blockStatement := label@'Block Statement' <|
     node(
         between(punctuator '{', punctuator '}', 
             statementList),
-        ast_statement.BlockStatement.create));
+        ast_statement.BlockStatement.create);
 
 // Variable Statement
 ////////////////////////////////////////
-var initialiser = next(
-    punctuator '=',
-    parse.expected("initialiser expression", expression.assignmentExpression));
+var initialiser :=
+    next(
+        punctuator '=',
+        assignmentExpression |> expected@"initialiser expression");
 
-var initialiserNoIn = next(
-    punctuator '=',
-    parse.expected("initialiser expression", expression.assignmentExpressionNoIn));
+var initialiserNoIn :=
+    next(
+        punctuator '=',
+        assignmentExpressionNoIn |> expected@"initialiser expression");
 
 /**
  * Parser for a single variable declaration.
  */
-var variableDeclaration = nodea(
-    parse.enumeration(
-        value.identifier,
-        parse.optional(initialiser)),
+var variableDeclaration := nodea(
+    enumeration(
+        identifier,
+        optional initialiser),
     ast_declaration.VariableDeclarator.create);
 
 /**
  * Parser for a single variable declaration without the in operator.
  */
-var variableDeclarationNoIn = nodea(
-    parse.enumeration(
-        value.identifier,
-        parse.optional(initialiserNoIn)),
+var variableDeclarationNoIn := nodea(
+    enumeration(
+        identifier,
+        optional initialiserNoIn),
     ast_declaration.VariableDeclarator.create);
 
-var variableDeclarationList = eager(parse_lang.sepBy1(punctuator ',',
-    parse.expected('variable declaration', variableDeclaration)));
+var variableDeclarationList :=
+    eager sepBy1(punctuator ',',
+        variableDeclaration |> expected@"variable declaration");
 
-var variableDeclarationListNoIn = eager(parse_lang.sepBy1(punctuator ',',
-    parse.expected('variable declaration', variableDeclarationNoIn)));
+var variableDeclarationListNoIn :=
+    eager sepBy1(punctuator ',',
+        variableDeclarationNoIn |> expected@"variable declaration");
 
 /**
  * Parser for a variable statement which declares one or more variables with
  * optional initializer values.
  */
-variableStatement = parse.label('Variable Statement', 
+variableStatement := label@'Variable Statement' <|
     node(
         between(keyword 'var', logicalSemiColon,
-            parse.expected("variable declaration list", variableDeclarationList)),
-        ast_declaration.VariableDeclaration.create));
+            variableDeclarationList |> expected@"variable declaration list"),
+        ast_declaration.VariableDeclaration.create);
 
 // Empty Statement
 ////////////////////////////////////////
-/**
- * Parser for an empty statement.
- */
-emptyStatement = parse.label('Empty Statement',
+emptyStatement := label@'Empty Statement' <|
     node(
         punctuator ';',
-        ast_statement.EmptyStatement.create));
+        ast_statement.EmptyStatement.create);
 
 // Expression
 ////////////////////////////////////////
-/**
- * Parser for an expression statement.
- *
- * @TODO: Add lookahead not 'function' check?
- */
-expressionStatement = parse.label('Expression Statement',
+expressionStatement := label@'Expression Statement' <|
     node(
         then(
-            expression.expression,
+            expression,
             logicalSemiColon),
-        ast_statement.ExpressionStatement.create));
+        ast_statement.ExpressionStatement.create);
 
 // If
 ////////////////////////////////////////
-/**
- * Parser for an if statement with optional alternate.
- */
-ifStatement = parse.label('If Statement',
+ifStatement := label@'If Statement' <| let
+    test =
+        between(punctuator '(', punctuator ')',
+            expression |> expected@"if test"),
+    
+    consequent = statement |> expected@"if consequent",
+    
+    alternate =
+        next(
+            keyword 'else',
+            statement |> expected@"if alternate")
+in
     nodea(
         next(
             keyword 'if',
-            parse.enumeration(
-                between(punctuator '(', punctuator ')',
-                    parse.expected("if test", expression.expression)),
-                parse.expected("if consequent", statement),
-                parse.optional(next(keyword 'else',
-                    parse.expected("if alternate", statement))))),
-        ast_statement.IfStatement.create));
+            enumeration(
+                test,
+                consequent,
+                optional alternate)),
+        ast_statement.IfStatement.create);
 
 // Iteration
 ////////////////////////////////////////
-/**
- * Parser for while statement.
- */
-whileStatement = parse.label('While Statement',
+whileStatement := label@'While Statement' <|
     nodea(
         next(
             keyword 'while',
-            parse.enumeration(
+            enumeration(
                 between(punctuator '(', punctuator ')',
-                    parse.expected('while test', expression.expression)),
+                    parse.expected('while test', expression)),
                 parse.expected('while body', statement))),
-        ast_statement.WhileStatement.create));
+        ast_statement.WhileStatement.create);
 
-/**
- * Parser for a do while statement.
- */
-doWhileStatement = parse.label('Do While Statement',
+doWhileStatement := label@'Do While Statement' <|
     nodea(
         next(
             keyword 'do',
-            parse.enumeration(
+            enumeration(
                 parse.expected('do-while body', statement),
                 next(
                     keyword 'while',
                     between(punctuator '(', punctuator ')',
-                        parse.expected('do-while test', expression.expression))),
+                        parse.expected('do-while test', expression))),
                 punctuator ';')),
-        ast_statement.DoWhileStatement.create));
+        ast_statement.DoWhileStatement.create);
 
-var forInit = parse.either(
+var forInit := parse.either(
     node(
         next(
             keyword 'var',
             parse.expected("variable declaration list", parse.memo(variableDeclarationListNoIn))),
         ast_declaration.VariableDeclaration.create),
-    expression.expressionNoIn);
+    expressionNoIn);
 
 /**
  * Parser for a for statement with optional init, test, and update expressions.
  */
-forStatement = parse.label('For Statement',
+forStatement := parse.label('For Statement',
     nodea(
         next(
             keyword 'for',
             next(
                 punctuator '(',
-                parse.enumeration(
+                enumeration(
                     then(
-                        parse.optional(forInit),
+                        optional forInit,
                         punctuator ';'),
                     then(
-                        parse.optional(expression.expressionNoIn),
+                        optional expressionNoIn,
                         punctuator ';'),
                     then(
-                        parse.optional(expression.expressionNoIn),
+                        optional expressionNoIn,
                         punctuator ')'),
                     statement))),
         ast_statement.ForStatement.create));
 
-var forInLeft = parse.either(
+var forInLeft := parse.either(
     node(
         next(
             keyword 'var',
             parse.expected("variable declaration", parse.memo(variableDeclarationNoIn))),
         \loc, x ->
             ast_declaration.VariableDeclaration.create(loc, [x])),
-    expression.leftHandSideExpression);
+    leftHandSideExpression);
 
 /**
  * Parser for a for in statement.
  */
-forInStatement = parse.label('For In Statement',
+forInStatement := parse.label('For In Statement',
     nodea(
         next(
             keyword 'for',
             next(
                 punctuator '(',
-                parse.enumeration(
+                enumeration(
                     then(
                         forInLeft,
                         keyword 'in'),
                     then(
-                        expression.expressionNoIn,
+                        expressionNoIn,
                         punctuator ')'),
                     statement))),
         ast_statement.ForInStatement.create));
@@ -272,97 +279,92 @@ forInStatement = parse.label('For In Statement',
 /**
  * Parser for any iteration statement.
  */
-iterationStatement = parse.label('Iteration Statement',
+iterationStatement := parse.label('Iteration Statement',
     parse.choice(
         doWhileStatement,
         whileStatement,
-        parse.attempt(forInStatement),
+        attempt forInStatement,
         forStatement));
 
 // Continue
 ////////////////////////////////////////
-/**
- * Parser for a continue statement with optional label.
- */
-continueStatement = parse.label('Continue Statement',
+continueStatement := label@'Continue Statement' <| let
+    label = noLineTerminator identifier
+in
     node(
         between(keyword 'continue', logicalSemiColon,
-            parse.optional(noLineTerminator(value.identifier))),
-        ast_statement.ContinueStatement.create));
+            optional label),
+        ast_statement.ContinueStatement.create);
 
 // Break
 ////////////////////////////////////////
-/**
- * Parser for a break statement with optional label.
- */
-breakStatement = parse.label('Break Statement',
+breakStatement := label@'Break Statement' <| let
+    label = noLineTerminator identifier
+in
     node(
         between(keyword 'break', logicalSemiColon,
-            parse.optional(noLineTerminator(value.identifier))),
-        ast_statement.BreakStatement.create));
+            optional label),
+        ast_statement.BreakStatement.create);
 
 // Return
 ////////////////////////////////////////
-/**
- * Parser for a return statement.
- */
-returnStatement = parse.label('Return Statement',
+returnStatement := label@'Return Statement' <| let
+    argument = noLineTerminator expression
+in
     node(
         between(keyword 'return', logicalSemiColon,
-            parse.optional(noLineTerminator(expression.expression))),
-        ast_statement.ReturnStatement.create));
+            optional argument),
+        ast_statement.ReturnStatement.create);
 
 // Throw
 ////////////////////////////////////////
-/**
- * Parser for a throw statement.
- */
-throwStatement = parse.label('Throw Statement',
+throwStatement := label@'Throw Statement'<| let
+    argument = noLineTerminator(expression) |> expected@"throw argument"
+in
     node(
         between(keyword 'throw', logicalSemiColon,
-            parse.expected("throw argument", noLineTerminator(expression.expression))),
-        ast_statement.ThrowStatement.create));
+            argument),
+        ast_statement.ThrowStatement.create);
 
 // With
 ////////////////////////////////////////
-/**
- * Parser for a with statement.
- */
-withStatement = parse.label('With Statement',
+withStatement := label@'With Statement' <| let
+    object =
+        between(punctuator '(', punctuator ')',
+            expression |> expected@"with object"),
+    
+    body = statement |> expected@"with body"
+in
     nodea(
         next(
             keyword 'with',
-            parse.enumeration(
-                between(punctuator '(', punctuator ')',
-                    parse.expected("with object", expression.expression)),
-                parse.expected("with body", statement))),
-        ast_statement.WithStatement.create));
+            enumeration(
+                object,
+                body)),
+        ast_statement.WithStatement.create);
 
 // Labeled
 ////////////////////////////////////////
-/**
- * Parser for a labeled statement.
- */
-labeledStatement = parse.label('Labeled Statement',
+labeledStatement := label@'Labeled Statement' <|
     nodea(
-        parse.enumeration(
+        enumeration(
             then(
-                value.identifier,
+                identifier,
                 punctuator ':'),
             statement),
-        ast_statement.LabeledStatement.create));
+        ast_statement.LabeledStatement.create);
 
 // Switch
 ////////////////////////////////////////
 /**
  * Parser for a case clause from a switch statement.
  */
-var caseClause = nodea(
+var caseClause := nodea(
     next(
         keyword 'case',
-        parse.enumeration(
+        enumeration(
             then(
-                parse.expected("case test", expression.expression),
+                parse.expected("case test", expression),
                 punctuator ':'),
             statementList)),
     ast_clause.SwitchCase.create);
@@ -370,7 +372,7 @@ var caseClause = nodea(
 /**
  * Parser for the default case of a switch statement.
  */
-var defaultClause = node(
+var defaultClause := node(
     next(
         keyword 'default',
         next(
@@ -379,13 +381,13 @@ var defaultClause = node(
     \loc, consequent ->
         ast_clause.SwitchCase.create(loc, null, consequent));
 
-var caseClauses = eager(parse.many(caseClause));
+var caseClauses := eager(parse.many(caseClause));
 
-var caseBlock = between(punctuator '{', punctuator '}',
+var caseBlock := between(punctuator '{', punctuator '}',
     parse.binds(
-        parse.enumeration(
+        enumeration(
             parse.optional([], caseClauses),
-            parse.optional(defaultClause),
+            optional defaultClause,
             parse.optional([], caseClauses)),
         \first, defaultClause, rest ->
             parse.always(?defaultClause
@@ -396,13 +398,13 @@ var caseBlock = between(punctuator '{', punctuator '}',
  * Parser for a switch statement with zero or more case clauses and zero or one
  * default case clauses in any order.
  */
-switchStatement = parse.label('Switch Statement',
+switchStatement := parse.label('Switch Statement',
     nodea(
         next(
             keyword 'switch',
-            parse.enumeration(
+            enumeration(
                 between(punctuator '(', punctuator ')',
-                    expression.expression),
+                    expression),
                 caseBlock)),
         ast_statement.SwitchStatement.create));
 
@@ -411,53 +413,47 @@ switchStatement = parse.label('Switch Statement',
 /**
  * Parser for a catch block in a try statement.
  */
-var catchBlock = nodea(
+var catchBlock := nodea(
     next(
         keyword 'catch',
-        parse.enumeration(
+        enumeration(
             between(punctuator '(', punctuator ')',
-                value.identifier),
-            parse.expected("block statement", blockStatement))),
+                identifier),
+            blockStatement)),
     ast_clause.CatchClause.create);
 
 /**
  * Parser for a finally block in try statement.
  */
-var finallyBlock = next(
+var finallyBlock := next(
     keyword 'finally',
-    parse.expected("block statement", blockStatement));
+    blockStatement);
 
 /**
  * Parser for a try statement with optional catch and finally blocks.
  */
-tryStatement = parse.label('Try Statement',
+tryStatement := label@'Try Statement' <|
     nodea(
         next(
             keyword 'try',
-            parse.enumeration(
-                parse.expected("block statement", blockStatement),
-                parse.optional(catchBlock),
-                parse.optional(finallyBlock))),
-        ast_statement.TryStatement.create));
+            enumeration(
+                blockStatement,
+                optional catchBlock,
+                optional finallyBlock)),
+        ast_statement.TryStatement.create);
 
 // Debugger
 ////////////////////////////////////////
-/**
- * Parser for a debugger statement.
- */
-debuggerStatement = parse.label('Debugger Statement',
+debuggerStatement := label@'Debugger Statement' <|
     node(
         next(
             keyword 'debugger',
             punctuator ';'),
-        ast_statement.DebuggerStatement.create));
+        ast_statement.DebuggerStatement.create);
 
 // statement
 ////////////////////////////////////////
-/**
- * 
- */
-statement = parse.label('Statement',
+statement := parse.label('Statement',
     parse.expected("statement", parse.choice(
         blockStatement,
         variableStatement,

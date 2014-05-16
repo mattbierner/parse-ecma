@@ -1,5 +1,5 @@
 /**
- * @fileOverview Lexers for ECMAScript 5.1 punctuators.
+ * @fileOverview ECMAScript 5.1 punctuator lexer.
  */
 package (
     punctuator)
@@ -7,12 +7,10 @@ with
     import 'bennu::parse' {
         label},
     import 'bennu::text' {
-        string
         trie}
 in {
 
-
-var punctuators = [
+var punctuators := [
     '{', '}', '(', ')', ',', '[', ']', '.', ';', ',', ':', '?', '&&', '||', '<<', '>>',
     '>>>', '<=', '<', '>=', '>', '===', '!==', '==', '!=', '=', '<<=', '>>=',
     '>>>=', '+=', '-=', '*=', '%=', '++', '--', '!', '~', '&', '|', '^', '+',

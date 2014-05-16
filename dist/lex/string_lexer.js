@@ -6,7 +6,11 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
     "./number_lexer"
 ], (function(require, exports, __o, __o0, __o1, __o2, __o3, __o4) {
     "use strict";
-    var always = __o["always"],
+    var doubleQuote, escape, singleQuote, lineContinuation, singleEscapeCharacter, escapeCharacter,
+            nonEscapeCharacter, characterEscapeSequence, unicodeEscapeSequence, hexEscapeSequence,
+            escapeSequence, singleStringCharacter, singleStringCharacters, singleStringLiteral,
+            doubleStringCharacter, doubleStringCharacters, doubleStringLiteral, stringLiteral, always = __o[
+                "always"],
         anyToken = __o["anyToken"],
         attempt = __o["attempt"],
         choice = __o["choice"],
@@ -16,7 +20,6 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
         many = __o["many"],
         next = __o["next"],
         not = __o["not"],
-        eof = __o["eof"],
         sequence = __o["sequence"],
         between = __o0["between"],
         times = __o0["times"],
@@ -28,18 +31,14 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
         lineTerminatorSequence = __o3["lineTerminatorSequence"],
         decimalDigit = __o4["decimalDigit"],
         hexDigit = __o4["hexDigit"],
-        doubleQuote, escape, singleQuote, lineContinuation, singleEscapeCharacter, escapeCharacter,
-            nonEscapeCharacter, characterEscapeSequence, unicodeEscapeSequence, hexEscapeSequence,
-            escapeSequence, singleStringCharacter, singleStringCharacters, singleStringLiteral,
-            doubleStringCharacter, doubleStringCharacters, doubleStringLiteral, stringLiteral, y, __add = (
-                function(x, y) {
-                    return (x + y);
-                }),
+        y, __add = (function(x, y) {
+            return (x + y);
+        }),
         join = map.bind(null, foldl.bind(null, __add, "")),
         fromCharCodeParser = ((y = map.bind(null, (function(x) {
             return String.fromCharCode(parseInt(x, 16));
-        }))), (function(x) {
-            return y(join(x));
+        }))), (function(z) {
+            return y(join(z));
         }));
     (doubleQuote = character("\""));
     (escape = character("\\"));
@@ -54,8 +53,8 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "bennu/text", "nu-str
     (hexEscapeSequence = next(character("x"), fromCharCodeParser(times(2, hexDigit))));
     (unicodeEscapeSequence = next(character("u"), fromCharCodeParser(times(4, hexDigit))));
     (characterEscapeSequence = either(singleEscapeCharacter, nonEscapeCharacter));
-    (escapeSequence = choice(characterEscapeSequence, sequence(character("0"), either(eof, next(not(
-        decimalDigit), anyToken)), always("\u0000")), hexEscapeSequence, unicodeEscapeSequence));
+    (escapeSequence = choice(characterEscapeSequence, sequence(character("0"), not(decimalDigit), always(
+        "\u0000")), hexEscapeSequence, unicodeEscapeSequence));
     (singleStringCharacter = choice(attempt(lineContinuation), next(escape, escapeSequence), next(not(
         lineTerminator), noneOf("\\'"))));
     (singleStringCharacters = many(singleStringCharacter));

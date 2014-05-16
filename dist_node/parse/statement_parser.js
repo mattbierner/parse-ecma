@@ -4,30 +4,42 @@
 */
 "use strict";
 var parse = require("bennu")["parse"],
-    parse_lang = require("bennu")["lang"],
+    __o = require("bennu")["lang"],
     ast_clause = require("ecma-ast")["clause"],
     ast_declaration = require("ecma-ast")["declaration"],
     ast_statement = require("ecma-ast")["statement"],
-    __o = require("ecma-ast")["node"],
-    token = require("./token_parser"),
-    __o0 = require("./common"),
-    expression = require("./expression_parser"),
-    value = require("./value_parser"),
+    __o0 = require("ecma-ast")["node"],
+    __o1 = require("./token_parser"),
+    __o2 = require("./common"),
+    __o3 = require("./expression_parser"),
+    __o4 = require("./value_parser"),
     blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement, forInStatement,
         whileStatement, doWhileStatement, iterationStatement, continueStatement, breakStatement, returnStatement,
         withStatement, labeledStatement, switchStatement, throwStatement, tryStatement, debuggerStatement, statement,
-        eager = parse["eager"],
+        attempt = parse["attempt"],
+    eager = parse["eager"],
+    enumeration = parse["enumeration"],
+    expected = parse["expected"],
     late = parse["late"],
+    label = parse["label"],
     look = parse["look"],
     next = parse["next"],
     not = parse["not"],
-    between = parse_lang["between"],
-    then = parse_lang["then"],
-    getData = __o["getData"],
-    keyword = token["keyword"],
-    punctuator = token["punctuator"],
-    node = __o0["node"],
-    nodea = __o0["nodea"];
+    optional = parse["optional"],
+    between = __o["between"],
+    sepBy1 = __o["sepBy1"],
+    then = __o["then"],
+    getData = __o0["getData"],
+    keyword = __o1["keyword"],
+    punctuator = __o1["punctuator"],
+    node = __o2["node"],
+    nodea = __o2["nodea"],
+    assignmentExpression = __o3["assignmentExpression"],
+    assignmentExpressionNoIn = __o3["assignmentExpressionNoIn"],
+    expression = __o3["expression"],
+    expressionNoIn = __o3["expressionNoIn"],
+    leftHandSideExpression = __o3["leftHandSideExpression"],
+    identifier = __o4["identifier"];
 (statement = late((function() {
     return statement;
 })));
@@ -35,84 +47,85 @@ var lineTerminator = look(parse.token((function(node0) {
     return getData(node0, "lineTerminator");
 }))),
     noLineTerminator = next.bind(null, not(lineTerminator)),
-    logicalSemiColon = parse.expected("logical semicolon", parse.choice(punctuator(";"), parse.look(punctuator("}")),
+    logicalSemiColon = parse.expected("logical semicolon", parse.choice(punctuator(";"), look(punctuator("}")),
         lineTerminator, parse.eof)),
     statementList = eager(parse.many(statement));
-(blockStatement = parse.label("Block Statement", node(between(punctuator("{"), punctuator("}"), statementList),
-    ast_statement.BlockStatement.create)));
-var initialiser = next(punctuator("="), parse.expected("initialiser expression", expression.assignmentExpression)),
-    initialiserNoIn = next(punctuator("="), parse.expected("initialiser expression", expression.assignmentExpressionNoIn)),
-    variableDeclaration = nodea(parse.enumeration(value.identifier, parse.optional(initialiser)), ast_declaration.VariableDeclarator
+(blockStatement = label("Block Statement", node(between(punctuator("{"), punctuator("}"), statementList), ast_statement
+    .BlockStatement.create)));
+var initialiser = next(punctuator("="), expected("initialiser expression", assignmentExpression)),
+    initialiserNoIn = next(punctuator("="), expected("initialiser expression", assignmentExpressionNoIn)),
+    variableDeclaration = nodea(enumeration(identifier, optional(initialiser)), ast_declaration.VariableDeclarator.create),
+    variableDeclarationNoIn = nodea(enumeration(identifier, optional(initialiserNoIn)), ast_declaration.VariableDeclarator
         .create),
-    variableDeclarationNoIn = nodea(parse.enumeration(value.identifier, parse.optional(initialiserNoIn)),
-        ast_declaration.VariableDeclarator.create),
-    variableDeclarationList = eager(parse_lang.sepBy1(punctuator(","), parse.expected("variable declaration",
-        variableDeclaration))),
-    variableDeclarationListNoIn = eager(parse_lang.sepBy1(punctuator(","), parse.expected("variable declaration",
+    variableDeclarationList = eager(sepBy1(punctuator(","), expected("variable declaration", variableDeclaration))),
+    variableDeclarationListNoIn = eager(sepBy1(punctuator(","), expected("variable declaration",
         variableDeclarationNoIn)));
-(variableStatement = parse.label("Variable Statement", node(between(keyword("var"), logicalSemiColon, parse.expected(
+(variableStatement = label("Variable Statement", node(between(keyword("var"), logicalSemiColon, expected(
     "variable declaration list", variableDeclarationList)), ast_declaration.VariableDeclaration.create)));
-(emptyStatement = parse.label("Empty Statement", node(punctuator(";"), ast_statement.EmptyStatement.create)));
-(expressionStatement = parse.label("Expression Statement", node(then(expression.expression, logicalSemiColon),
-    ast_statement.ExpressionStatement.create)));
-(ifStatement = parse.label("If Statement", nodea(next(keyword("if"), parse.enumeration(between(punctuator("("),
-    punctuator(")"), parse.expected("if test", expression.expression)), parse.expected(
-    "if consequent", statement), parse.optional(next(keyword("else"), parse.expected("if alternate",
-    statement))))), ast_statement.IfStatement.create)));
-(whileStatement = parse.label("While Statement", nodea(next(keyword("while"), parse.enumeration(between(punctuator("("),
-    punctuator(")"), parse.expected("while test", expression.expression)), parse.expected(
-    "while body", statement))), ast_statement.WhileStatement.create)));
-(doWhileStatement = parse.label("Do While Statement", nodea(next(keyword("do"), parse.enumeration(parse.expected(
-        "do-while body", statement), next(keyword("while"), between(punctuator("("), punctuator(")"),
-        parse.expected("do-while test", expression.expression))), punctuator(";"))), ast_statement.DoWhileStatement
+(emptyStatement = label("Empty Statement", node(punctuator(";"), ast_statement.EmptyStatement.create)));
+(expressionStatement = label("Expression Statement", node(then(expression, logicalSemiColon), ast_statement.ExpressionStatement
     .create)));
+var test, consequent, alternate;
+(ifStatement = label("If Statement", ((test = between(punctuator("("), punctuator(")"), expected("if test", expression))), (
+    consequent = expected("if consequent", statement)), (alternate = next(keyword("else"), expected(
+    "if alternate", statement))), nodea(next(keyword("if"), enumeration(test, consequent, optional(
+    alternate))), ast_statement.IfStatement.create))));
+(whileStatement = label("While Statement", nodea(next(keyword("while"), enumeration(between(punctuator("("), punctuator(
+        ")"), parse.expected("while test", expression)), parse.expected("while body", statement))),
+    ast_statement.WhileStatement.create)));
+(doWhileStatement = label("Do While Statement", nodea(next(keyword("do"), enumeration(parse.expected("do-while body",
+    statement), next(keyword("while"), between(punctuator("("), punctuator(")"), parse.expected(
+    "do-while test", expression))), punctuator(";"))), ast_statement.DoWhileStatement.create)));
 var forInit = parse.either(node(next(keyword("var"), parse.expected("variable declaration list", parse.memo(
-    variableDeclarationListNoIn))), ast_declaration.VariableDeclaration.create), expression.expressionNoIn);
-(forStatement = parse.label("For Statement", nodea(next(keyword("for"), next(punctuator("("), parse.enumeration(then(
-        parse.optional(forInit), punctuator(";")), then(parse.optional(expression.expressionNoIn),
-        punctuator(";")), then(parse.optional(expression.expressionNoIn), punctuator(")")),
-    statement))), ast_statement.ForStatement.create)));
+    variableDeclarationListNoIn))), ast_declaration.VariableDeclaration.create), expressionNoIn);
+(forStatement = parse.label("For Statement", nodea(next(keyword("for"), next(punctuator("("), enumeration(then(optional(
+    forInit), punctuator(";")), then(optional(expressionNoIn), punctuator(";")), then(optional(
+    expressionNoIn), punctuator(")")), statement))), ast_statement.ForStatement.create)));
 var forInLeft = parse.either(node(next(keyword("var"), parse.expected("variable declaration", parse.memo(
     variableDeclarationNoIn))), (function(loc, x) {
     return ast_declaration.VariableDeclaration.create(loc, [x]);
-})), expression.leftHandSideExpression);
-(forInStatement = parse.label("For In Statement", nodea(next(keyword("for"), next(punctuator("("), parse.enumeration(
-        then(forInLeft, keyword("in")), then(expression.expressionNoIn, punctuator(")")), statement))),
-    ast_statement.ForInStatement.create)));
-(iterationStatement = parse.label("Iteration Statement", parse.choice(doWhileStatement, whileStatement, parse.attempt(
+})), leftHandSideExpression);
+(forInStatement = parse.label("For In Statement", nodea(next(keyword("for"), next(punctuator("("), enumeration(then(
+        forInLeft, keyword("in")), then(expressionNoIn, punctuator(")")), statement))), ast_statement.ForInStatement
+    .create)));
+(iterationStatement = parse.label("Iteration Statement", parse.choice(doWhileStatement, whileStatement, attempt(
     forInStatement), forStatement)));
-(continueStatement = parse.label("Continue Statement", node(between(keyword("continue"), logicalSemiColon, parse.optional(
-    noLineTerminator(value.identifier))), ast_statement.ContinueStatement.create)));
-(breakStatement = parse.label("Break Statement", node(between(keyword("break"), logicalSemiColon, parse.optional(
-    noLineTerminator(value.identifier))), ast_statement.BreakStatement.create)));
-(returnStatement = parse.label("Return Statement", node(between(keyword("return"), logicalSemiColon, parse.optional(
-    noLineTerminator(expression.expression))), ast_statement.ReturnStatement.create)));
-(throwStatement = parse.label("Throw Statement", node(between(keyword("throw"), logicalSemiColon, parse.expected(
-    "throw argument", noLineTerminator(expression.expression))), ast_statement.ThrowStatement.create)));
-(withStatement = parse.label("With Statement", nodea(next(keyword("with"), parse.enumeration(between(punctuator("("),
-    punctuator(")"), parse.expected("with object", expression.expression)), parse.expected(
-    "with body", statement))), ast_statement.WithStatement.create)));
-(labeledStatement = parse.label("Labeled Statement", nodea(parse.enumeration(then(value.identifier, punctuator(":")),
-    statement), ast_statement.LabeledStatement.create)));
-var caseClause = nodea(next(keyword("case"), parse.enumeration(then(parse.expected("case test", expression.expression),
-    punctuator(":")), statementList)), ast_clause.SwitchCase.create),
-    defaultClause = node(next(keyword("default"), next(punctuator(":"), statementList)), (function(loc, consequent) {
-        return ast_clause.SwitchCase.create(loc, null, consequent);
+var label0;
+(continueStatement = label("Continue Statement", ((label0 = noLineTerminator(identifier)), node(between(keyword(
+    "continue"), logicalSemiColon, optional(label0)), ast_statement.ContinueStatement.create))));
+var label1;
+(breakStatement = label("Break Statement", ((label1 = noLineTerminator(identifier)), node(between(keyword("break"),
+    logicalSemiColon, optional(label1)), ast_statement.BreakStatement.create))));
+var argument;
+(returnStatement = label("Return Statement", ((argument = noLineTerminator(expression)), node(between(keyword("return"),
+    logicalSemiColon, optional(argument)), ast_statement.ReturnStatement.create))));
+var argument0;
+(throwStatement = label("Throw Statement", ((argument0 = expected("throw argument", noLineTerminator(expression))),
+    node(between(keyword("throw"), logicalSemiColon, argument0), ast_statement.ThrowStatement.create))));
+var object, body;
+(withStatement = label("With Statement", ((object = between(punctuator("("), punctuator(")"), expected("with object",
+    expression))), (body = expected("with body", statement)), nodea(next(keyword("with"), enumeration(
+    object, body)), ast_statement.WithStatement.create))));
+(labeledStatement = label("Labeled Statement", nodea(enumeration(then(identifier, punctuator(":")), statement),
+    ast_statement.LabeledStatement.create)));
+var caseClause = nodea(next(keyword("case"), enumeration(then(parse.expected("case test", expression), punctuator(":")),
+    statementList)), ast_clause.SwitchCase.create),
+    defaultClause = node(next(keyword("default"), next(punctuator(":"), statementList)), (function(loc, consequent0) {
+        return ast_clause.SwitchCase.create(loc, null, consequent0);
     })),
     caseClauses = eager(parse.many(caseClause)),
-    caseBlock = between(punctuator("{"), punctuator("}"), parse.binds(parse.enumeration(parse.optional([], caseClauses),
-        parse.optional(defaultClause), parse.optional([], caseClauses)), (function(first, defaultClause0, rest) {
+    caseBlock = between(punctuator("{"), punctuator("}"), parse.binds(enumeration(parse.optional([], caseClauses),
+        optional(defaultClause), parse.optional([], caseClauses)), (function(first, defaultClause0, rest) {
         return parse.always((defaultClause0 ? first.concat(defaultClause0, rest) : first.concat(rest)));
     })));
-(switchStatement = parse.label("Switch Statement", nodea(next(keyword("switch"), parse.enumeration(between(punctuator(
-    "("), punctuator(")"), expression.expression), caseBlock)), ast_statement.SwitchStatement.create)));
-var catchBlock = nodea(next(keyword("catch"), parse.enumeration(between(punctuator("("), punctuator(")"), value.identifier),
-    parse.expected("block statement", blockStatement))), ast_clause.CatchClause.create),
-    finallyBlock = next(keyword("finally"), parse.expected("block statement", blockStatement));
-(tryStatement = parse.label("Try Statement", nodea(next(keyword("try"), parse.enumeration(parse.expected(
-        "block statement", blockStatement), parse.optional(catchBlock), parse.optional(finallyBlock))),
-    ast_statement.TryStatement.create)));
-(debuggerStatement = parse.label("Debugger Statement", node(next(keyword("debugger"), punctuator(";")), ast_statement.DebuggerStatement
+(switchStatement = parse.label("Switch Statement", nodea(next(keyword("switch"), enumeration(between(punctuator("("),
+    punctuator(")"), expression), caseBlock)), ast_statement.SwitchStatement.create)));
+var catchBlock = nodea(next(keyword("catch"), enumeration(between(punctuator("("), punctuator(")"), identifier),
+    blockStatement)), ast_clause.CatchClause.create),
+    finallyBlock = next(keyword("finally"), blockStatement);
+(tryStatement = label("Try Statement", nodea(next(keyword("try"), enumeration(blockStatement, optional(catchBlock),
+    optional(finallyBlock))), ast_statement.TryStatement.create)));
+(debuggerStatement = label("Debugger Statement", node(next(keyword("debugger"), punctuator(";")), ast_statement.DebuggerStatement
     .create)));
 (statement = parse.label("Statement", parse.expected("statement", parse.choice(blockStatement, variableStatement,
     emptyStatement, ifStatement, iterationStatement, continueStatement, breakStatement, returnStatement,
