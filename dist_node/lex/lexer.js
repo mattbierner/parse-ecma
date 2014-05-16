@@ -56,14 +56,17 @@ var parse = require("bennu")["parse"],
                 return tok;
         }
     }),
-    isRegExpCtx = getState.chain((function(prev) {
-        if ((!prev)) return always();
+    isRegExpCtx = (function(prev) {
+        if ((!prev)) return true;
         switch (prev.type) {
             case "Keyword":
             case "Punctuator":
-                return always();
+                return true;
         }
-        return never();
+        return false;
+    }),
+    enterRegExpCtx = getState.chain((function(prev) {
+        return (isRegExpCtx(prev) ? always() : never());
     })),
     literal = choice(((type = lexToken.StringToken.create), stringLiteral.map((function(x) {
         return [type, x];
@@ -73,8 +76,8 @@ var parse = require("bennu")["parse"],
         return [type1, x];
     }))), ((type2 = lexToken.NumberToken.create), numericLiteral.map((function(x) {
         return [type2, x];
-    }))), ((type3 = lexToken.RegularExpressionToken.create), (p = next(isRegExpCtx, regularExpressionLiteral)), p.map(
-        (function(x) {
+    }))), ((type3 = lexToken.RegularExpressionToken.create), (p = next(enterRegExpCtx, regularExpressionLiteral)),
+        p.map((function(x) {
             return [type3, x];
         })))),
     token = choice(attempt(((type4 = lexToken.IdentifierToken), identifier.map((function(x) {

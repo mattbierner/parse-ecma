@@ -8,8 +8,9 @@ var parse = require("bennu")["parse"],
     ast_clause = require("ecma-ast")["clause"],
     ast_declaration = require("ecma-ast")["declaration"],
     ast_statement = require("ecma-ast")["statement"],
+    __o = require("ecma-ast")["node"],
     token = require("./token_parser"),
-    __o = require("./common"),
+    __o0 = require("./common"),
     expression = require("./expression_parser"),
     value = require("./value_parser"),
     blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement, forInStatement,
@@ -17,19 +18,21 @@ var parse = require("bennu")["parse"],
         withStatement, labeledStatement, switchStatement, throwStatement, tryStatement, debuggerStatement, statement,
         eager = parse["eager"],
     late = parse["late"],
+    look = parse["look"],
     next = parse["next"],
     not = parse["not"],
     between = parse_lang["between"],
     then = parse_lang["then"],
+    getData = __o["getData"],
     keyword = token["keyword"],
     punctuator = token["punctuator"],
-    node = __o["node"],
-    nodea = __o["nodea"];
+    node = __o0["node"],
+    nodea = __o0["nodea"];
 (statement = late((function() {
     return statement;
 })));
-var lineTerminator = parse.look(parse.token((function(x) {
-    return x.lineTerminator;
+var lineTerminator = look(parse.token((function(node0) {
+    return getData(node0, "lineTerminator");
 }))),
     noLineTerminator = next.bind(null, not(lineTerminator)),
     logicalSemiColon = parse.expected("logical semicolon", parse.choice(punctuator(";"), parse.look(punctuator("}")),

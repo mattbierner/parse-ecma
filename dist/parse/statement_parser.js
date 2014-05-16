@@ -3,29 +3,30 @@
  * DO NOT EDIT
 */
 define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/clause", "ecma-ast/declaration",
-    "ecma-ast/statement", "./token_parser", "./common", "./expression_parser", "./value_parser"
-], (function(require, exports, parse, parse_lang, ast_clause, ast_declaration, ast_statement, token, __o,
+    "ecma-ast/statement", "ecma-ast/node", "./token_parser", "./common", "./expression_parser", "./value_parser"
+], (function(require, exports, parse, parse_lang, ast_clause, ast_declaration, ast_statement, __o, token, __o0,
     expression, value) {
     "use strict";
-    var eager = parse["eager"],
+    var blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement,
+            forInStatement, whileStatement, doWhileStatement, iterationStatement, continueStatement,
+            breakStatement, returnStatement, withStatement, labeledStatement, switchStatement, throwStatement,
+            tryStatement, debuggerStatement, statement, eager = parse["eager"],
         late = parse["late"],
+        look = parse["look"],
         next = parse["next"],
         not = parse["not"],
         between = parse_lang["between"],
         then = parse_lang["then"],
+        getData = __o["getData"],
         keyword = token["keyword"],
         punctuator = token["punctuator"],
-        node = __o["node"],
-        nodea = __o["nodea"],
-        blockStatement, variableStatement, emptyStatement, expressionStatement, ifStatement, forStatement,
-            forInStatement, whileStatement, doWhileStatement, iterationStatement, continueStatement,
-            breakStatement, returnStatement, withStatement, labeledStatement, switchStatement, throwStatement,
-            tryStatement, debuggerStatement, statement;
+        node = __o0["node"],
+        nodea = __o0["nodea"];
     (statement = late((function() {
         return statement;
     })));
-    var lineTerminator = parse.look(parse.token((function(x) {
-        return x.lineTerminator;
+    var lineTerminator = look(parse.token((function(node0) {
+        return getData(node0, "lineTerminator");
     }))),
         noLineTerminator = next.bind(null, not(lineTerminator)),
         logicalSemiColon = parse.expected("logical semicolon", parse.choice(punctuator(";"), parse.look(

@@ -28,6 +28,7 @@ with
     import 'bennu::parse' parse#{
         eager
         late
+        look
         next
         not},
     import 'bennu::lang' parse_lang#{
@@ -37,6 +38,7 @@ with
     import 'ecma-ast::clause' ast_clause,
     import 'ecma-ast::declaration' ast_declaration,
     import 'ecma-ast::statement' ast_statement,
+    import 'ecma-ast::node' {getData},
 
     import './token_parser' token#{
         keyword
@@ -57,7 +59,7 @@ statement = late \-> { return statement; };
 /**
  * Checks if a line terminator existed in the original stream.
  */
-var lineTerminator = parse.look(parse.token(.lineTerminator));
+var lineTerminator = look parse.token(\node -> getData(node, 'lineTerminator'));
 
 /**
  * Consumes 'p' as long as a line terminator did not exist before 'p'.

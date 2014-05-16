@@ -7,7 +7,8 @@ package (
     node
     nodea)
 with
-    import 'bennu::parse' parse,
+    import 'bennu::parse' parse#{
+        extract},
     import 'bennu::lang' lang,
     
     import 'ecma-ast::position' position,
@@ -88,28 +89,28 @@ precedence = \p, table -> {
 
 // State Interaction
 ////////////////////////////////////////
-var loclabel = parse.extract (.loc);
+var positionParser = extract \{position} -> position.sourcePosition;
 
-var prevEnd = parse.extract ((._prevEnd));
+var prevEnd = extract \{position} -> position.prevEnd;
 
 // Ast Node
 ////////////////////////////////////////
 node = \p, f ->
     parse.binds(
         parse.enumeration(
-            loclabel,
+            positionParser,
             p,
             prevEnd),
         \o, x, c ->
-            parse.always(f(new position.SourceLocation(o.start, c, o.file), x)));
+            parse.always(f(new position.SourceLocation(o, c, o.file), x)));
 
 nodea = \p, f ->
     parse.binds(
         parse.enumeration(
-            loclabel,
+            positionParser,
             p,
             prevEnd),
         \o, x, c ->
-            parse.always(f.apply(undefined, toArray(cons(new position.SourceLocation(o.start, c, o.file), x)))));
+            parse.always(f.apply(undefined, toArray(cons(new position.SourceLocation(o, c, o.file), x)))));
 
 }

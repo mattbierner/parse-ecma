@@ -5,7 +5,8 @@
 define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", "nu-stream/stream", "./token_parser"], (
     function(require, exports, parse, lang, position, __o, token) {
         "use strict";
-        var precedence, node, nodea, cons = __o["cons"],
+        var precedence, node, nodea, extract = parse["extract"],
+            cons = __o["cons"],
             toArray = __o["toArray"],
             NIL = __o["NIL"];
         (precedence = (function(p, table) {
@@ -65,20 +66,22 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", 
                 return parse.always(out.pop());
             }));
         }));
-        var loclabel = parse.extract((function(x) {
-            return x.loc;
+        var positionParser = extract((function(__o0) {
+            var position0 = __o0["position"];
+            return position0.sourcePosition;
         })),
-            prevEnd = parse.extract((function(x) {
-                return x._prevEnd;
+            prevEnd = extract((function(__o0) {
+                var position0 = __o0["position"];
+                return position0.prevEnd;
             }));
         (node = (function(p, f) {
-            return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
-                return parse.always(f(new(position.SourceLocation)(o.start, c, o.file), x));
+            return parse.binds(parse.enumeration(positionParser, p, prevEnd), (function(o, x, c) {
+                return parse.always(f(new(position.SourceLocation)(o, c, o.file), x));
             }));
         }));
         (nodea = (function(p, f) {
-            return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
-                return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o.start,
+            return parse.binds(parse.enumeration(positionParser, p, prevEnd), (function(o, x, c) {
+                return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o,
                     c, o.file), x))));
             }));
         }));

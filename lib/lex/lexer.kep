@@ -42,8 +42,12 @@ with
     import './whitespace_lexer' whitespace_lexer,
     import './regular_expression_lexer' {regularExpressionLiteral}
 in {
+
 /* State
  ******************************************************************************/
+/**
+ * Update the previous token `self` when `tok` is consumed.
+ */
 var consume := \tok self -> {
     switch (tok.type) {
     case 'Comment':
@@ -53,6 +57,17 @@ var consume := \tok self -> {
     default:
         return tok;
     }
+};
+
+var isRegExpCtx := \ prev -> {
+    if (!prev) return true;
+    switch (prev.type) {
+    case 'Keyword':
+    case 'Punctuator':
+        return true;
+    
+    }
+    return false;
 };
 
 /* Token
@@ -67,24 +82,19 @@ var buildToken = \p ->
             p,
             getPosition),
         \start [type value] end ->
-            always(new type(
-                new SourceLocation(start, end, start.file || end.file),
-                value)))
+            always(
+                new type(
+                    new SourceLocation(start, end, start.file || end.file),
+                    value)))
     .chain \tok ->
         next(
             modifyState (consume @ tok),
             always tok);
 
-var isRegExpCtx := getState.chain \ prev -> {
-    if (!prev) return always();
-    switch (prev.type) {
-    case 'Keyword':
-    case 'Punctuator':
-        return always();
-    
-    }
-    return never();
-};
+var enterRegExpCtx := getState.chain \ prev ->
+    ?isRegExpCtx prev
+        :always()
+        :never();
 
 /* Lexers
  ******************************************************************************/
@@ -107,7 +117,7 @@ var literal = choice(
     makeToken(
         lexToken.RegularExpressionToken.create,
         next(
-            isRegExpCtx,
+            enterRegExpCtx,
             regularExpressionLiteral)));
 
 /**
@@ -143,9 +153,10 @@ var inputElement := choice(
 /**
  * Tokenizer.
  */
-lexer := then(
-    many buildToken(inputElement),
-    eof);
+lexer :=
+    then(
+        many buildToken(inputElement),
+        eof);
 
 /* Running
  ******************************************************************************/

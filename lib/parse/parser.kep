@@ -2,39 +2,30 @@
  * @fileOverview 
  */
 package(
-    ParserState
     parseStream
+    
     parse)
 with
     import 'bennu::parse' {
-        always
-        bind
-        eof
-        choice
-        rec
         runState
-        parseState
-        expected
-        next
-        setParserState
-        many
-        never
-        Parser
-        Position
-        
-        'ParserState': BennuParserState},
+        ParserState},
     
-    import 'nu-stream::stream' stream,
+    import 'nu-stream::stream' stream#{
+        first
+        rest
+        isEmpty
+        filter},
     
-    import 'ecma-ast::token' lexToken,
+    import 'ecma-ast::node' {setData getData},
+    import 'ecma-ast::token' {LineTerminatorToken},
     
-    import 'ecma-ast::position' {SourcePosition SourceLocation},
+    import 'ecma-ast::position' {SourcePosition},
     
     import '../lex/lexer' lexer,
+    import './position' Position,
     import './program_parser' program
 in {
 
-/* State
 /**
  * Filters lex stream to remove whitespace and comments.
  * 
@@ -46,44 +37,35 @@ var langElementStream = let
     commentFilter = \x -> {
         if (x.type === 'Comment') {
             return ?x.value.indexOf('\n') >= 0
-                :stream.cons(new lexToken.LineTerminatorToken(x.loc, '\n'), stream.end)
+                :stream.cons(new LineTerminatorToken(x.loc, '\n'), stream.end)
                 :stream.end;
         }
         return stream.cons(x, stream.end);
     }
 in
-    stream.filter@whitespaceFilter \> stream.bind@commentFilter;
+    filter@whitespaceFilter \> stream.bind@commentFilter;
 
 /**
  * Filters lex stream to remove line terminators and note tokens following
  * a line terminator.
  */
 var lineTerminatorStream = \s -> {
-    if (stream.isEmpty(s))
+    if (isEmpty s)
         return s;
     
-    var first = stream.first(s), rest = stream.rest(s);
+    var x = first s,
+        xs = rest s;
     
-    if (first.type === 'LineTerminator') {
-        while (first.type === 'LineTerminator') {
-            if (stream.isEmpty(rest))
-                return rest;
-            first = stream.first(rest);
-            rest = stream.rest(rest);
+    if (x.type === 'LineTerminator') {
+        while (x.type === 'LineTerminator') {
+            if (isEmpty xs)
+                return xs;
+            x = first xs;
+            xs = rest xs;
         }
-        first = Object.create(first, {
-            'loc': {
-                'value': first.loc
-            },
-            'value': {
-                'value': first.value
-            },
-            'lineTerminator': {
-                'value': true
-            }
-        });
+        x = setData(x, 'lineTerminator', true);
     }
-    return stream.memoStream(first, lineTerminatorStream.bind(undefined, rest));
+    return stream.memoStream(x, lineTerminatorStream@xs);
 };
 
 /**
@@ -94,47 +76,6 @@ var lineTerminatorStream = \s -> {
  * @return Stream suitable for parsing.
  */
 var parserStream = langElementStream \> lineTerminatorStream;
-
-var ParserPosition = function \tokenPosition, sourcePosition =self -> {
-    self.tokenPosition = tokenPosition;
-    self.sourcePosition = sourcePosition;
-};
-
-ParserPosition.initial = new ParserPosition(
-    Position.initial,
-    SourcePosition.initial);
-
-ParserPosition.prototype.increment = \tok, end =self->
-    new ParserPosition(self.tokenPosition.increment(tok), end);
-
-ParserPosition.prototype.toString = \ =self->
-    '' + self.sourcePosition;
-
-ParserPosition.prototype.compare = \pos =self->
-    self.tokenPosition.compare(pos.tokenPosition);
-
-ParserState = function \stream, pos, prevEnd =self-> {
-    BennuParserState.call(self, stream, pos);
-    self._prevEnd = prevEnd;
-};
-ParserState.prototype = new BennuParserState();
-
-ParserState.prototype.next = \tok =self-> {
-    if (!self._next) {
-        var rest = stream.rest(self.input);
-        var end = ?stream.isEmpty(rest) : tok.loc.end : stream.first(rest).loc.start;
-        var s = new ParserState(rest, self.position.increment(tok, end), self.loc.end);
-        self._next = new Parser\_ m cok -> cok(tok, s, m);
-    }
-    return self._next;
-};
-
-Object.defineProperty(ParserState.prototype, 'loc', {
-    'get': \=self->
-        ?stream.isEmpty(self.input)
-            :new SourceLocation(self._prevEnd, self._prevEnd)
-            :stream.first(self.input).loc
-    });
 
 /* Running
  ******************************************************************************/
@@ -152,8 +93,7 @@ parseStream = \s file ->
         program.program,
         new ParserState(
             parserStream(lexer.lexStream s),
-            ParserPosition.initial,
-            SourcePosition.initial));
+            Position.initial));
 
 /**
  * Parses a lex array into an AST.
