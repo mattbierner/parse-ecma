@@ -30,190 +30,213 @@ package (
 // Literal
     stringLiteral)
 with
-    import 'bennu::parse' parse,
-    import 'bennu::lang' parse_lang,
-    import 'bennu::text' parse_text,
+    import 'bennu::parse' {
+        always
+        anyToken
+        attempt
+        choice
+        either
+        label
+        map
+        many
+        next
+        not
+        eof
+        sequence},
+    import 'bennu::lang' {
+        between
+        times},
+    import 'bennu::text' {
+        character
+        oneOf
+        noneOf},
     
-    import 'nu-stream::stream' stream,
+    import 'nu-stream::stream' {foldl},
     
-    import './line_terminator_lexer' line_terminator_lexer,
-    import './number_lexer' number_lexer
+    import './line_terminator_lexer' {
+        lineTerminator
+        lineTerminatorSequence},
+    import './number_lexer' {
+        decimalDigit
+        hexDigit}
 in {
 
-var join = (+);
+var join := map@(foldl @ (+) @ '');
 
-var fromCharCodelabel = \digits ->
-    parse.always(String.fromCharCode(parseInt(stream.foldl(join, '', digits), 16)));
+var fromCharCodeParser := join \> map @ \x -> String.fromCharCode(parseInt(x, 16));
 
 /* Lexers
  ******************************************************************************/
 // Constants
-////////////////////////////////////////
-doubleQuote = parse_text.character('"');
-escape = parse_text.character('\\');
-singleQuote = parse_text.character("'");
+// //////////////////////////////////////
+doubleQuote := character '"';
+escape := character '\\';
+singleQuote := character("'");
 
 /**
  * Lexer for string line continuation.
  * 
  * Returns an empty string.
  */
-lineContinuation = parse.next(
-    parse.next(escape, line_terminator_lexer.lineTerminatorSequence),
-    parse.always(''));
+lineContinuation :=
+    sequence(
+        escape,
+        lineTerminatorSequence,
+        always '');
 
 // Escape Character
-////////////////////////////////////////
+// //////////////////////////////////////
 /**
  * Lexer for a single escape character.
  * 
  * Returns the value represented by the escape character.
  */
-singleEscapeCharacter = parse.choice(
-    parse_text.character("'"),
-    parse_text.character('"'),
-    parse_text.character('\\'),
-    parse.next(parse_text.character('b'), parse.always('\u0008')),
-    parse.next(parse_text.character('f'), parse.always('\u000C')),
-    parse.next(parse_text.character('n'), parse.always('\u000A')),
-    parse.next(parse_text.character('r'), parse.always('\u000D')),
-    parse.next(parse_text.character('t'), parse.always('\u0009')),
-    parse.next(parse_text.character('v'), parse.always('\u000B')));
+singleEscapeCharacter := choice(
+    character "'",
+    character '"',
+    character '\\',
+    next(character 'b', always('\u0008')),
+    next(character 'f', always('\u000C')),
+    next(character 'n', always('\u000A')),
+    next(character 'r', always('\u000D')),
+    next(character 't', always('\u0009')),
+    next(character 'v', always('\u000B')));
 
 /**
  * 
  */
-escapeCharacter = parse.choice(
-    singleEscapeCharacter,
-    number_lexer.decimalDigit,
-    parse_text.character('u'),
-    parse_text.character('x'));
+escapeCharacter :=
+    choice(
+        singleEscapeCharacter,
+        decimalDigit,
+        oneOf 'ux');
 
 /**
  * Lexer for a string character which is not an escape character.
  */
-nonEscapeCharacter = parse.token(\tok -> {
-    return !(parse.test(escapeCharacter, tok) ||
-        parse.test(line_terminator_lexer.lineTerminator, tok));
-});
+nonEscapeCharacter :=
+    sequence(
+        not escapeCharacter,
+        not lineTerminator,
+        anyToken);
 
 // Escape Sequence
-////////////////////////////////////////
+// //////////////////////////////////////
 /**
  * Lexer for a hex escape sequence.
  * 
  * Returns the character defined by the escape sequence.
  */
-hexEscapeSequence = parse.next(
-    parse_text.character('x'),
-    parse.bind(parse_lang.times(2, number_lexer.hexDigit),
-        fromCharCodelabel));
+hexEscapeSequence :=
+    next(
+        character 'x',
+        hexDigit |> times@2 |> fromCharCodeParser);
 
 /**
  * Lexer for a unicode escape sequence.
  * 
  * Returns the unicode character defined by the escape sequence.
  */
-unicodeEscapeSequence = parse.next(
-    parse_text.character('u'),
-    parse.bind(parse_lang.times(4, number_lexer.hexDigit),
-        fromCharCodelabel));
+unicodeEscapeSequence :=
+    next(
+        character 'u',
+        hexDigit |> times@4 |> fromCharCodeParser);
 
 /**
  * Lexer for a character escape sequence.
  */
-characterEscapeSequence = parse.either(
-    singleEscapeCharacter,
-    nonEscapeCharacter);
+characterEscapeSequence :=
+    either(
+        singleEscapeCharacter,
+        nonEscapeCharacter);
 
 /**
  * Lexer for an escape sequence.
  * 
  * Returns the character defined by the escape sequence.
  */
-escapeSequence = parse.choice(
-    characterEscapeSequence,
-    parse.next(
-        parse_text.character('0'),
-        parse.next(
-            parse.either(
-                parse.eof,
-                parse.token(\tok -> {
-                    return !parse.test(number_lexer.decimalDigit, tok);
-                })
-            ),
-        parse.always('\u0000'))),
-    hexEscapeSequence,
-    unicodeEscapeSequence);
+escapeSequence :=
+    choice(
+        characterEscapeSequence,
+        sequence(
+            character '0',
+            either(
+                eof,
+                next(
+                    not decimalDigit,
+                    anyToken)),
+            always '\u0000'),
+        hexEscapeSequence,
+        unicodeEscapeSequence);
 
 // Single String Literal
-////////////////////////////////////////
+// //////////////////////////////////////
 /**
  * Lexer for a valid single string character.
  */
-singleStringCharacter = parse.choice(
-    parse.attempt(lineContinuation),
-    parse.next(escape, escapeSequence),
-    parse.token(\tok ->{
-        return !(parse.test(singleQuote, tok) ||
-            parse.test(escape, tok) || 
-            parse.test(line_terminator_lexer.lineTerminator, tok));
-    }));
+singleStringCharacter :=
+    choice(
+        attempt lineContinuation,
+        next(
+            escape,
+            escapeSequence),
+        next(
+            not lineTerminator,
+            noneOf "\\'"));
 
 /**
  * Lexer for a sequence of single string characters.
  */
-singleStringCharacters = parse.many(singleStringCharacter);
+singleStringCharacters := many singleStringCharacter;
 
 /**
  * Lexer for a single quoted string literal.
  * 
  * Returns the value of the string enclosed in the single quoted string literal.
  */
-singleStringLiteral = parse.label('Single String Literal',
-    parse_lang.between(singleQuote, singleQuote,
-        parse.bind(singleStringCharacters, \str ->
-            parse.always(stream.foldl(join, '', str)))));
+singleStringLiteral := label@'Single String Literal' <|
+    between(singleQuote, singleQuote,
+        join singleStringCharacters);
 
 // Double String Literal
-////////////////////////////////////////
+// //////////////////////////////////////
 /**
  * Lexer for a valid double string character
  */
-doubleStringCharacter = parse.choice(
-    parse.attempt(lineContinuation),
-    parse.next(escape, escapeSequence),
-    parse.token(\tok -> {
-        return !(parse.test(doubleQuote, tok) ||
-            parse.test(escape, tok) ||
-            parse.test(line_terminator_lexer.lineTerminator, tok));
-    }));
+doubleStringCharacter :=
+    choice(
+        attempt lineContinuation,
+        next(
+            escape,
+            escapeSequence),
+        next(
+            not lineTerminator,
+            noneOf '"\\'));
 
 /**
  * Lexer for a sequence of double string characters.
  */
-doubleStringCharacters = parse.many(doubleStringCharacter);
+doubleStringCharacters := many doubleStringCharacter;
 
 /**
  * Lexer for a double quoted string literal.
  * 
  * Returns the value of the string enclosed in the double quoted string literal.
  */
-doubleStringLiteral = parse.label('Double String Literal',
-    parse_lang.between(doubleQuote, doubleQuote,
-        parse.bind(doubleStringCharacters, \str ->
-            parse.always(stream.foldl(join, '', str)))));
+doubleStringLiteral := label@'Double String Literal' <|
+    between(doubleQuote, doubleQuote,
+        join doubleStringCharacters);
 
 // String Literal
-////////////////////////////////////////
+// //////////////////////////////////////
 /**
  * Lexer for a string literal.
  * 
  * Returns the value of the string enclosed in the string literal.
  */
-stringLiteral = parse.label('Sting Literal Lexer',
-    parse.either(
+stringLiteral := label@'Sting Literal Lexer' <|
+    either(
         singleStringLiteral,
-        doubleStringLiteral));
+        doubleStringLiteral);
 
 }

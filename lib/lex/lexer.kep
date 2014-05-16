@@ -61,14 +61,13 @@ var makeToken = \type p ->
 var buildToken = \p ->
     binds(
         enumeration(
-            getState,
             getPosition,
             p,
             getPosition),
-        \file start entry end ->
-            always(new (entry.(0))(
-                new SourceLocation(file, start, end),
-                entry.(1))));
+        \start [type value] end ->
+            always(new type(
+                new SourceLocation(start, end, start.file || end.file),
+                value)));
 
 /* Lexers
  ******************************************************************************/
@@ -212,8 +211,7 @@ lexDivStream = \s file ->
     lexDivState(
         new ParserState(
             s,
-            SourcePosition.initial,
-            file));
+            new SourcePosition(1, 0, file)));
 
 /**
  * Lexes array-like input in division context.
@@ -239,8 +237,7 @@ lexRegExpStream = \s file ->
     lexRegExpState(
         new ParserState(
             s,
-            SourcePosition.initial,
-            file));
+            new SourcePosition(1, 0, file)));
 
 /**
  * Lexes array-like in non-division context.

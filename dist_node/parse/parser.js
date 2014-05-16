@@ -9,7 +9,7 @@ var __o = require("bennu")["parse"],
     lexToken = require("ecma-ast")["token"],
     lexer = require("../lex/lexer"),
     program = require("./program_parser"),
-    labelState, parseStream, parse, always = __o["always"],
+    ParserState, parseStream, parse, always = __o["always"],
     bind = __o["bind"],
     eof = __o["eof"],
     choice = __o["choice"],
@@ -18,10 +18,11 @@ var __o = require("bennu")["parse"],
     parseState = __o["parseState"],
     expected = __o["expected"],
     next = __o["next"],
-    setlabelState = __o["setlabelState"],
+    setParserState = __o["setParserState"],
     many = __o["many"],
     never = __o["never"],
-    BennulabelState = __o["labelState"],
+    Parser = __o["Parser"],
+    BennuParserState = __o["ParserState"],
     tokenizer = (function(token) {
         var followLineTerminator = (function(x) {
             return always(((!x) ? null : Object.create(x, ({
@@ -62,66 +63,65 @@ var __o = require("bennu")["parse"],
     var self = this;
     return new(Position)(position0, self.position);
 }));
-var createNextRegExpState = (function(file, input, pos, ok, err) {
-    return parseState(inputElementRegExp, new(BennulabelState)(input, pos), (function(x, state) {
-        return ok(new(labelState)(file, ((x === null) ? stream.end : input), new(Position)(state.position,
-            pos), x, state.input));
+var createNextRegExpState = (function(input, pos, ok, err) {
+    return parseState(inputElementRegExp, new(BennuParserState)(input, pos), (function(x, state) {
+        return ok(new(ParserState)(((x === null) ? stream.end : input), new(Position)(state.position, pos),
+            x, state.input));
     }), err);
 });
-(labelState = (function(file, input, pos, first, rest) {
+(ParserState = (function(input, pos, first, rest) {
     var self = this;
-    BennulabelState.call(self, input, pos);
-    (self.file = file);
+    BennuParserState.call(self, input, pos);
     (self._first = first);
     (self._rest = rest);
 }));
-(labelState.prototype = new(BennulabelState)());
-Object.defineProperty(labelState.prototype, "loc", ({
+(ParserState.prototype = new(BennuParserState)());
+Object.defineProperty(ParserState.prototype, "loc", ({
     "get": (function() {
         var self = this;
-        return (self.isEmpty() ? new(position.SourceLocation)(self.file, self.position.previousEnd, self.position
-            .previousEnd) : self._first.loc);
+        return (self.isEmpty() ? new(position.SourceLocation)(self.position.previousEnd, self.position.previousEnd,
+            self.position.previousEnd.file) : self._first.loc);
     })
 }));
-(labelState.prototype.first = (function() {
+(ParserState.prototype.first = (function() {
     var self = this;
     return self._first;
 }));
-(labelState.prototype.setInput = (function(input) {
+(ParserState.prototype.setInput = (function(input) {
     var self = this;
-    return new(labelState)(self.file, input, self.pos, self._first, self._rest);
+    return new(ParserState)(input, self.pos, self._first, self._rest);
 }));
-(labelState.prototype.next = (function(tok) {
+(ParserState.prototype.next = (function(tok) {
     var self = this;
     if ((!self._next)) {
         var end = (self.loc ? self.loc.end : self.position.previousEnd);
-        (self._next = parseState(inputElementDiv, new(BennulabelState)(self._rest, end, self.file), (function(x,
-            state) {
-            var s = new(labelState)(self.file, ((x === null) ? stream.end : self._rest), self.position
-                .next(state.position), x, state.input);
-            return (function(_, m, cok) {
+        (self._next = parseState(inputElementDiv, new(BennuParserState)(self._rest, end), (function(x, state) {
+            var s = new(ParserState)(((x === null) ? stream.end : self._rest), self.position.next(
+                state.position), x, state.input);
+            return new(Parser)((function(_, m, cok) {
                 return cok(tok, s, m);
-            });
+            }));
         }), never));
     }
     return self._next;
 }));
-(labelState.prototype.asRegExp = (function(tok) {
+(ParserState.prototype.asRegExp = (function(tok) {
     var self = this;
     if ((!self._as)) {
-        (self._as = createNextRegExpState(self.file, self.input, self.position.previousEnd, setlabelState,
-            never));
+        (self._as = createNextRegExpState(self.input, self.position.previousEnd, setParserState, never));
     }
     return self._as;
 }));
 (parseStream = (function(s, file) {
-    return runState(next(new(labelState)(file, s, new(Position)(position.SourcePosition.initial, position.SourcePosition
-            .initial), ({}), s)
-        .next(null), program.program), new(BennulabelState)());
+    var initial;
+    return runState(next(new(ParserState)(s, ((initial = new(position.SourcePosition)(position.SourcePosition.initial
+                .line, position.SourcePosition.initial.column, file)), new(Position)(initial, initial)), ({}),
+            s)
+        .next(null), program.program), new(BennuParserState)());
 }));
 (parse = (function(input, file) {
     return parseStream(stream.from(input), file);
 }));
-(exports["labelState"] = labelState);
+(exports["ParserState"] = ParserState);
 (exports["parseStream"] = parseStream);
 (exports["parse"] = parse);

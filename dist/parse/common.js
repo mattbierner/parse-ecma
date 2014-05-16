@@ -74,13 +74,13 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "ecma-ast/position", 
             }));
         (node = (function(p, f) {
             return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
-                return parse.always(f(new(position.SourceLocation)(o.file, o.start, c), x));
+                return parse.always(f(new(position.SourceLocation)(o.start, c, o.file), x));
             }));
         }));
         (nodea = (function(p, f) {
             return parse.binds(parse.enumeration(loclabel, p, prevEnd), (function(o, x, c) {
-                return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o.file,
-                    o.start, c), x))));
+                return parse.always(f.apply(undefined, toArray(cons(new(position.SourceLocation)(o.start,
+                    c, o.file), x))));
             }));
         }));
         (exports["precedence"] = precedence);

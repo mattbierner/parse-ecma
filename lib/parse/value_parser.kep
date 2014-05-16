@@ -44,7 +44,7 @@ regularExpressionLiteral := parse.label('Regular Expression Literal',
         selectLiteral('regexp', token.regularExpressionLiteral)));
 
 /**
- * label for a simple ECMAScript literal, excluding array and object literals.
+ * Parser for a simple ECMAScript literal, excluding array and object literals.
  */
 literal := parse.label('Literal',
     parse.choice(

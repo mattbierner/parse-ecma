@@ -101,7 +101,7 @@ node = \p, f ->
             p,
             prevEnd),
         \o, x, c ->
-            parse.always(f(new position.SourceLocation(o.file, o.start, c), x)));
+            parse.always(f(new position.SourceLocation(o.start, c, o.file), x)));
 
 nodea = \p, f ->
     parse.binds(
@@ -110,6 +110,6 @@ nodea = \p, f ->
             p,
             prevEnd),
         \o, x, c ->
-            parse.always(f.apply(undefined, toArray(cons(new position.SourceLocation(o.file, o.start, c), x)))));
+            parse.always(f.apply(undefined, toArray(cons(new position.SourceLocation(o.start, c, o.file), x)))));
 
 }

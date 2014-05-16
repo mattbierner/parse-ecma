@@ -27,11 +27,10 @@ var parse = require("bennu")["parse"],
     choice = parse["choice"],
     eof = parse["eof"],
     getPosition = parse["getPosition"],
-    getState = parse["getState"],
     enumeration = parse["enumeration"],
     many = parse["many"],
     runState = parse["runState"],
-    labelState = parse["labelState"],
+    ParserState = parse["ParserState"],
     then = __o["then"],
     streamFrom = __o0["from"],
     SourceLocation = __o1["SourceLocation"],
@@ -67,8 +66,10 @@ var parse = require("bennu")["parse"],
         return always([type6, x]);
     })))),
     p0 = tokenDivToken;
-(tokenDiv = binds(enumeration(getState, getPosition, p0, getPosition), (function(file, start, entry, end) {
-    return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+(tokenDiv = binds(enumeration(getPosition, p0, getPosition), (function(start, __o10, end) {
+    var type7 = __o10[0],
+        value = __o10[1];
+    return always(new(type7)(new(SourceLocation)(start, end, (start.file || end.file)), value));
 })));
 var tokenRegExpToken = choice(attempt(((type7 = lexToken.IdentifierToken), bind(identifier, (function(x) {
     return always([type7, x]);
@@ -78,8 +79,10 @@ var tokenRegExpToken = choice(attempt(((type7 = lexToken.IdentifierToken), bind(
     return always([type9, x]);
 })))),
     p1 = tokenRegExpToken;
-(tokenRegExp = binds(enumeration(getState, getPosition, p1, getPosition), (function(file, start, entry, end) {
-    return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+(tokenRegExp = binds(enumeration(getPosition, p1, getPosition), (function(start, __o10, end) {
+    var type10 = __o10[0],
+        value = __o10[1];
+    return always(new(type10)(new(SourceLocation)(start, end, (start.file || end.file)), value));
 })));
 var commentToken = ((type10 = lexToken.CommentToken), (p2 = comment_lexer.comment), bind(p2, (function(x) {
     return always([type10, x]);
@@ -91,32 +94,41 @@ var commentToken = ((type10 = lexToken.CommentToken), (p2 = comment_lexer.commen
         p4, (function(x) {
             return always([type12, x]);
         })));
-(comment = binds(enumeration(getState, getPosition, commentToken, getPosition), (function(file, start, entry, end) {
-    return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+(comment = binds(enumeration(getPosition, commentToken, getPosition), (function(start, __o10, end) {
+    var type13 = __o10[0],
+        value = __o10[1];
+    return always(new(type13)(new(SourceLocation)(start, end, (start.file || end.file)), value));
 })));
-(whitespace = binds(enumeration(getState, getPosition, whitespaceToken, getPosition), (function(file, start, entry, end) {
-    return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+(whitespace = binds(enumeration(getPosition, whitespaceToken, getPosition), (function(start, __o10, end) {
+    var type13 = __o10[0],
+        value = __o10[1];
+    return always(new(type13)(new(SourceLocation)(start, end, (start.file || end.file)), value));
 })));
-(lineTerminator = binds(enumeration(getState, getPosition, lineTerminatorToken, getPosition), (function(file, start,
-    entry, end) {
-    return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+(lineTerminator = binds(enumeration(getPosition, lineTerminatorToken, getPosition), (function(start, __o10, end) {
+    var type13 = __o10[0],
+        value = __o10[1];
+    return always(new(type13)(new(SourceLocation)(start, end, (start.file || end.file)), value));
 })));
 var element = choice(commentToken, whitespaceToken, lineTerminatorToken),
     inputElementDiv = choice(element, tokenDivToken),
     inputElementRegExp = choice(element, tokenRegExpToken),
-    lexerDiv = many(((p5 = inputElementDiv), binds(enumeration(getState, getPosition, p5, getPosition), (function(file,
-        start, entry, end) {
-        return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+    lexerDiv = many(((p5 = inputElementDiv), binds(enumeration(getPosition, p5, getPosition), (function(start, __o10,
+        end) {
+        var type13 = __o10[0],
+            value = __o10[1];
+        return always(new(type13)(new(SourceLocation)(start, end, (start.file || end.file)), value));
     })))),
-    lexerRegExp = many(((p6 = inputElementRegExp), binds(enumeration(getState, getPosition, p6, getPosition), (function(
-        file, start, entry, end) {
-        return always(new(entry[0])(new(SourceLocation)(file, start, end), entry[1]));
+    lexerRegExp = many(((p6 = inputElementRegExp), binds(enumeration(getPosition, p6, getPosition), (function(start,
+        __o10, end) {
+        var type13 = __o10[0],
+            value = __o10[1];
+        return always(new(type13)(new(SourceLocation)(start, end, (start.file || end.file)), value));
     }))));
 (lexDivState = (function(state) {
     return runState(then(lexerDiv, eof), state);
 }));
 (lexDivStream = (function(s, file) {
-    return lexDivState(new(labelState)(s, SourcePosition.initial, file));
+    return lexDivState(new(ParserState)(s, new(SourcePosition)(1, 0, file)));
 }));
 var y = lexDivStream;
 (lexDiv = (function(z) {
@@ -126,7 +138,7 @@ var y = lexDivStream;
     return runState(then(lexerRegExp, parse.eof), state);
 }));
 (lexRegExpStream = (function(s, file) {
-    return lexRegExpState(new(labelState)(s, SourcePosition.initial, file));
+    return lexRegExpState(new(ParserState)(s, new(SourcePosition)(1, 0, file)));
 }));
 var y0 = lexRegExpStream;
 (lexRegExp = (function(z) {

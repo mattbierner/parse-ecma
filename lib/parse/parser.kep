@@ -94,13 +94,12 @@ Position.prototype.next = \position =self->
 
 /* State
  ******************************************************************************/
-var createNextRegExpState = \file, input, pos, ok, err ->
+var createNextRegExpState = \input, pos, ok, err ->
     parseState(
         inputElementRegExp,
         new BennuParserState(input, pos),
         \x, state ->
             ok(new ParserState(
-                file,
                 ?x === null : stream.end : input,
                 new Position(state.position, pos),
                 x,
@@ -111,9 +110,8 @@ var createNextRegExpState = \file, input, pos, ok, err ->
  * State for an ECMAScript parser.
  * 
  */
-ParserState = function \file input pos first rest =self-> {
+ParserState = function \input pos first rest =self-> {
     BennuParserState.call(self, input, pos);
-    self.file = file;
     self._first = first;
     self._rest = rest;
 };
@@ -122,7 +120,10 @@ ParserState.prototype = new BennuParserState();
 Object.defineProperty(ParserState.prototype, 'loc', {
     'get': \ =self->
          ?self.isEmpty()
-            :new position.SourceLocation(self.file, self.position.previousEnd, self.position.previousEnd)
+            :new position.SourceLocation(
+                self.position.previousEnd,
+                self.position.previousEnd,
+                self.position.previousEnd.file)
             :self._first.loc
 });
 
@@ -131,7 +132,6 @@ ParserState.prototype.first = \ =self ->
 
 ParserState.prototype.setInput = \input =self->
     new ParserState(
-        self.file,
         input,
         self.pos,
         self._first,
@@ -143,10 +143,9 @@ ParserState.prototype.next = \tok =self-> {
         
         self._next = parseState(
             inputElementDiv,
-            new BennuParserState(self._rest, end, self.file),
+            new BennuParserState(self._rest, end),
             \x state -> let
                 s = new ParserState(
-                    self.file,
                     ?x === null : stream.end : self._rest,
                     self.position.next(state.position),
                     x,
@@ -161,7 +160,6 @@ ParserState.prototype.next = \tok =self-> {
 ParserState.prototype.asRegExp = \tok =self-> {
     if (!self._as) {
         self._as = createNextRegExpState(
-            self.file,
             self.input,
             self.position.previousEnd,
             setParserState,
@@ -185,9 +183,13 @@ parseStream = \s, file ->
     runState(
         next(
             new ParserState(
-                file,
                 s,
-                new Position(position.SourcePosition.initial, position.SourcePosition.initial),
+                let initial = new position.SourcePosition(
+                    position.SourcePosition.initial.line,
+                    position.SourcePosition.initial.column,
+                    file)
+                in
+                    new Position(initial, initial),
                 {},
                 s).next(null),
             program.program),

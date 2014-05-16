@@ -21,7 +21,7 @@ with
     import 'ecma-ast::program' ast_program,
     import 'ecma-ast::statement' ast_statement,
     
-    import './common' ecma_parse,
+    import './common' {node nodea},
     import './token_parser' token#{
         keyword
         punctuator},
@@ -44,14 +44,14 @@ sourceElements = late \-> { return sourceElements; };
 /* Parsers
  ******************************************************************************/
 /**
- * label for the body of a function.
+ * Parser for the body of a function.
  */
-functionBody = ecma_parse.node(
+functionBody = node(
     sourceElements,
     ast_statement.BlockStatement.create);
 
 /**
- * label for a function's parameters.
+ * Parser for a function's parameters.
  */
 var formalParameterList = parse.eager(parse_lang.sepBy(punctuator ',',
     value.identifier));
@@ -59,12 +59,12 @@ var formalParameterList = parse.eager(parse_lang.sepBy(punctuator ',',
 // Function Expression
 ////////////////////////////////////////
 /**
- * label for an function expression.
+ * Parser for an function expression.
  * 
  * May be named or anon.
  */
 functionExpression = parse.label('Function Expression',
-    ecma_parse.nodea(
+    nodea(
         parse.next(
             keyword 'function',
             parse.enumeration(
@@ -78,12 +78,12 @@ functionExpression = parse.label('Function Expression',
 // Function Declaration
 ////////////////////////////////////////
 /**
- * label for a function declaration.
+ * Parser for a function declaration.
  * 
  * Requires an identifier.
  */
 functionDeclaration = parse.label('Function Declaration',
-    ecma_parse.nodea(
+    nodea(
         parse.next(
             keyword 'function',
             parse.enumeration(
@@ -97,7 +97,7 @@ functionDeclaration = parse.label('Function Declaration',
 // Source Elements
 ////////////////////////////////////////
 /**
- * label for an ECMAScript source element.
+ * Parser for an ECMAScript source element.
  * 
  * Source Elements are top level nodes that makes up a program.
  */
@@ -107,17 +107,17 @@ sourceElement = parse.expected("statement or function",
         statementlabel));
 
 /**
- * label for a sequence of zero or more source elements.
+ * Parser for a sequence of zero or more source elements.
  */
 sourceElements = parse.eager(parse.many(sourceElement));
 
 // Program
 ////////////////////////////////////////
 /**
- * label for an ECMAScript 5.1 program.
+ * Parser for an ECMAScript 5.1 program.
  */
 program = parse.label('Program',
-    ecma_parse.node(
+    node(
         parse.eager(parse.rec\self ->
             parse.either(
                 parse.next(parse.eof, parse.always(stream.end)),

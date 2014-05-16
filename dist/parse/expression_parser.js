@@ -4,8 +4,7 @@
 */
 define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "ecma-ast/expression",
     "ecma-ast/position", "ecma-ast/value", "./program_parser", "./token_parser", "./value_parser", "./common"
-], (function(require, exports, parse, parse_lang, stream, ast_expression, position, ast_value, program, token,
-    value, ecma_parse) {
+], (function(require, exports, parse, __o, stream, ast_expression, position, ast_value, program, token, value, __o0) {
     "use strict";
     var arrayElement, arrayElements, arrayLiteral, propertyName, propertySetParameterList,
             propertyValueInitializer, propertyGetInitializer, propertySetInitializer, propertyInitializer,
@@ -13,17 +12,28 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
             bracketAccessor, accessor, memberExpression, newExpression, leftHandSideExpression, postfixOperator,
             postfixExpression, unaryOperator, unaryExpression, binaryExpression, binaryExpressionNoIn,
             conditionalExpression, conditionalExpressionNoIn, assignmentOperator, assignmentExpression,
-            assignmentExpressionNoIn, expression, expressionNoIn, late = parse["late"],
+            assignmentExpressionNoIn, expression, expressionNoIn, choice = parse["choice"],
+        either = parse["either"],
+        late = parse["late"],
+        eager = parse["eager"],
+        between = __o["between"],
+        sepBy = __o["sepBy"],
+        sepBy1 = __o["sepBy1"],
+        sepEndBy = __o["sepEndBy"],
+        then = __o["then"],
         keyword = token["keyword"],
         punctuator = token["punctuator"],
+        node = __o0["node"],
+        nodea = __o0["nodea"],
+        precedence = __o0["precedence"],
         obj, props, obj0, props0, functionExpression = late((function() {
-            var __o = require("ecma/parse/program_parser"),
-                functionExpression0 = __o["functionExpression"];
+            var __o1 = require("ecma/parse/program_parser"),
+                functionExpression0 = __o1["functionExpression"];
             return functionExpression0;
         })),
         functionBody = late((function() {
-            var __o = require("ecma/parse/program_parser"),
-                functionBody0 = __o["functionBody"];
+            var __o1 = require("ecma/parse/program_parser"),
+                functionBody0 = __o1["functionBody"];
             return functionBody0;
         }));
     (assignmentExpression = late((function() {
@@ -38,102 +48,97 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
     (newExpression = late((function() {
         return newExpression;
     })));
-    (arrayElement = parse.label("Array Element", parse.either(assignmentExpression, parse.next(parse.look(
-        punctuator(",")), parse.always(null)))));
-    (arrayElements = parse.label("Array Elements", parse.eager(parse_lang.sepEndBy(punctuator(","),
-        arrayElement))));
-    (arrayLiteral = parse.label("Array Literal", ecma_parse.node(parse_lang.between(punctuator("["), punctuator(
-        "]"), arrayElements), ast_expression.ArrayExpression.create)));
-    (propertyName = parse.label("Property Name", parse.expected("property name", parse.choice(value.identifier,
-        value.stringLiteral, value.numericLiteral))));
+    (arrayElement = parse.label("Array Element", either(assignmentExpression, parse.next(parse.look(punctuator(
+        ",")), parse.always(null)))));
+    (arrayElements = parse.label("Array Elements", sepEndBy(punctuator(","), arrayElement)));
+    (arrayLiteral = parse.label("Array Literal", node(between(punctuator("["), punctuator("]"), eager(
+        arrayElements)), ast_expression.ArrayExpression.create)));
+    (propertyName = parse.label("Property Name", parse.expected("property name", choice(value.identifier, value
+        .stringLiteral, value.numericLiteral))));
     (propertySetParameterList = parse.bind(value.identifier, (function(x) {
         return parse.always([x]);
     })));
-    var propertyValueKey = parse.label("Property Value Key", parse_lang.then(propertyName, punctuator(":")));
+    var propertyValueKey = parse.label("Property Value Key", then(propertyName, punctuator(":")));
     (propertyValueInitializer = parse.label("Property Value Initializer", assignmentExpression));
-    var valueProperty = parse.label("Value Property", ecma_parse.nodea(parse.enumeration(parse.attempt(
-            propertyValueKey), parse.expected("Assignment Expression", propertyValueInitializer)),
-        ast_value.ObjectValue.create)),
+    var valueProperty = parse.label("Value Property", nodea(parse.enumeration(parse.attempt(propertyValueKey),
+        parse.expected("Assignment Expression", propertyValueInitializer)), ast_value.ObjectValue.create)),
         propertyGetterKey = parse.label("Property Getter Key", parse.next(token.identifier("get"), propertyName));
-    (propertyGetInitializer = parse.label("Property Get Initializer", ecma_parse.node(parse.next(parse.next(
-        punctuator("("), punctuator(")")), parse_lang.between(punctuator("{"), punctuator("}"),
-        functionBody)), (function(loc, body) {
+    (propertyGetInitializer = parse.label("Property Get Initializer", node(parse.next(parse.next(punctuator("("),
+        punctuator(")")), between(punctuator("{"), punctuator("}"), functionBody)), (function(loc,
+        body) {
         return new(ast_expression.FunctionExpression)(loc, null, [], body);
     }))));
-    var getterProperty = parse.label("Getter Property", ecma_parse.nodea(parse.enumeration(propertyGetterKey,
+    var getterProperty = parse.label("Getter Property", nodea(parse.enumeration(propertyGetterKey,
         propertyGetInitializer), ast_value.ObjectGetter.create)),
         propertySetterKey = parse.label("Property Setter Key", parse.next(token.identifier("set"), propertyName));
-    (propertySetInitializer = parse.label("Property Set Initializer", ecma_parse.nodea(parse.enumeration(
-        parse_lang.between(punctuator("("), punctuator(")"), propertySetParameterList), parse_lang.between(
-            punctuator("{"), punctuator("}"), functionBody)), (function(loc, params, body) {
+    (propertySetInitializer = parse.label("Property Set Initializer", nodea(parse.enumeration(between(
+        punctuator("("), punctuator(")"), propertySetParameterList), between(punctuator("{"),
+        punctuator("}"), functionBody)), (function(loc, params, body) {
         return new(ast_expression.FunctionExpression)(loc, null, params, body);
     }))));
-    var setterProperty = parse.label("Setter Property", ecma_parse.nodea(parse.enumeration(propertySetterKey,
+    var setterProperty = parse.label("Setter Property", nodea(parse.enumeration(propertySetterKey,
         propertySetInitializer), ast_value.ObjectSetter.create));
-    (propertyInitializer = parse.label("Property Initializer", parse.choice(valueProperty, getterProperty,
+    (propertyInitializer = parse.label("Property Initializer", choice(valueProperty, getterProperty,
         setterProperty)));
-    (propertyList = parse.label("Property List", parse.eager(parse_lang.sepEndBy(punctuator(","),
-        propertyInitializer))));
-    (objectLiteral = parse.label("Object Literal", ecma_parse.node(parse_lang.between(punctuator("{"),
-        punctuator("}"), propertyList), ast_expression.ObjectExpression.create)));
-    (thisExpression = parse.label("This Expression", ecma_parse.node(keyword("this"), ast_expression.ThisExpression
-        .create)));
-    (primaryExpression = parse.memo(parse.label("Primary Expression", parse.choice(functionExpression,
-        thisExpression, value.identifier, value.literal, arrayLiteral, objectLiteral, parse_lang.between(
-            punctuator("("), punctuator(")"), expression)))));
-    (argumentList = parse.label("Argument List", parse.eager(parse_lang.sepBy(punctuator(","), parse.expected(
-        "assignment expression", assignmentExpression)))));
-    (args = parse.label("Arguments", ecma_parse.node(parse_lang.between(punctuator("("), punctuator(")"),
-        argumentList), (function(loc, args0) {
-        (args0.loc = loc);
-        return args0;
-    }))));
-    (dotAccessor = parse.label("Dot Accessor", ecma_parse.node(parse.next(punctuator("."), value.identifier), (
-        function(loc, x) {
-            return ({
-                "loc": loc,
-                "property": x,
-                "computed": false
-            });
+    (propertyList = parse.label("Property List", sepEndBy(punctuator(","), propertyInitializer)));
+    (objectLiteral = parse.label("Object Literal", node(between(punctuator("{"), punctuator("}"), eager(
+        propertyList)), ast_expression.ObjectExpression.create)));
+    (thisExpression = parse.label("This Expression", node(keyword("this"), ast_expression.ThisExpression.create)));
+    (primaryExpression = parse.memo(parse.label("Primary Expression", choice(functionExpression, thisExpression,
+        value.identifier, value.literal, arrayLiteral, objectLiteral, between(punctuator("("),
+            punctuator(")"), expression)))));
+    (argumentList = parse.label("Argument List", sepBy(punctuator(","), parse.expected("assignment expression",
+        assignmentExpression))));
+    (args = parse.label("Arguments", node(between(punctuator("("), punctuator(")"), eager(argumentList)), (
+        function(loc, args0) {
+            (args0.loc = loc);
+            return args0;
         }))));
-    (bracketAccessor = parse.label("Bracket Accessor", ecma_parse.node(parse_lang.between(punctuator("["),
-        punctuator("]"), parse.expected("expression", expression)), (function(loc, x) {
+    (dotAccessor = parse.label("Dot Accessor", node(parse.next(punctuator("."), value.identifier), (function(
+        loc, x) {
+        return ({
+            "loc": loc,
+            "property": x,
+            "computed": false
+        });
+    }))));
+    (bracketAccessor = parse.label("Bracket Accessor", node(between(punctuator("["), punctuator("]"), parse.expected(
+        "expression", expression)), (function(loc, x) {
         return ({
             "loc": loc,
             "property": x,
             "computed": true
         });
     }))));
-    (accessor = parse.label("Accessor", parse.either(dotAccessor, bracketAccessor)));
+    (accessor = parse.label("Accessor", either(dotAccessor, bracketAccessor)));
     var reducer = (function(p, c) {
         return ast_expression.MemberExpression.create(position.SourceLocation.merge(p.loc, c.loc), p, c.property,
             c.computed);
     });
-    (memberExpression = parse.memo(parse.label("Member Expression", parse.binds(parse.enumeration(parse.either(
+    (memberExpression = parse.memo(parse.label("Member Expression", parse.binds(parse.enumeration(either(
         newExpression, primaryExpression), parse.many(accessor)), (function(expression0, props) {
         return parse.always(stream.foldl(reducer, expression0, props));
     })))));
-    (newExpression = parse.memo(parse.label("New Expression", ecma_parse.nodea(parse.next(keyword("new"), parse
-        .enumeration(parse.expected("member expression", memberExpression), parse.optional([],
-            args))), ast_expression.NewExpression.create))));
+    (newExpression = parse.memo(parse.label("New Expression", nodea(parse.next(keyword("new"), parse.enumeration(
+            parse.expected("member expression", memberExpression), parse.optional([], args))),
+        ast_expression.NewExpression.create))));
     var reducer0 = (function(p, c) {
         var loc = position.SourceLocation.merge(p.loc, c.loc);
         return (c.hasOwnProperty("property") ? ast_expression.MemberExpression.create(loc, p, c.property, c
             .computed) : ast_expression.CallExpression.create(loc, p, c));
     });
     (leftHandSideExpression = parse.memo(parse.label("Left Hand Side Expression", parse.binds(parse.enumeration(
-        memberExpression, parse.many(parse.either(args, accessor))), (function(member,
-        accessors) {
+        memberExpression, parse.many(either(args, accessor))), (function(member, accessors) {
         return parse.always(stream.foldl(reducer0, member, accessors));
     })))));
     (postfixOperator = parse.label("Postfix Operator", punctuator("++", "--")));
-    (postfixExpression = parse.label("Postfix Expression", ecma_parse.nodea(parse.enumeration(
-        leftHandSideExpression, parse.optional(postfixOperator)), (function(loc, argument, op) {
+    (postfixExpression = parse.label("Postfix Expression", nodea(parse.enumeration(leftHandSideExpression,
+        parse.optional(postfixOperator)), (function(loc, argument, op) {
         return ((!op) ? argument : ast_expression.UpdateExpression.create(position.SourceLocation
             .merge(argument.loc, op.loc), op.value, argument, false));
     }))));
-    (unaryOperator = parse.label("Unary Operator", parse.either(keyword("delete", "void", "typeof"), punctuator(
-        "++", "--", "+", "-", "~", "!"))));
+    (unaryOperator = parse.label("Unary Operator", either(keyword("delete", "void", "typeof"), punctuator("++",
+        "--", "+", "-", "~", "!"))));
     var reducer1 = (function(argument, op) {
         var loc = position.SourceLocation.merge(op.loc, argument.loc);
         return (((op.value === "++") || (op.value === "--")) ? new(ast_expression.UpdateExpression)(loc, op
@@ -309,28 +314,27 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
                 }));
                 return p;
             }), ({}))));
-    (binaryExpression = parse.label("Binary Expression", ecma_parse.precedence(unaryExpression, precedenceTable)));
-    (binaryExpressionNoIn = parse.label("Binary Expression", ecma_parse.precedence(unaryExpression,
-        precedenceTableNoIn)));
+    (binaryExpression = parse.label("Binary Expression", precedence(unaryExpression, precedenceTable)));
+    (binaryExpressionNoIn = parse.label("Binary Expression", precedence(unaryExpression, precedenceTableNoIn)));
     var binExpr, assignExpr;
     (conditionalExpression = parse.label("Conditional Expression", ((binExpr = binaryExpression), (assignExpr =
-        parse.expected("assignment expression", assignmentExpression)), parse.either(ecma_parse.nodea(
-        parse.enumeration(parse.attempt(parse_lang.then(parse.memo(binExpr), punctuator("?"))),
-            parse_lang.then(assignExpr, punctuator(":")), assignExpr), ast_expression.ConditionalExpression
-        .create), parse.memo(binExpr)))));
+        parse.expected("assignment expression", assignmentExpression)), either(nodea(parse.enumeration(
+        parse.attempt(then(parse.memo(binExpr), punctuator("?"))), then(assignExpr,
+            punctuator(":")), assignExpr), ast_expression.ConditionalExpression.create), parse.memo(
+        binExpr)))));
     var binExpr0, assignExpr0;
     (conditionalExpressionNoIn = parse.label("Conditional Expression No In", ((binExpr0 = binaryExpressionNoIn), (
             assignExpr0 = parse.expected("assignment expression no in", assignmentExpressionNoIn)),
-        parse.either(ecma_parse.nodea(parse.enumeration(parse.attempt(parse_lang.then(parse.memo(
-                binExpr0), punctuator("?"))), parse_lang.then(assignExpr0, punctuator(":")),
-            assignExpr0), ast_expression.ConditionalExpression.create), parse.memo(binExpr0)))));
+        either(nodea(parse.enumeration(parse.attempt(then(parse.memo(binExpr0), punctuator("?"))), then(
+                assignExpr0, punctuator(":")), assignExpr0), ast_expression.ConditionalExpression.create),
+            parse.memo(binExpr0)))));
     (assignmentOperator = parse.label("Assignment Operator", punctuator("=", "*=", "*=", "/=", "%=", "+=", "-=",
         "<<=", ">>=", ">>>=", "&=", "^=", "|=")));
     var condExpr;
     (assignmentExpression = parse.label("Assignment Expression", ((condExpr = conditionalExpression), parse.rec(
         (function(self) {
-            return parse.either(parse.binds(parse.attempt(parse.enumeration(
-                leftHandSideExpression, assignmentOperator)), (function(left, operator) {
+            return either(parse.binds(parse.attempt(parse.enumeration(leftHandSideExpression,
+                assignmentOperator)), (function(left, operator) {
                 return parse.bind(parse.expected("assignment expression", self), (
                     function(right) {
                         return parse.always(ast_expression.AssignmentExpression
@@ -342,8 +346,8 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
     var condExpr0;
     (assignmentExpressionNoIn = parse.label("Assignment Expression No In", ((condExpr0 =
         conditionalExpressionNoIn), parse.rec((function(self) {
-        return parse.either(parse.binds(parse.attempt(parse.enumeration(
-            leftHandSideExpression, assignmentOperator)), (function(left, operator) {
+        return either(parse.binds(parse.attempt(parse.enumeration(leftHandSideExpression,
+            assignmentOperator)), (function(left, operator) {
             return parse.bind(parse.expected("assignment expression", self), (
                 function(right) {
                     return parse.always(ast_expression.AssignmentExpression
@@ -353,15 +357,14 @@ define(["require", "exports", "bennu/parse", "bennu/lang", "nu-stream/stream", "
         })), condExpr0);
     })))));
     var expr;
-    (expression = parse.label("Expression", ((expr = parse.expected("expression", assignmentExpression)),
-        ecma_parse.node(parse.eager(parse_lang.sepBy1(punctuator(","), expr)), (function(loc, list) {
+    (expression = parse.label("Expression", ((expr = parse.expected("expression", assignmentExpression)), node(
+        eager(sepBy1(punctuator(","), expr)), (function(loc, list) {
             return ((list.length > 1) ? new(ast_expression.SequenceExpression)(loc, list) :
                 list[0]);
         })))));
     var expr0;
     (expressionNoIn = parse.label("Expression No In", ((expr0 = parse.expected("expression no in",
-        assignmentExpressionNoIn)), ecma_parse.node(parse.eager(parse_lang.sepBy1(punctuator(","),
-        expr0)), (function(loc, list) {
+        assignmentExpressionNoIn)), node(eager(sepBy1(punctuator(","), expr0)), (function(loc, list) {
         return ((list.length > 1) ? new(ast_expression.SequenceExpression)(loc, list) :
             list[0]);
     })))));
