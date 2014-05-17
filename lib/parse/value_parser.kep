@@ -13,7 +13,10 @@ package (
 // Identifier
     identifier)
 with
-    import 'bennu::parse' parse,
+    import 'bennu::parse' parse#{
+        choice
+        label
+        map},
     
     import 'ecma-ast::value' ast_value,
     
@@ -21,43 +24,39 @@ with
 in {
 
 var selectLiteral := \kind p ->
-    parse.bind(p, \x ->
-        parse.always(new ast_value.Literal(x.loc, kind, x.value)));
+    map(
+        \x -> new ast_value.Literal(x.loc, kind, x.value),
+        p);
 
 // Literal
 ////////////////////////////////////////
-nullLiteral := parse.label('Null Literal',
-    selectLiteral('null', token.nullLiteral));
+nullLiteral := label@'Null Literal' <|
+    selectLiteral('null', token.nullLiteral);
 
-booleanLiteral := parse.label('Boolean Literal',
-    selectLiteral('boolean', token.booleanLiteral));
+booleanLiteral := label@'Boolean Literal' <|
+    selectLiteral('boolean', token.booleanLiteral);
 
-numericLiteral := parse.label('Numeric Literal',
-    selectLiteral('number', token.numericLiteral));
+numericLiteral := label@'Numeric Literal' <|
+    selectLiteral('number', token.numericLiteral);
 
-stringLiteral := parse.label('String Literal',
-    selectLiteral('string', token.stringLiteral));
+stringLiteral := label@'String Literal' <|
+    selectLiteral('string', token.stringLiteral);
 
-regularExpressionLiteral := parse.label('Regular Expression Literal',
-    selectLiteral('regexp', token.regularExpressionLiteral));
+regularExpressionLiteral := label@'Regular Expression Literal' <|
+    selectLiteral('regexp', token.regularExpressionLiteral);
 
-/**
- * Parser for a simple ECMAScript literal, excluding array and object literals.
- */
-literal := parse.label('Literal',
-    parse.choice(
+literal := label@'Literal' <|
+    choice(
         nullLiteral,
         booleanLiteral,
         numericLiteral,
         stringLiteral,
-        regularExpressionLiteral));
+        regularExpressionLiteral);
 
 // Identifier
 ////////////////////////////////////////
-identifier := parse.label('Identifier',
-    parse.bind(
-        token.anyIdentifier,
-        \x ->
-            parse.always(new ast_value.Identifier(x.loc, x.value))));
-
+identifier := label@'Identifier' <|
+    map(
+        \x -> new ast_value.Identifier(x.loc, x.value),
+        token.anyIdentifier);
 }
