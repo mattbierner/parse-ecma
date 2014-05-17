@@ -1,6 +1,6 @@
 {
     "name": "ecma-parse",
-    "version": "4.5.0",
+    "version": "5.0.0",
     "description": "Bennu ECMAScript 5.1 parsers",
     "main": "",
     "repository": {
@@ -10,8 +10,10 @@
     "keywords": [
         "parsing",
         "parser",
-        "ecmascript"
-    ],
+        "javascript",
+        "ecmascript",
+        "lexer",
+        "parser combinator"],
     "author": "Matt Bierner",
     "license": "MIT",
     
